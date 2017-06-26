@@ -74,6 +74,7 @@
     <Compile Include="IRoom.cs" />
     <Compile Include="IRoomSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AbstractRoom.cs" />
     <Compile Include="AbstractRoomChildIdCollection.cs" />
