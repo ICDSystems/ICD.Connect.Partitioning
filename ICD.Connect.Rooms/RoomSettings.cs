@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Settings;
+﻿using System;
+using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.Factories;
 using ICD.Connect.Settings.Core;
 
@@ -14,16 +15,9 @@ namespace ICD.Connect.Rooms
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
 		/// <summary>
-		/// Creates a new originator instance from the settings.
+		/// Gets the type of the originator for this settings instance.
 		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			Room output = new Room();
-			output.ApplySettings(this, factory);
-			return output;
-		}
+		public override Type OriginatorType { get { return typeof(Room); } }
 
 		/// <summary>
 		/// Instantiates room settings from an xml element.
