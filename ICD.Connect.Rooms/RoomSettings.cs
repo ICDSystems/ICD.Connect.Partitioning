@@ -1,7 +1,6 @@
 ﻿using System;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.Factories;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Rooms
 {
