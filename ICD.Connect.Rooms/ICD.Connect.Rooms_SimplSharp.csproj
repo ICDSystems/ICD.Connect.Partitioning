@@ -7,7 +7,7 @@
     <ProjectGuid>{42FB8CF0-6AE6-4C70-AFDD-DF95F07E077F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ICD.Connect.Rooms_SimplSharp</RootNamespace>
+    <RootNamespace>ICD.Connect.Rooms</RootNamespace>
     <AssemblyName>ICD.Connect.Rooms_SimplSharp</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
