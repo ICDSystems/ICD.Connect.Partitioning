@@ -1,13 +1,9 @@
 ﻿using ICD.Connect.Devices;
-using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Panels;
-using ICD.Connect.Panels.Extensions;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
-using ICD.Connect.Routing.Extensions;
 
 namespace ICD.Connect.Rooms
 {
@@ -17,7 +13,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomPortIdCollection(IRoom room)
-			: base(() => room.Core.GetPorts())
+			: base(room)
 		{
 		}
 	}
@@ -28,7 +24,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomDeviceIdCollection(IRoom room)
-			: base(() => room.Core.GetDevices())
+			: base(room)
 		{
 		}
 	}
@@ -39,7 +35,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomPanelIdCollection(IRoom room)
-			: base(() => room.Core.GetPanels())
+			: base(room)
 		{
 		}
 	}
@@ -50,7 +46,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomSourceIdCollection(IRoom room)
-			: base(() => room.Core.GetRoutingGraph().Sources)
+			: base(room)
 		{
 		}
 	}
@@ -61,7 +57,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomDestinationIdCollection(IRoom room)
-			: base(() => room.Core.GetRoutingGraph().Destinations)
+			: base(room)
 		{
 		}
 	}
@@ -72,7 +68,7 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomDestinationGroupIdCollection(IRoom room)
-			: base(() => room.Core.GetRoutingGraph().DestinationGroups)
+			: base(room)
 		{
 		}
 	}

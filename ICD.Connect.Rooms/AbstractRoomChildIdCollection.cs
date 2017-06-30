@@ -16,7 +16,7 @@ namespace ICD.Connect.Rooms
 
 		private readonly IcdHashSet<int> m_Ids;
 		private readonly SafeCriticalSection m_Section;
-		private readonly Func<IOriginatorCollection<TChild>> m_GetCoreCollection;
+		private readonly IRoom m_Room;
 
 		/// <summary>
 		/// Gets the number of items in the collection.
@@ -30,19 +30,16 @@ namespace ICD.Connect.Rooms
 		/// <returns></returns>
 		public TChild this[int id] { get { return GetInstance(id); } }
 
-		/// <summary>
-		/// Gets the core collection.
-		/// </summary>
-		public IOriginatorCollection<TChild> CoreCollection { get { return m_GetCoreCollection(); } }
+		public IOriginatorCollection<IOriginator> Collection { get { return m_Room.Core.Originators; } }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		protected AbstractRoomChildIdCollection(Func<IOriginatorCollection<TChild>> getGetCoreCollection)
+		protected AbstractRoomChildIdCollection(IRoom room)
 		{
 			m_Ids = new IcdHashSet<int>();
 			m_Section = new SafeCriticalSection();
-			m_GetCoreCollection = getGetCoreCollection;
+			m_Room = room;
 		}
 
 		#region Methods
@@ -68,7 +65,7 @@ namespace ICD.Connect.Rooms
 			try
 			{
 				if (m_Ids.Contains(id))
-					return CoreCollection.GetChild(id);
+					return Collection.GetChild<TChild>(id);
 
 				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(TChild).Name, id);
 				throw new InvalidOperationException(message);
@@ -155,7 +152,7 @@ namespace ICD.Connect.Rooms
 
 			try
 			{
-				if (!CoreCollection.ContainsChild(id))
+				if (!Collection.ContainsChild(id))
 					return false;
 
 				if (!m_Ids.Add(id))
