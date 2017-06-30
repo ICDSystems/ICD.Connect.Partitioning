@@ -86,13 +86,11 @@ namespace ICD.Connect.Rooms
 			where TInstance : TChild
 		{
 			TChild child = GetInstance(id);
-			TInstance output = (TInstance)child;
 
-			if (output != null)
-				return output;
+			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
+				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
 
-			throw new InvalidCastException(string.Format("{0} is not of type {1}", typeof(TChild).Name,
-			                                             typeof(TInstance).Name));
+			return (TInstance)child;
 		}
 
 		/// <summary>
@@ -128,6 +126,9 @@ namespace ICD.Connect.Rooms
 		/// </summary>
 		public void SetIds(IEnumerable<int> ids)
 		{
+			if (ids == null)
+				throw new ArgumentNullException("ids");
+
 			m_Section.Enter();
 
 			try
@@ -175,9 +176,6 @@ namespace ICD.Connect.Rooms
 
 			try
 			{
-				if (!m_Ids.Contains(id))
-					return false;
-
 				if (!m_Ids.Remove(id))
 					return false;
 			}
