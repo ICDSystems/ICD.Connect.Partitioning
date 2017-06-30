@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
@@ -87,23 +86,12 @@ namespace ICD.Connect.Settings
 		{
 			base.WriteElements(writer);
 
-			ListToXml(writer, DEVICES_ELEMENT, DEVICE_ELEMENT, Devices.Order());
-			ListToXml(writer, PANELS_ELEMENT, PANEL_ELEMENT, Panels.Order());
-			ListToXml(writer, PORTS_ELEMENT, PORT_ELEMENT, Ports.Order());
-			ListToXml(writer, SOURCES_ELEMENT, SOURCE_ELEMENT, Sources.Order());
-			ListToXml(writer, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT, Destinations.Order());
-			ListToXml(writer, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT, DestinationGroups.Order());
-		}
-
-		private static void ListToXml(IcdXmlTextWriter writer, string parentElement, string childElement,
-		                              IEnumerable<int> list)
-		{
-			writer.WriteStartElement(parentElement);
-			{
-				foreach (int item in list)
-					writer.WriteElementString(childElement, item.ToString());
-			}
-			writer.WriteEndElement();
+			XmlUtils.WriteListToXml(writer, Devices.Order(), DEVICES_ELEMENT, DEVICE_ELEMENT);
+			XmlUtils.WriteListToXml(writer, Panels.Order(), PANELS_ELEMENT, PANEL_ELEMENT);
+			XmlUtils.WriteListToXml(writer, Ports.Order(), PORTS_ELEMENT, PORT_ELEMENT);
+			XmlUtils.WriteListToXml(writer, Sources.Order(), SOURCES_ELEMENT, SOURCE_ELEMENT);
+			XmlUtils.WriteListToXml(writer, Destinations.Order(), DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
+			XmlUtils.WriteListToXml(writer, DestinationGroups.Order(), DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 		}
 
 		#region Protected Methods
@@ -117,28 +105,19 @@ namespace ICD.Connect.Settings
 		{
 			AbstractSettings.ParseXml(instance, xml);
 
-			IEnumerable<string> panels = GetListElementsFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT);
-			IEnumerable<string> ports = GetListElementsFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);
-			IEnumerable<string> devices = GetListElementsFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT);
-			IEnumerable<string> sources = GetListElementsFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
-			IEnumerable<string> destinations = GetListElementsFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
-			IEnumerable<string> destinationGroups = GetListElementsFromXml(xml, DESTINATION_GROUPS_ELEMENT,
-			                                                               DESTINATION_GROUP_ELEMENT);
+			IEnumerable<int> panels = XmlUtils.ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> ports = XmlUtils.ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> devices = XmlUtils.ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> sources = XmlUtils.ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> destinations = XmlUtils.ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> destinationGroups = XmlUtils.ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 
-			instance.Panels.AddRange(panels.Select(p => XmlUtils.ReadElementContentAsInt(p)));
-			instance.Ports.AddRange(ports.Select(p => XmlUtils.ReadElementContentAsInt(p)));
-			instance.Devices.AddRange(devices.Select(d => XmlUtils.ReadElementContentAsInt(d)));
-			instance.Sources.AddRange(sources.Select(s => XmlUtils.ReadElementContentAsInt(s)));
-			instance.Destinations.AddRange(destinations.Select(d => XmlUtils.ReadElementContentAsInt(d)));
-			instance.DestinationGroups.AddRange(destinationGroups.Select(d => XmlUtils.ReadElementContentAsInt(d)));
-		}
-
-		private static IEnumerable<string> GetListElementsFromXml(string xml, string listElement, string itemElement)
-		{
-			string child;
-			return XmlUtils.TryGetChildElementAsString(xml, listElement, out child)
-				       ? XmlUtils.GetChildElementsAsString(child, itemElement)
-				       : Enumerable.Empty<string>();
+			instance.Panels.AddRange(panels);
+			instance.Ports.AddRange(ports);
+			instance.Devices.AddRange(devices);
+			instance.Sources.AddRange(sources);
+			instance.Destinations.AddRange(destinations);
+			instance.DestinationGroups.AddRange(destinationGroups);
 		}
 
 		#endregion
