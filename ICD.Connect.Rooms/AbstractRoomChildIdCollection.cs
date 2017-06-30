@@ -152,9 +152,6 @@ namespace ICD.Connect.Rooms
 
 			try
 			{
-				if (!Collection.ContainsChild(id))
-					return false;
-
 				if (!m_Ids.Add(id))
 					return false;
 			}
