@@ -123,6 +123,14 @@ namespace ICD.Connect.Rooms
 		/// <param name="factory"></param>
 		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
 		{
+			// Ensure all dependencies are loaded first.
+			factory.LoadOriginators(settings.Devices);
+			factory.LoadOriginators(settings.Ports);
+			factory.LoadOriginators(settings.Panels);
+			factory.LoadOriginators(settings.Sources);
+			factory.LoadOriginators(settings.Destinations);
+			factory.LoadOriginators(settings.DestinationGroups);
+
 			base.ApplySettingsFinal(settings, factory);
 
 			Core = ServiceProvider.GetService<ICore>();
