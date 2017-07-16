@@ -36,7 +36,7 @@ namespace ICD.Connect.Rooms
 		/// <summary>
 		/// Gets the name of the node in the console.
 		/// </summary>
-		public virtual string ConsoleName { get { return GetType().Name; } }
+		public virtual string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().Name : Name; } }
 
 		/// <summary>
 		/// Gets the help information for the node.
