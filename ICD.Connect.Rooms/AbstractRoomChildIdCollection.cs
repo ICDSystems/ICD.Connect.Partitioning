@@ -53,64 +53,7 @@ namespace ICD.Connect.Rooms
 			OnChildrenChanged.Raise(this);
 		}
 
-		/// <summary>
-		/// Gets the originator instance with the given id.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		public TChild GetInstance(int id)
-		{
-			m_Section.Enter();
-
-			try
-			{
-				if (m_Ids.Contains(id))
-					return Collection.GetChild<TChild>(id);
-
-				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(TChild).Name, id);
-				throw new InvalidOperationException(message);
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
-		}
-
-		/// <summary>
-		/// Gets the originator instance with the given type and id.
-		/// </summary>
-		/// <typeparam name="TInstance"></typeparam>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		public TInstance GetInstance<TInstance>(int id)
-			where TInstance : TChild
-		{
-			TChild child = GetInstance(id);
-
-			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
-				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
-
-			return (TInstance)child;
-		}
-
-		/// <summary>
-		/// Gets all of the orignator instances from the core.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<TChild> GetInstances()
-		{
-			return GetIds().Select(id => GetInstance(id));
-		}
-
-		/// <summary>
-		/// Gets all of the originator instances of the given type from the core.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<TInstance> GetInstances<TInstance>()
-			where TInstance : TChild
-		{
-			return GetInstances().OfType<TInstance>();
-		}
+		#region Ids
 
 		/// <summary>
 		/// Gets the child ids.
@@ -187,6 +130,71 @@ namespace ICD.Connect.Rooms
 			OnChildrenChanged.Raise(this);
 			return true;
 		}
+
+		#endregion
+
+		#region Instances
+
+		/// <summary>
+		/// Gets the originator instance with the given id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public TChild GetInstance(int id)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				if (m_Ids.Contains(id))
+					return Collection.GetChild<TChild>(id);
+
+				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(TChild).Name, id);
+				throw new InvalidOperationException(message);
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Gets the originator instance with the given type and id.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public TInstance GetInstance<TInstance>(int id)
+			where TInstance : TChild
+		{
+			TChild child = GetInstance(id);
+
+			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
+				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
+
+			return (TInstance)child;
+		}
+
+		/// <summary>
+		/// Gets all of the orignator instances from the core.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TChild> GetInstances()
+		{
+			return GetIds().Select(id => GetInstance(id));
+		}
+
+		/// <summary>
+		/// Gets all of the originator instances of the given type from the core.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstances<TInstance>()
+			where TInstance : TChild
+		{
+			return GetInstances().OfType<TInstance>();
+		}
+
+		#endregion
 
 		#endregion
 
