@@ -21,6 +21,7 @@ namespace ICD.Connect.Rooms
 		private readonly RoomSourceIdCollection m_SourceIds;
 		private readonly RoomDestinationIdCollection m_DestinationIds;
 		private readonly RoomDestinationGroupIdCollection m_DestinationGroupIds;
+		private readonly RoomPartitionIdCollection m_PartitionIds;
 
 		#region Properties
 
@@ -32,6 +33,7 @@ namespace ICD.Connect.Rooms
 		public RoomSourceIdCollection Sources { get { return m_SourceIds; } }
 		public RoomDestinationIdCollection Destinations { get { return m_DestinationIds; } }
 		public RoomDestinationGroupIdCollection DestinationGroups { get { return m_DestinationGroupIds; } }
+		public RoomPartitionIdCollection Partitions { get { return m_PartitionIds; } }
 
 		/// <summary>
 		/// Gets the name of the node in the console.
@@ -58,6 +60,7 @@ namespace ICD.Connect.Rooms
 			m_SourceIds = new RoomSourceIdCollection(this);
 			m_DestinationIds = new RoomDestinationIdCollection(this);
 			m_DestinationGroupIds = new RoomDestinationGroupIdCollection(this);
+			m_PartitionIds = new RoomPartitionIdCollection(this);
 		}
 
 		#endregion
@@ -77,6 +80,7 @@ namespace ICD.Connect.Rooms
 			m_SourceIds.Clear();
 			m_DestinationIds.Clear();
 			m_DestinationGroupIds.Clear();
+			m_PartitionIds.Clear();
 		}
 
 		#endregion
@@ -97,6 +101,7 @@ namespace ICD.Connect.Rooms
 			settings.Sources.AddRange(m_SourceIds.GetIds());
 			settings.Destinations.AddRange(m_DestinationIds.GetIds());
 			settings.DestinationGroups.AddRange(m_DestinationGroupIds.GetIds());
+			settings.Partitions.AddRange(m_PartitionIds.GetIds());
 		}
 
 		/// <summary>
@@ -114,6 +119,7 @@ namespace ICD.Connect.Rooms
 			m_SourceIds.Clear();
 			m_DestinationIds.Clear();
 			m_DestinationGroupIds.Clear();
+			m_PartitionIds.Clear();
 		}
 
 		/// <summary>
@@ -130,6 +136,7 @@ namespace ICD.Connect.Rooms
 			factory.LoadOriginators(settings.Sources);
 			factory.LoadOriginators(settings.Destinations);
 			factory.LoadOriginators(settings.DestinationGroups);
+			factory.LoadOriginators(settings.Partitions);
 
 			base.ApplySettingsFinal(settings, factory);
 
@@ -141,6 +148,7 @@ namespace ICD.Connect.Rooms
 			m_SourceIds.SetIds(settings.Sources);
 			m_DestinationIds.SetIds(settings.Destinations);
 			m_DestinationGroupIds.SetIds(settings.DestinationGroups);
+			m_PartitionIds.SetIds(settings.Partitions);
 		}
 
 		#endregion
@@ -159,6 +167,7 @@ namespace ICD.Connect.Rooms
 			addRow("Source count", m_SourceIds.Count);
 			addRow("Destination count", m_DestinationIds.Count);
 			addRow("Destination Group count", m_DestinationGroupIds.Count);
+			addRow("Partition count", m_PartitionIds.Count);
 		}
 
 		/// <summary>

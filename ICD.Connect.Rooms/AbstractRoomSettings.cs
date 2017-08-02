@@ -27,6 +27,8 @@ namespace ICD.Connect.Rooms
 		private const string DESTINATION_ELEMENT = "Destination";
 		private const string DESTINATION_GROUPS_ELEMENT = "DestinationGroups";
 		private const string DESTINATION_GROUP_ELEMENT = "DestinationGroup";
+		private const string PARTITION_ELEMENT = "Partition";
+		private const string PARTITIONS_ELEMENT = "Partitions";
 
 		private readonly IcdHashSet<int> m_Devices;
 		private readonly IcdHashSet<int> m_Ports;
@@ -34,6 +36,7 @@ namespace ICD.Connect.Rooms
 		private readonly IcdHashSet<int> m_Sources;
 		private readonly IcdHashSet<int> m_Destinations;
 		private readonly IcdHashSet<int> m_DestinationGroups;
+		private readonly IcdHashSet<int> m_Partitions;
 
 		#region Properties
 
@@ -43,6 +46,7 @@ namespace ICD.Connect.Rooms
 		public IcdHashSet<int> Sources { get { return m_Sources; } }
 		public IcdHashSet<int> Destinations { get { return m_Destinations; } }
 		public IcdHashSet<int> DestinationGroups { get { return m_DestinationGroups; } }
+		public IcdHashSet<int> Partitions { get { return m_Partitions; } }
 
 		/// <summary>
 		/// Gets the xml element.
@@ -62,6 +66,7 @@ namespace ICD.Connect.Rooms
 			m_Sources = new IcdHashSet<int>();
 			m_Destinations = new IcdHashSet<int>();
 			m_DestinationGroups = new IcdHashSet<int>();
+			m_Partitions = new IcdHashSet<int>();
 		}
 
 		#region Methods
@@ -93,6 +98,7 @@ namespace ICD.Connect.Rooms
 			XmlUtils.WriteListToXml(writer, Sources.Order(), SOURCES_ELEMENT, SOURCE_ELEMENT);
 			XmlUtils.WriteListToXml(writer, Destinations.Order(), DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			XmlUtils.WriteListToXml(writer, DestinationGroups.Order(), DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
+			XmlUtils.WriteListToXml(writer, Partitions.Order(), PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 		}
 
 		#region Protected Methods
@@ -112,6 +118,7 @@ namespace ICD.Connect.Rooms
 			IEnumerable<int> sources = XmlUtils.ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 			IEnumerable<int> destinations = XmlUtils.ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 			IEnumerable<int> destinationGroups = XmlUtils.ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<int> partitions = XmlUtils.ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 
 			instance.Panels.AddRange(panels);
 			instance.Ports.AddRange(ports);
@@ -119,6 +126,7 @@ namespace ICD.Connect.Rooms
 			instance.Sources.AddRange(sources);
 			instance.Destinations.AddRange(destinations);
 			instance.DestinationGroups.AddRange(destinationGroups);
+			instance.Partitions.AddRange(partitions);
 		}
 
 		#endregion

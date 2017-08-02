@@ -27,6 +27,7 @@ namespace ICD.Connect.Rooms
 		RoomSourceIdCollection Sources { get; }
 		RoomDestinationIdCollection Destinations { get; }
 		RoomDestinationGroupIdCollection DestinationGroups { get; }
+		RoomPartitionIdCollection Partitions { get; }
 	}
 
 	/// <summary>

@@ -1,5 +1,6 @@
 ﻿using ICD.Connect.Devices;
 using ICD.Connect.Panels;
+using ICD.Connect.Partitions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Groups;
@@ -68,6 +69,17 @@ namespace ICD.Connect.Rooms
 		/// Constructor.
 		/// </summary>
 		public RoomDestinationGroupIdCollection(IRoom room)
+			: base(room)
+		{
+		}
+	}
+
+	public sealed class RoomPartitionIdCollection : AbstractRoomChildIdCollection<IPartition>
+	{
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public RoomPartitionIdCollection(IRoom room)
 			: base(room)
 		{
 		}
