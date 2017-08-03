@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
@@ -35,38 +37,23 @@ namespace ICD.Connect.Rooms
 	/// </summary>
 	public static class RoomExtensions
 	{
+		#region Controls
+
 		/// <summary>
-		/// Gets the first device of the given type.
-		/// Returns null if no device of the given type.
+		/// Returns true if the room contains the given control.
 		/// </summary>
-		/// <typeparam name="TDevice"></typeparam>
 		/// <param name="extends"></param>
+		/// <param name="controlInfo"></param>
 		/// <returns></returns>
-		[CanBeNull]
-		[PublicAPI]
-		public static TDevice GetDevice<TDevice>(this IRoom extends)
-			where TDevice : IDevice
+		public static bool ContainsControl(this IRoom extends, DeviceControlInfo controlInfo)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.GetDevices<TDevice>().FirstOrDefault();
-		}
-
-		/// <summary>
-		/// Gets the devices of the given type.
-		/// </summary>
-		/// <typeparam name="TDevice"></typeparam>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static IEnumerable<TDevice> GetDevices<TDevice>(this IRoom extends)
-			where TDevice : IDevice
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.Devices.OfType<TDevice>();
+			// TODO - Janky, controls can be on IDeviceBase, IDeviceBase lives in Ports, Devices and Panels
+			return extends.Ports.Contains(controlInfo.DeviceId) ||
+			       extends.Devices.Contains(controlInfo.DeviceId) ||
+			       extends.Panels.Contains(controlInfo.DeviceId);
 		}
 
 		/// <summary>
@@ -92,12 +79,18 @@ namespace ICD.Connect.Rooms
 		/// <param name="controlInfo"></param>
 		/// <returns></returns>
 		[PublicAPI]
+		[NotNull]
 		public static IDeviceControl GetControl(this IRoom extends, DeviceControlInfo controlInfo)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Devices[controlInfo.DeviceId].Controls[controlInfo.ControlId];
+			if (extends.ContainsControl(controlInfo))
+				return extends.Core.GetControl(controlInfo);
+
+			string message = string.Format("{0} does not contain an {1} with id {2}", extends, typeof(IDeviceBase),
+			                               controlInfo.DeviceId);
+			throw new KeyNotFoundException(message);
 		}
 
 		/// <summary>
@@ -107,6 +100,7 @@ namespace ICD.Connect.Rooms
 		/// <param name="controlInfo"></param>
 		/// <returns></returns>
 		[PublicAPI]
+		[NotNull]
 		public static T GetControl<T>(this IRoom extends, DeviceControlInfo controlInfo)
 			where T : IDeviceControl
 		{
@@ -121,7 +115,7 @@ namespace ICD.Connect.Rooms
 		}
 
 		/// <summary>
-		/// Returns the first available control of the given type.
+		/// Returns the controls of the given type.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -132,8 +126,146 @@ namespace ICD.Connect.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Devices.SelectMany(d => d.Controls.GetControls<T>());
+			// TODO - Janky, controls can be on IDeviceBase, IDeviceBase lives in Ports, Devices and Panels
+			IEnumerable<IDeviceBase> devices = extends.Devices.GetInstances().Cast<IDeviceBase>();
+			IEnumerable<IDeviceBase> ports = extends.Ports.GetInstances().Cast<IDeviceBase>();
+			IEnumerable<IDeviceBase> panels = extends.Panels.GetInstances().Cast<IDeviceBase>();
+
+			return devices.Concat(ports)
+			              .Concat(panels)
+			              .SelectMany(d => d.Controls.GetControls<T>());
 		}
+
+		#endregion
+
+		#region Control Recursion
+
+		/// <summary>
+		/// Returns the first available control of the given type.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		[CanBeNull]
+		[PublicAPI]
+		public static T GetControlRecursive<T>(this IRoom extends)
+			where T : IDeviceControl
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetControlsRecursive<T>().FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Returns the control matching the given type and control info recursively, as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[PublicAPI]
+		[NotNull]
+		public static IDeviceControl GetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			foreach (IRoom room in extends.GetRoomsRecursive().Where(room => room.ContainsControl(controlInfo)))
+				return room.GetControl(controlInfo);
+
+			string message = string.Format("{0} does not recursively contain an {1} with id {2}", extends, typeof(IDeviceBase),
+			                               controlInfo.DeviceId);
+			throw new KeyNotFoundException(message);
+		}
+
+		/// <summary>
+		/// Returns the control matching the given type and control info recursively, as defined by partitions.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		[PublicAPI]
+		[NotNull]
+		public static T GetControlRecursive<T>(this IRoom extends, DeviceControlInfo controlInfo)
+			where T : IDeviceControl
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			IDeviceControl control = extends.GetControlRecursive(controlInfo);
+			if (control is T)
+				return (T)control;
+
+			throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
+		}
+
+		/// <summary>
+		/// Returns the controls of the given type recursively, as defined by partitions.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static IEnumerable<T> GetControlsRecursive<T>(this IRoom extends)
+			where T : IDeviceControl
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetRoomsRecursive()
+			              .SelectMany(r => r.GetControls<T>())
+			              .Distinct();
+		}
+
+		#endregion
+
+		#region Rooms
+
+		/// <summary>
+		/// Gets the child rooms as defined by the partitions.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static IEnumerable<IRoom> GetRooms(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.Partitions
+			              .GetInstances()
+			              .SelectMany(p => p.GetRooms())
+						  .Distinct()
+			              .Select(i => extends.Core.Originators.GetChild<IRoom>(i));
+		}
+
+		/// <summary>
+		/// Returns this room, and all child rooms as defined by the partitions.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static IEnumerable<IRoom> GetRoomsRecursive(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetRoomsRecursive(new IcdHashSet<IRoom>());
+		}
+
+		/// <summary>
+		/// Returns this room, and all child rooms as defined by the partitions.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="visited"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		private static IEnumerable<IRoom> GetRoomsRecursive(this IRoom extends, IcdHashSet<IRoom> visited)
+		{
+			if (!visited.Add(extends))
+				yield break;
+
+			yield return extends;
+
+			foreach (IRoom child in extends.GetRooms().SelectMany(r => r.GetRoomsRecursive(visited)))
+				yield return child;
+		}
+
+		#endregion
 
 		/// <summary>
 		/// Returns true if the room has a destination with the given connection type
@@ -146,7 +278,9 @@ namespace ICD.Connect.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Destinations.Any(d => d.ConnectionType.HasFlags(type));
+			return extends.Destinations
+			              .GetInstancesRecursive()
+			              .Any(d => d.ConnectionType.HasFlags(type));
 		}
 	}
 }

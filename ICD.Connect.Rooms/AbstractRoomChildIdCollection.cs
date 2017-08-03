@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
@@ -9,7 +9,8 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Rooms
 {
-	public abstract class AbstractRoomChildIdCollection<TChild> : IEnumerable<TChild>
+	public abstract class AbstractRoomChildIdCollection<TCollection, TChild>
+		where TCollection : AbstractRoomChildIdCollection<TCollection, TChild>
 		where TChild : IOriginator
 	{
 		public event EventHandler OnChildrenChanged;
@@ -23,14 +24,7 @@ namespace ICD.Connect.Rooms
 		/// </summary>
 		public int Count { get { return m_Section.Execute(() => m_Ids.Count); } }
 
-		/// <summary>
-		/// Gets the originator instance with the given id.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		public TChild this[int id] { get { return GetInstance(id); } }
-
-		public IOriginatorCollection<IOriginator> Collection { get { return m_Room.Core.Originators; } }
+		private IOriginatorCollection<IOriginator> Originators { get { return m_Room.Core.Originators; } }
 
 		/// <summary>
 		/// Constructor.
@@ -131,6 +125,17 @@ namespace ICD.Connect.Rooms
 			return true;
 		}
 
+		/// <summary>
+		/// Returns true if the 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public bool Contains(int id)
+		{
+			return m_Section.Execute(() => m_Ids.Contains(id));
+		}
+
 		#endregion
 
 		#region Instances
@@ -140,6 +145,7 @@ namespace ICD.Connect.Rooms
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
+		[NotNull]
 		public TChild GetInstance(int id)
 		{
 			m_Section.Enter();
@@ -147,7 +153,7 @@ namespace ICD.Connect.Rooms
 			try
 			{
 				if (m_Ids.Contains(id))
-					return Collection.GetChild<TChild>(id);
+					return Originators.GetChild<TChild>(id);
 
 				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(TChild).Name, id);
 				throw new InvalidOperationException(message);
@@ -164,6 +170,7 @@ namespace ICD.Connect.Rooms
 		/// <typeparam name="TInstance"></typeparam>
 		/// <param name="id"></param>
 		/// <returns></returns>
+		[NotNull]
 		public TInstance GetInstance<TInstance>(int id)
 			where TInstance : TChild
 		{
@@ -173,6 +180,18 @@ namespace ICD.Connect.Rooms
 				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
 
 			return (TInstance)child;
+		}
+
+		/// <summary>
+		/// Gets the first originator instance with the given type.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <returns></returns>
+		[CanBeNull]
+		public TInstance GetInstance<TInstance>()
+			where TInstance : TChild
+		{
+			return GetInstances<TInstance>().FirstOrDefault();
 		}
 
 		/// <summary>
@@ -196,19 +215,109 @@ namespace ICD.Connect.Rooms
 
 		#endregion
 
+		#region Recursion
+
+		/// <summary>
+		/// Returns true if the given id is contained in this collection or any child collection recursively.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public bool ContainsRecursive(int id)
+		{
+			return m_Room.GetRoomsRecursive()
+			             .Select(r => GetCollection(r))
+			             .Any(c => c.Contains(id));
+		}
+
+		/// <summary>
+		/// Gets all of the ids recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<int> GetIdsRecursive()
+		{
+			return m_Room.GetRoomsRecursive()
+			             .SelectMany(r => GetCollection(r).GetIds())
+			             .Distinct();
+		}
+
+		/// <summary>
+		/// Gets the instance for the given id recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		public TChild GetInstanceRecursive(int id)
+		{
+			TCollection collection = m_Room.GetRoomsRecursive()
+			                               .Select(r => GetCollection(r))
+			                               .FirstOrDefault(c => c.Contains(id));
+
+			if (collection != null)
+				return collection.GetInstance(id);
+
+			string message = string.Format("{0} does not recursively contain a {1} with id {2}", GetType().Name,
+			                               typeof(TChild).Name, id);
+			throw new InvalidOperationException(message);
+		}
+
+		/// <summary>
+		/// Gets the instance of the given type and id recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		public TInstance GetInstanceRecursive<TInstance>(int id)
+			where TInstance : TChild
+		{
+			TChild child = GetInstanceRecursive(id);
+
+			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
+				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
+
+			return (TInstance)child;
+		}
+
+		/// <summary>
+		/// Gets the first instance of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public TInstance GetInstanceRecursive<TInstance>()
+			where TInstance : TChild
+		{
+			return GetInstancesRecursive<TInstance>().FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TChild> GetInstancesRecursive()
+		{
+			return m_Room.GetRoomsRecursive()
+			             .Select(r => GetCollection(r))
+			             .SelectMany(c => c.GetInstances())
+			             .Distinct();
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>()
+			where TInstance : TChild
+		{
+			return m_Room.GetRoomsRecursive()
+						 .Select(r => GetCollection(r))
+						 .SelectMany(c => c.GetInstances<TInstance>())
+						 .Distinct();
+		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected abstract TCollection GetCollection(IRoom room);
+
 		#endregion
-
-		#region IEnumerable Methods
-
-		public IEnumerator<TChild> GetEnumerator()
-		{
-			return GetInstances().GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
 
 		#endregion
 	}

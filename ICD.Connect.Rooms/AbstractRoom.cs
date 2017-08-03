@@ -176,9 +176,9 @@ namespace ICD.Connect.Rooms
 		/// <returns></returns>
 		public virtual IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			yield return ConsoleNodeGroup.IndexNodeMap("Panels", m_PanelIds.GetInstances().OfType<IConsoleNode>());
-			yield return ConsoleNodeGroup.IndexNodeMap("Devices", m_DeviceIds.GetInstances().OfType<IConsoleNode>());
-			yield return ConsoleNodeGroup.IndexNodeMap("Ports", m_PortIds.GetInstances().OfType<IConsoleNode>());
+			yield return ConsoleNodeGroup.IndexNodeMap("Panels", m_PanelIds.GetInstancesRecursive().OfType<IConsoleNode>());
+			yield return ConsoleNodeGroup.IndexNodeMap("Devices", m_DeviceIds.GetInstancesRecursive().OfType<IConsoleNode>());
+			yield return ConsoleNodeGroup.IndexNodeMap("Ports", m_PortIds.GetInstancesRecursive().OfType<IConsoleNode>());
 			//yield return ConsoleNodeGroup.IndexNodeMap("Sources", m_SourceIds.GetInstances().OfType<IConsoleNode>());
 			//yield return ConsoleNodeGroup.IndexNodeMap("Destinations", m_DestinationIds.GetInstances().OfType<IConsoleNode>());
 			//yield return ConsoleNodeGroup.IndexNodeMap("DestinationGroups", m_DestinationGroupIds.GetInstances().OfType<IConsoleNode>());

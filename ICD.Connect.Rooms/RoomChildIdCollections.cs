@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Devices;
+﻿using System;
+using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 using ICD.Connect.Partitions;
 using ICD.Connect.Protocol.Ports;
@@ -8,7 +9,7 @@ using ICD.Connect.Routing.Endpoints.Sources;
 
 namespace ICD.Connect.Rooms
 {
-	public sealed class RoomPortIdCollection : AbstractRoomChildIdCollection<IPort>
+	public sealed class RoomPortIdCollection : AbstractRoomChildIdCollection<RoomPortIdCollection, IPort>
 	{
 		/// <summary>
 		/// Constructor.
@@ -17,9 +18,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomPortIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Ports;
+		}
 	}
 
-	public sealed class RoomDeviceIdCollection : AbstractRoomChildIdCollection<IDevice>
+	public sealed class RoomDeviceIdCollection : AbstractRoomChildIdCollection<RoomDeviceIdCollection, IDevice>
 	{
 		/// <summary>
 		/// Constructor.
@@ -28,9 +42,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomDeviceIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Devices;
+		}
 	}
 
-	public sealed class RoomPanelIdCollection : AbstractRoomChildIdCollection<IPanelDevice>
+	public sealed class RoomPanelIdCollection : AbstractRoomChildIdCollection<RoomPanelIdCollection, IPanelDevice>
 	{
 		/// <summary>
 		/// Constructor.
@@ -39,9 +66,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomPanelIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Panels;
+		}
 	}
 
-	public sealed class RoomSourceIdCollection : AbstractRoomChildIdCollection<ISource>
+	public sealed class RoomSourceIdCollection : AbstractRoomChildIdCollection<RoomSourceIdCollection, ISource>
 	{
 		/// <summary>
 		/// Constructor.
@@ -50,9 +90,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomSourceIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Sources;
+		}
 	}
 
-	public sealed class RoomDestinationIdCollection : AbstractRoomChildIdCollection<IDestination>
+	public sealed class RoomDestinationIdCollection : AbstractRoomChildIdCollection<RoomDestinationIdCollection, IDestination>
 	{
 		/// <summary>
 		/// Constructor.
@@ -61,9 +114,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomDestinationIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Destinations;
+		}
 	}
 
-	public sealed class RoomDestinationGroupIdCollection : AbstractRoomChildIdCollection<IDestinationGroup>
+	public sealed class RoomDestinationGroupIdCollection : AbstractRoomChildIdCollection<RoomDestinationGroupIdCollection, IDestinationGroup>
 	{
 		/// <summary>
 		/// Constructor.
@@ -72,9 +138,22 @@ namespace ICD.Connect.Rooms
 			: base(room)
 		{
 		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomDestinationGroupIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.DestinationGroups;
+		}
 	}
 
-	public sealed class RoomPartitionIdCollection : AbstractRoomChildIdCollection<IPartition>
+	public sealed class RoomPartitionIdCollection : AbstractRoomChildIdCollection<RoomPartitionIdCollection, IPartition>
 	{
 		/// <summary>
 		/// Constructor.
@@ -82,6 +161,19 @@ namespace ICD.Connect.Rooms
 		public RoomPartitionIdCollection(IRoom room)
 			: base(room)
 		{
+		}
+
+		/// <summary>
+		/// Gets the equivalent collection from the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		protected override RoomPartitionIdCollection GetCollection(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return room.Partitions;
 		}
 	}
 }

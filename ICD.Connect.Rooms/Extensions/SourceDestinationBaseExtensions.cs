@@ -20,7 +20,7 @@ namespace ICD.Connect.Rooms.Extensions
 				throw new ArgumentNullException("room");
 
 			return string.IsNullOrEmpty(extends.Name)
-					   ? room.Devices.GetInstance(extends.Endpoint.Device).Name
+					   ? room.Devices.GetInstanceRecursive(extends.Endpoint.Device).Name
 					   : extends.Name;
 		}
 	}
