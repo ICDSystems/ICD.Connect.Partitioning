@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.EventArguments;
 using ICD.Common.Services;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Settings;
@@ -15,6 +18,8 @@ namespace ICD.Connect.Rooms
 	public abstract class AbstractRoom<T> : AbstractOriginator<T>, IRoom, IConsoleNode
 		where T : AbstractRoomSettings, new()
 	{
+		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
+
 		private readonly RoomDeviceIdCollection m_DeviceIds;
 		private readonly RoomPortIdCollection m_PortIds;
 		private readonly RoomPanelIdCollection m_PanelIds;
@@ -23,9 +28,28 @@ namespace ICD.Connect.Rooms
 		private readonly RoomDestinationGroupIdCollection m_DestinationGroupIds;
 		private readonly RoomPartitionIdCollection m_PartitionIds;
 
+		private bool m_CombineState;
+
 		#region Properties
 
 		public ICore Core { get; private set; }
+
+		/// <summary>
+		/// Returns true if the room is currently behaving as part of a combined room.
+		/// </summary>
+		public bool CombineState
+		{
+			get { return m_CombineState; }
+			private set
+			{
+				if (value == m_CombineState)
+					return;
+
+				m_CombineState = value;
+
+				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
+			}
+		}
 
 		public RoomDeviceIdCollection Devices { get { return m_DeviceIds; } }
 		public RoomPortIdCollection Ports { get { return m_PortIds; } }
@@ -72,6 +96,8 @@ namespace ICD.Connect.Rooms
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
+			OnCombineStateChanged = null;
+
 			base.DisposeFinal(disposing);
 
 			m_DeviceIds.Clear();
@@ -81,6 +107,22 @@ namespace ICD.Connect.Rooms
 			m_DestinationIds.Clear();
 			m_DestinationGroupIds.Clear();
 			m_PartitionIds.Clear();
+		}
+
+		/// <summary>
+		/// Informs the room it is part of a combined room.
+		/// </summary>
+		public void EnterCombineState()
+		{
+			CombineState = true;
+		}
+
+		/// <summary>
+		/// Informs the room it is no longer part of a combined room.
+		/// </summary>
+		public void LeaveCombineState()
+		{
+			CombineState = false;
 		}
 
 		#endregion

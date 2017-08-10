@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
@@ -19,9 +20,19 @@ namespace ICD.Connect.Rooms
 	public interface IRoom : IOriginator
 	{
 		/// <summary>
+		/// Raised when the room combine state changes.
+		/// </summary>
+		event EventHandler<BoolEventArgs> OnCombineStateChanged;
+		
+		/// <summary>
 		/// Gets the parent core instance.
 		/// </summary>
 		ICore Core { get; }
+
+		/// <summary>
+		/// Returns true if the room is currently behaving as part of a combined room.
+		/// </summary>
+		bool CombineState { get; }
 
 		RoomDeviceIdCollection Devices { get; }
 		RoomPortIdCollection Ports { get; }
@@ -30,6 +41,16 @@ namespace ICD.Connect.Rooms
 		RoomDestinationIdCollection Destinations { get; }
 		RoomDestinationGroupIdCollection DestinationGroups { get; }
 		RoomPartitionIdCollection Partitions { get; }
+
+		/// <summary>
+		/// Informs the room it is part of a combined room.
+		/// </summary>
+		void EnterCombineState();
+
+		/// <summary>
+		/// Informs the room it is no longer part of a combined room.
+		/// </summary>
+		void LeaveCombineState();
 	}
 
 	/// <summary>
