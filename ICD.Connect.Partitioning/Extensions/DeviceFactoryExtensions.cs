@@ -1,7 +1,8 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Rooms.Extensions
+namespace ICD.Connect.Partitioning.Extensions
 {
 	public static class DeviceFactoryExtensions
 	{

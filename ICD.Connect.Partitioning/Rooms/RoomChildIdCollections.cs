@@ -1,13 +1,13 @@
 ﻿using System;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels;
-using ICD.Connect.Partitions;
+using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	public sealed class RoomPortIdCollection : AbstractRoomChildIdCollection<RoomPortIdCollection, IPort>
 	{

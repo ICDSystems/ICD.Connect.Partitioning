@@ -1,7 +1,8 @@
 ﻿using System;
+using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Routing.Endpoints;
 
-namespace ICD.Connect.Rooms.Extensions
+namespace ICD.Connect.Partitioning.Extensions
 {
 	public static class SourceDestinationBaseExtensions
 	{

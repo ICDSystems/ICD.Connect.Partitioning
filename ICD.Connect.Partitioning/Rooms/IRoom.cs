@@ -12,7 +12,7 @@ using ICD.Connect.Routing.Connections;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	/// <summary>
 	/// Represents a room of devices.

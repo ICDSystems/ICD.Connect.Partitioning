@@ -7,7 +7,7 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	public abstract class AbstractRoomChildIdCollection<TCollection, TChild>
 		where TCollection : AbstractRoomChildIdCollection<TCollection, TChild>

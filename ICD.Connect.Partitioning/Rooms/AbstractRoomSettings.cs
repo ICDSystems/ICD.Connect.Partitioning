@@ -5,7 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	/// <summary>
 	/// Base class for room settings.

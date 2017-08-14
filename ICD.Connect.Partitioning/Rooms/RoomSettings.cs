@@ -1,8 +1,7 @@
 ﻿using System;
-using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.Factories;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	public sealed class RoomSettings : AbstractRoomSettings
 	{

@@ -1,6 +1,7 @@
 using ICD.Common.Utils.Collections;
+using ICD.Connect.Settings;
 
-namespace ICD.Connect.Settings
+namespace ICD.Connect.Partitioning.Rooms
 {
 	public interface IRoomSettings : ISettings
 	{
