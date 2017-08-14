@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning.Partitions
 {
 	public interface IPartitionSettings : ISettings
 	{

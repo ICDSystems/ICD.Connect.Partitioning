@@ -5,7 +5,7 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning.Partitions
 {
 	public abstract class AbstractPartitionSettings : AbstractSettings, IPartitionSettings
 	{

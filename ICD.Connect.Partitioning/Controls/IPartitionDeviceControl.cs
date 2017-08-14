@@ -3,7 +3,7 @@ using ICD.Common.EventArguments;
 using ICD.Common.Properties;
 using ICD.Connect.Devices.Controls;
 
-namespace ICD.Connect.Partitions.Controls
+namespace ICD.Connect.Partitioning.Controls
 {
 	public interface IPartitionDeviceControl : IDeviceControl
 	{

@@ -2,9 +2,9 @@
 using ICD.Common.EventArguments;
 using ICD.Common.Properties;
 using ICD.Connect.Devices;
-using ICD.Connect.Partitions.Controls;
+using ICD.Connect.Partitioning.Controls;
 
-namespace ICD.Connect.Partitions.Devices
+namespace ICD.Connect.Partitioning.Devices
 {
 	/// <summary>
 	/// IPartitionDevice simply notifies if a partition has been opened.

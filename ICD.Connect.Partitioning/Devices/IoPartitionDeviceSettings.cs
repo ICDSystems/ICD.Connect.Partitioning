@@ -4,7 +4,7 @@ using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.Factories;
 
-namespace ICD.Connect.Partitions.Devices
+namespace ICD.Connect.Partitioning.Devices
 {
 	public sealed class IoPartitionDeviceSettings : AbstractPartitionDeviceSettings
 	{

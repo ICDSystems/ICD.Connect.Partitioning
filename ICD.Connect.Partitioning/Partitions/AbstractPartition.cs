@@ -6,7 +6,7 @@ using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning.Partitions
 {
 	public abstract class AbstractPartition<TSettings> : AbstractOriginator<TSettings>, IPartition
 		where TSettings : IPartitionSettings, new()

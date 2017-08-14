@@ -1,6 +1,7 @@
-﻿using ICD.Connect.Settings;
+﻿using ICD.Connect.Partitioning.Partitions;
+using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning
 {
 	public interface IPartitionManager : IOriginator
 	{

@@ -2,7 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Connect.API.Commands;
 
-namespace ICD.Connect.Partitions.Devices
+namespace ICD.Connect.Partitioning.Devices
 {
 	public sealed class MockPartitionDevice : AbstractPartitionDevice<MockPartitionDeviceSettings>
 	{

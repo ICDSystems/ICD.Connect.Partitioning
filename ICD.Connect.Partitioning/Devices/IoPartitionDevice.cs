@@ -8,7 +8,7 @@ using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Partitions.Devices
+namespace ICD.Connect.Partitioning.Devices
 {
 	public sealed class IoPartitionDevice : AbstractPartitionDevice<IoPartitionDeviceSettings>
 	{

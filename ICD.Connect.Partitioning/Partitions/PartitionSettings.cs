@@ -2,7 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Connect.Settings.Attributes.Factories;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning.Partitions
 {
 	public sealed class PartitionSettings : AbstractPartitionSettings
 	{

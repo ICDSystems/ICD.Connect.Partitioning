@@ -1,7 +1,7 @@
 ﻿using ICD.Common.EventArguments;
-using ICD.Connect.Partitions.Devices;
+using ICD.Connect.Partitioning.Devices;
 
-namespace ICD.Connect.Partitions.Controls
+namespace ICD.Connect.Partitioning.Controls
 {
 	/// <summary>
 	/// Simple partition control for a partition device.

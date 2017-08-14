@@ -4,9 +4,9 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
-using ICD.Connect.Partitions.Controls;
+using ICD.Connect.Partitioning.Controls;
 
-namespace ICD.Connect.Partitions.Devices
+namespace ICD.Connect.Partitioning.Devices
 {
 	public abstract class AbstractPartitionDevice<TSettings> : AbstractDevice<TSettings>, IPartitionDevice
 		where TSettings : IPartitionDeviceSettings, new()

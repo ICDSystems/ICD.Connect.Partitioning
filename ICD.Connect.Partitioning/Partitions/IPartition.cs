@@ -3,7 +3,7 @@ using ICD.Common.Properties;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitions
+namespace ICD.Connect.Partitioning.Partitions
 {
 	/// <summary>
 	/// IPartition describes a division between multiple adjacent rooms.

@@ -6,7 +6,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Rooms
+namespace ICD.Connect.Partitioning.Rooms
 {
 	/// <summary>
 	/// Base class for rooms.
