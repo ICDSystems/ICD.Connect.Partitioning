@@ -98,7 +98,6 @@
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomChildIdCollections.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />
-    <Compile Include="Extensions\SourceDestinationBaseExtensions.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
