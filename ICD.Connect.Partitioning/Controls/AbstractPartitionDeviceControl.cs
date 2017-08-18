@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
@@ -35,6 +37,16 @@ namespace ICD.Connect.Partitioning.Controls
 		}
 
 		/// <summary>
+		/// Opens the partition.
+		/// </summary>
+		public abstract void Open();
+
+		/// <summary>
+		/// Closes the partition.
+		/// </summary>
+		public abstract void Close();
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="parent"></param>
@@ -65,6 +77,28 @@ namespace ICD.Connect.Partitioning.Controls
 			base.BuildConsoleStatus(addRow);
 
 			addRow("IsOpen", IsOpen);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new ConsoleCommand("Open", "Opens the partition", () => Open());
+			yield return new ConsoleCommand("Close", "Closes the partition", () => Close());
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion

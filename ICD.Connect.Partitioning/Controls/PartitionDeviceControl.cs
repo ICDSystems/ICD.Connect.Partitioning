@@ -30,6 +30,22 @@ namespace ICD.Connect.Partitioning.Controls
 		}
 
 		/// <summary>
+		/// Opens the partition.
+		/// </summary>
+		public override void Open()
+		{
+			Parent.Open();
+		}
+
+		/// <summary>
+		/// Closes the partition.
+		/// </summary>
+		public override void Close()
+		{
+			Parent.Close();
+		}
+
+		/// <summary>
 		/// Called when the parent IsOpen status changes.
 		/// </summary>
 		/// <param name="sender"></param>

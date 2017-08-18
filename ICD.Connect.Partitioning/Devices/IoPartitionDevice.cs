@@ -43,6 +43,24 @@ namespace ICD.Connect.Partitioning.Devices
 			SetPort(null);
 		}
 
+		/// <summary>
+		/// Opens the partition.
+		/// </summary>
+		public override void Open()
+		{
+			// Currently not supporting opening/closing partitions
+			Logger.AddEntry(eSeverity.Error, "{0} does not support opening/closing", GetType().Name);
+		}
+
+		/// <summary>
+		/// Closes the partition.
+		/// </summary>
+		public override void Close()
+		{
+			// Currently not supporting opening/closing partitions
+			Logger.AddEntry(eSeverity.Error, "{0} does not support opening/closing", GetType().Name);
+		}
+
 		#region Methods
 
 		/// <summary>
