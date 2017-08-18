@@ -106,8 +106,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			if (extends.ContainsControl(controlInfo))
-				return extends.Core.GetControl(controlInfo);
+			IDeviceControl output;
+			if (extends.TryGetControl(controlInfo, out output))
+				return output;
 
 			string message = string.Format("{0} does not contain an {1} with id {2}", extends, typeof(IDeviceBase),
 			                               controlInfo.DeviceId);
@@ -157,6 +158,55 @@ namespace ICD.Connect.Partitioning.Rooms
 			              .SelectMany(d => d.Controls.GetControls<T>());
 		}
 
+		/// <summary>
+		/// Gets the control matching the given control info.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="controlInfo"></param>
+		/// <param name="control"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static bool TryGetControl(this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			control = null;
+			if (!extends.ContainsControl(controlInfo))
+				return false;
+			
+			control = extends.Core.GetControl(controlInfo);
+			return true;
+		}
+
+		/// <summary>
+		/// Gets the control matching the given control info.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="controlInfo"></param>
+		/// <param name="control"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static bool TryGetControl<T>(this IRoom extends, DeviceControlInfo controlInfo, out T control)
+			where T : IDeviceControl
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			control = default(T);
+
+			IDeviceControl output;
+			bool found = extends.TryGetControl(controlInfo, out output);
+			if (!found)
+				return false;
+
+			if (!(output is T))
+				throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
+
+			control = (T)output;
+			return true;
+		}
+
 		#endregion
 
 		#region Control Recursion
@@ -188,8 +238,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			foreach (IRoom room in extends.GetRoomsRecursive().Where(room => room.ContainsControl(controlInfo)))
-				return room.GetControl(controlInfo);
+			IDeviceControl output;
+			if (extends.TryGetControlRecursive(controlInfo, out output))
+				return output;
 
 			string message = string.Format("{0} does not recursively contain an {1} with id {2}", extends, typeof(IDeviceBase),
 			                               controlInfo.DeviceId);
@@ -230,6 +281,53 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.GetRoomsRecursive()
 			              .SelectMany(r => r.GetControls<T>())
 			              .Distinct();
+		}
+
+		/// <summary>
+		/// Returns the control matching the given type and control info recursively, as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[PublicAPI]
+		public static bool TryGetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			control = null;
+
+			foreach (IRoom room in extends.GetRoomsRecursive().Where(room => room.ContainsControl(controlInfo)))
+			{
+				control = room.GetControl(controlInfo);
+				return true;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Returns the control matching the given type and control info recursively, as defined by partitions.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		[PublicAPI]
+		public static bool TryGetControlRecursive<T>(this IRoom extends, DeviceControlInfo controlInfo, out T control)
+			where T : IDeviceControl
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			control = default(T);
+
+			IDeviceControl output;
+			bool found = extends.TryGetControlRecursive(controlInfo, out output);
+			if (!found)
+				return false;
+
+			if (!(output is T))
+				throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
+
+			control = (T)output;
+			return true;
 		}
 
 		#endregion
