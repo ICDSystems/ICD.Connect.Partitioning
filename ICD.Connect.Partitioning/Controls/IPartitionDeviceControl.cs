@@ -18,5 +18,17 @@ namespace ICD.Connect.Partitioning.Controls
 		/// </summary>
 		[PublicAPI]
 		bool IsOpen { get; }
+
+		/// <summary>
+		/// Opens the partition.
+		/// </summary>
+		[PublicAPI]
+		void Open();
+
+		/// <summary>
+		/// Closes the partition.
+		/// </summary>
+		[PublicAPI]
+		void Close();
 	}
 }
