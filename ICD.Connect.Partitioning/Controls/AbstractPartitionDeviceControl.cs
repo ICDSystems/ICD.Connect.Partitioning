@@ -47,6 +47,17 @@ namespace ICD.Connect.Partitioning.Controls
 		public abstract void Close();
 
 		/// <summary>
+		/// Toggles the open state of the partition.
+		/// </summary>
+		public virtual void Toggle()
+		{
+			if (IsOpen)
+				Close();
+			else
+				Open();
+		}
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="parent"></param>

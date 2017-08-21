@@ -30,5 +30,11 @@ namespace ICD.Connect.Partitioning.Controls
 		/// </summary>
 		[PublicAPI]
 		void Close();
+
+		/// <summary>
+		/// Toggles the open state of the partition.
+		/// </summary>
+		[PublicAPI]
+		void Toggle();
 	}
 }
