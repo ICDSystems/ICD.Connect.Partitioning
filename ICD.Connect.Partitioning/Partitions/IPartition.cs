@@ -43,4 +43,17 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		IEnumerable<int> GetRooms();
 	}
+
+	public static class PartitionExtensions
+	{
+		/// <summary>
+		/// Returns true if a control has been specified for this partition.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static bool HasPartitionControl(this IPartition extends)
+		{
+			return extends.PartitionControl != default(DeviceControlInfo);
+		}
+	}
 }
