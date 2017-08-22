@@ -7,7 +7,7 @@ namespace ICD.Connect.Partitioning
 {
 	public interface IPartitionManager : IOriginator
 	{
-		IOriginatorCollection<IPartition> Partitions { get; }
+		IPartitionsCollection Partitions { get; }
 
 		/// <summary>
 		/// Gets the control for the given partition.

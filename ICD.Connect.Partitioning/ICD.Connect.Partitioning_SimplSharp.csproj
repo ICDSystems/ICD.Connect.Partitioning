@@ -71,6 +71,7 @@
     <Compile Include="Extensions\CoreExtensions.cs" />
     <Compile Include="Partitions\AbstractPartition.cs" />
     <Compile Include="Partitions\AbstractPartitionSettings.cs" />
+    <Compile Include="Partitions\IPartitionsCollection.cs" />
     <Compile Include="Rooms\AbstractRoomSettings.cs" />
     <Compile Include="Controls\AbstractPartitionDeviceControl.cs" />
     <Compile Include="Controls\IPartitionDeviceControl.cs" />
