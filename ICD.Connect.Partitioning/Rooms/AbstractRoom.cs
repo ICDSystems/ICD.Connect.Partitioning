@@ -32,7 +32,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#region Properties
 
-		public ICore Core { get; private set; }
+		public ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Returns true if the room is currently behaving as part of a combined room.
@@ -153,7 +153,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.ClearSettingsFinal();
 
-			//Core = null;
 
 			m_DeviceIds.Clear();
 			m_PortIds.Clear();
@@ -182,7 +181,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			base.ApplySettingsFinal(settings, factory);
 
-			Core = ServiceProvider.GetService<ICore>();
 
 			m_DeviceIds.SetIds(settings.Devices);
 			m_PortIds.SetIds(settings.Ports);
