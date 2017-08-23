@@ -25,5 +25,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		IcdHashSet<int> Sources { get; }
 
 		IcdHashSet<int> Destinations { get; }
+
+		IcdHashSet<int> DestinationGroups { get; }
+
+		IcdHashSet<int> Partitions { get; }
 	}
 }
