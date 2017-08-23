@@ -5,6 +5,8 @@ namespace ICD.Connect.Partitioning.Rooms
 {
 	public interface IRoomSettings : ISettings
 	{
+		int CombinePriority { get; set; }
+
 		/// <summary>
 		/// Gets the device settings.
 		/// </summary>

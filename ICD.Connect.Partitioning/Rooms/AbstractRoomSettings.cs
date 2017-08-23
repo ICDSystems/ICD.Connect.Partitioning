@@ -15,6 +15,8 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public const string ROOM_ELEMENT = "Room";
 
+		private const string COMBINE_PRIORITY_ELEMENT = "CombinePriority";
+
 		private const string PANELS_ELEMENT = "Panels";
 		private const string PANEL_ELEMENT = "Panel";
 		private const string PORTS_ELEMENT = "Ports";
@@ -39,6 +41,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly IcdHashSet<int> m_Partitions;
 
 		#region Properties
+
+		public int CombinePriority { get; set; }
 
 		public IcdHashSet<int> Devices { get { return m_Devices; } }
 		public IcdHashSet<int> Ports { get { return m_Ports; } }
@@ -92,6 +96,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.WriteElements(writer);
 
+			writer.WriteElementString(COMBINE_PRIORITY_ELEMENT, IcdXmlConvert.ToString(CombinePriority));
+
 			XmlUtils.WriteListToXml(writer, Devices.Order(), DEVICES_ELEMENT, DEVICE_ELEMENT);
 			XmlUtils.WriteListToXml(writer, Panels.Order(), PANELS_ELEMENT, PANEL_ELEMENT);
 			XmlUtils.WriteListToXml(writer, Ports.Order(), PORTS_ELEMENT, PORT_ELEMENT);
@@ -111,6 +117,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected static void ParseXml(AbstractRoomSettings instance, string xml)
 		{
 			AbstractSettings.ParseXml(instance, xml);
+
+			instance.CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
 
 			IEnumerable<int> panels = XmlUtils.ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 			IEnumerable<int> ports = XmlUtils.ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));

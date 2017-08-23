@@ -51,6 +51,11 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 		}
 
+		/// <summary>
+		/// Returns the priority order for combining rooms. Lower is better.
+		/// </summary>
+		public int CombinePriority { get; set; }
+
 		public RoomDeviceIdCollection Devices { get { return m_DeviceIds; } }
 		public RoomPortIdCollection Ports { get { return m_PortIds; } }
 		public RoomPanelIdCollection Panels { get { return m_PanelIds; } }
@@ -137,6 +142,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.CopySettingsFinal(settings);
 
+			settings.CombinePriority = CombinePriority;
+
 			settings.Ports.AddRange(m_PortIds.GetIds());
 			settings.Devices.AddRange(m_DeviceIds.GetIds());
 			settings.Panels.AddRange(m_PanelIds.GetIds());
@@ -153,6 +160,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.ClearSettingsFinal();
 
+			CombinePriority = 0;
 
 			m_DeviceIds.Clear();
 			m_PortIds.Clear();
@@ -181,6 +189,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			base.ApplySettingsFinal(settings, factory);
 
+			CombinePriority = settings.CombinePriority;
 
 			m_DeviceIds.SetIds(settings.Devices);
 			m_PortIds.SetIds(settings.Ports);
@@ -201,6 +210,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="addRow"></param>
 		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
+			addRow("Combine Priority", CombinePriority);
+
 			addRow("Panel count", m_PanelIds.Count);
 			addRow("Device count", m_DeviceIds.Count);
 			addRow("Port count", m_PortIds.Count);
@@ -230,7 +241,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			yield break;
+			yield return
+				new GenericConsoleCommand<int>("SetCombinePriority", "SetCombinePriority <PRIORITY>", i => CombinePriority = i);
 		}
 
 		#endregion

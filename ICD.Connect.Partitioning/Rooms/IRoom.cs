@@ -34,6 +34,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		bool CombineState { get; }
 
+		/// <summary>
+		/// Returns the priority order for combining rooms. Lower is better.
+		/// </summary>
+		int CombinePriority { get; set; }
+
 		RoomDeviceIdCollection Devices { get; }
 		RoomPortIdCollection Ports { get; }
 		RoomPanelIdCollection Panels { get; }
