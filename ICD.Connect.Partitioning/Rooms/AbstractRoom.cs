@@ -16,7 +16,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public abstract class AbstractRoom<T> : AbstractOriginator<T>, IRoom, IConsoleNode
-		where T : AbstractRoomSettings, new()
+		where T : IRoomSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
