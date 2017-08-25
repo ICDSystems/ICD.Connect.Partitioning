@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
@@ -58,7 +60,27 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public static bool HasPartitionControl(this IPartition extends)
 		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
 			return extends.PartitionControl != default(DeviceControlInfo);
+		}
+
+		/// <summary>
+		/// Returns true if the other partition shares a common room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static bool IsAdjacent(this IPartition extends, IPartition other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			return extends.GetRooms().Any(other.ContainsRoom);
 		}
 	}
 }
