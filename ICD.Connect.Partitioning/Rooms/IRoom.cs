@@ -340,6 +340,19 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Rooms
 
 		/// <summary>
+		/// Returns true if the room is made up of child rooms.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static bool IsCombineRoom(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.Partitions.Count > 0;
+		}
+
+		/// <summary>
 		/// Gets the child rooms as defined by the partitions.
 		/// </summary>
 		/// <param name="extends"></param>
