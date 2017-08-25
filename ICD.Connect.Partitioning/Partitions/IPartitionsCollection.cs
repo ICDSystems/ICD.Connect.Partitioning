@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ICD.Connect.Devices.Controls;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
@@ -15,5 +16,11 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		/// <param name="partitions"></param>
 		void SetPartitions(IEnumerable<IPartition> partitions);
+
+		/// <summary>
+		/// Gets the partitions related to the given control.
+		/// </summary>
+		/// <param name="deviceControlInfo"></param>
+		IEnumerable<IPartition> GetPartitions(DeviceControlInfo deviceControlInfo);
 	}
 }
