@@ -17,6 +17,11 @@ namespace ICD.Connect.Partitioning.Partitions
 		DeviceControlInfo PartitionControl { get; set; }
 
 		/// <summary>
+		/// Gets the number of rooms the partition is adjacent to.
+		/// </summary>
+		int RoomsCount { get; }
+
+		/// <summary>
 		/// Adds a room as adjacent to this partition.
 		/// </summary>
 		/// <param name="roomId"></param>

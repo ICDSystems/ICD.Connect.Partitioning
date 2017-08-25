@@ -20,6 +20,11 @@ namespace ICD.Connect.Partitioning.Partitions
 		public DeviceControlInfo PartitionControl { get; set; }
 
 		/// <summary>
+		/// Gets the number of rooms the partition is adjacent to.
+		/// </summary>
+		public int RoomsCount { get { return m_RoomsSection.Execute(() => m_Rooms.Count); } }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractPartition()
