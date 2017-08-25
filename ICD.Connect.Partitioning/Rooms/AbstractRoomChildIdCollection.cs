@@ -103,6 +103,31 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
+		/// Adds the ids to the collection.
+		/// </summary>
+		/// <param name="ids"></param>
+		public void AddRange(IEnumerable<int> ids)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				int count = m_Ids.Count;
+
+				m_Ids.AddRange(ids);
+
+				if (m_Ids.Count != count)
+					return;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
+
+			OnChildrenChanged.Raise(this);
+		}
+
+		/// <summary>
 		/// Removes the id from the collection.
 		/// </summary>
 		/// <param name="id"></param>
