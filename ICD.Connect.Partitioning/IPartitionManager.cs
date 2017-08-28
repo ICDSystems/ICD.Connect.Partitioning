@@ -32,6 +32,20 @@ namespace ICD.Connect.Partitioning
 		IPartitionDeviceControl GetControl(IPartition partition);
 
 		/// <summary>
+		/// Returns true if the given partition is currently part of a combine room.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		bool CombinesRoom(IPartition partition);
+
+		/// <summary>
+		/// Returns true if the given partition is currently part of a combine room.
+		/// </summary>
+		/// <param name="partitionId"></param>
+		/// <returns></returns>
+		bool CombinesRoom(int partitionId);
+
+		/// <summary>
 		/// Gets the combine room containing the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
