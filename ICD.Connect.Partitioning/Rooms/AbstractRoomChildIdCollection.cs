@@ -116,7 +116,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_Ids.AddRange(ids);
 
-				if (m_Ids.Count != count)
+				if (m_Ids.Count == count)
 					return;
 			}
 			finally
