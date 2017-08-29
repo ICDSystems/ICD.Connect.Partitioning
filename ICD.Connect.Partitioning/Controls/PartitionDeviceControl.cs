@@ -1,4 +1,4 @@
-﻿using ICD.Common.EventArguments;
+﻿using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Partitioning.Devices;
 
 namespace ICD.Connect.Partitioning.Controls
