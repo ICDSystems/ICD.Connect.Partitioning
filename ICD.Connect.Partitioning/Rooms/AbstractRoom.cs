@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Services.Logging;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Services;
 using ICD.Common.Utils.Extensions;
@@ -46,6 +47,8 @@ namespace ICD.Connect.Partitioning.Rooms
 					return;
 
 				m_CombineState = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} combine state changed to {1}", this, m_CombineState);
 
 				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
 			}
