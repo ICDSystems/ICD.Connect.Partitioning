@@ -213,10 +213,22 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="TInstance"></typeparam>
 		/// <returns></returns>
 		[CanBeNull]
+		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
+			where TInstance : TChild
+		{
+			return m_Section.Execute(() => Originators.GetChild<TInstance>(m_Ids, selector));
+		}
+
+		/// <summary>
+		/// Gets the first originator instance with the given type.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <returns></returns>
+		[CanBeNull]
 		public TInstance GetInstance<TInstance>()
 			where TInstance : TChild
 		{
-			return m_Section.Execute(() => Originators.GetChild<TInstance>(m_Ids));
+			return GetInstance<TInstance>(i => true);
 		}
 
 		/// <summary>
@@ -304,14 +316,29 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the first instance of the given type recursively as defined by partitions.
 		/// </summary>
 		/// <returns></returns>
+		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>()
 			where TInstance : TChild
 		{
+			return GetInstanceRecursive<TInstance>(i => true);
+		}
+
+		/// <summary>
+		/// Gets the first instance of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[CanBeNull]
+		public TInstance GetInstanceRecursive<TInstance>(Func<TInstance, bool> selector)
+			where TInstance : TChild
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
 			return m_Room.GetRoomsRecursive()
-			             .Select(r => GetCollection(r))
-			             .Select(c => c.GetInstance<TInstance>())
-// ReSharper disable once CompareNonConstrainedGenericWithNull
-			             .FirstOrDefault(i => i != null);
+						 .Select(r => GetCollection(r))
+						 .Select(c => c.GetInstance<TInstance>(selector))
+				// ReSharper disable once CompareNonConstrainedGenericWithNull
+						 .FirstOrDefault(i => i != null);
 		}
 
 		/// <summary>

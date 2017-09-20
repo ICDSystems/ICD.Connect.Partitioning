@@ -363,11 +363,12 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Partitions
-			              .GetInstances()
-			              .SelectMany(p => p.GetRooms())
-						  .Distinct()
-			              .Select(i => extends.Core.Originators.GetChild<IRoom>(i));
+			IEnumerable<int> ids = extends.Partitions
+			                              .GetInstances()
+			                              .SelectMany(p => p.GetRooms())
+			                              .Distinct();
+
+			return extends.Core.Originators.GetChildren<IRoom>(ids);
 		}
 
 		/// <summary>
