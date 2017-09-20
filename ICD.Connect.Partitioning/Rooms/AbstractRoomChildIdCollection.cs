@@ -216,7 +216,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstance<TInstance>()
 			where TInstance : TChild
 		{
-			return GetInstances<TInstance>().FirstOrDefault();
+			return m_Section.Execute(() => Originators.GetChild<TInstance>(m_Ids));
 		}
 
 		/// <summary>
@@ -235,7 +235,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<TInstance> GetInstances<TInstance>()
 			where TInstance : TChild
 		{
-			return GetInstances().OfType<TInstance>();
+			return m_Section.Execute(() => Originators.GetChildren<TInstance>(m_Ids));
 		}
 
 		#endregion
@@ -307,7 +307,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstanceRecursive<TInstance>()
 			where TInstance : TChild
 		{
-			return GetInstancesRecursive<TInstance>().FirstOrDefault();
+			return m_Room.GetRoomsRecursive()
+			             .Select(r => GetCollection(r))
+			             .Select(c => c.GetInstance<TInstance>())
+// ReSharper disable once CompareNonConstrainedGenericWithNull
+			             .FirstOrDefault(i => i != null);
 		}
 
 		/// <summary>

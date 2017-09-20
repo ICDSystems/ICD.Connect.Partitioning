@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
@@ -381,25 +381,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.GetRoomsRecursive(new IcdHashSet<IRoom>());
-		}
-
-		/// <summary>
-		/// Returns this room, and all child rooms as defined by the partitions.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="visited"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		private static IEnumerable<IRoom> GetRoomsRecursive(this IRoom extends, IcdHashSet<IRoom> visited)
-		{
-			if (!visited.Add(extends))
-				yield break;
-
-			yield return extends;
-
-			foreach (IRoom child in extends.GetRooms().SelectMany(r => r.GetRoomsRecursive(visited)))
-				yield return child;
+			return RecursionUtils.BreadthFirstSearch(extends, r => r.GetRooms());
 		}
 
 		#endregion
