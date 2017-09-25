@@ -329,7 +329,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				return false;
 
 			if (!(output is T))
-				throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
+				throw new InvalidOperationException(string.Format("{0} is not of type {1}", output, typeof(T).Name));
 
 			control = (T)output;
 			return true;
