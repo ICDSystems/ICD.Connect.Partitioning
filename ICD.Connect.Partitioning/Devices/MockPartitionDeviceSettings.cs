@@ -1,6 +1,6 @@
 using System;
 using ICD.Common.Properties;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Devices
 {
@@ -23,7 +23,7 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static MockPartitionDeviceSettings FromXml(string xml)
 		{
 			MockPartitionDeviceSettings output = new MockPartitionDeviceSettings();

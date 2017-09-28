@@ -1,5 +1,5 @@
 ﻿using System;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -22,7 +22,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[XmlRoomSettingsFactoryMethod(FACTORY_NAME)]
+		[XmlFactoryMethod(FACTORY_NAME)]
 		public static RoomSettings FromXml(string xml)
 		{
 			RoomSettings output = new RoomSettings();

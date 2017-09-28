@@ -1,6 +1,6 @@
 ﻿using System;
 using ICD.Common.Properties;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
@@ -23,7 +23,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlPartitionSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static PartitionSettings FromXml(string xml)
 		{
 			PartitionSettings output = new PartitionSettings();
