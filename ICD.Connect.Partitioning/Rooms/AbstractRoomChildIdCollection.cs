@@ -216,7 +216,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
 			where TInstance : TChild
 		{
-			return m_Section.Execute(() => Originators.GetChild<TInstance>(m_Ids, selector));
+			return m_Section.Execute(() => Originators.GetChild(m_Ids, selector));
 		}
 
 		/// <summary>
@@ -336,7 +336,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			return m_Room.GetRoomsRecursive()
 						 .Select(r => GetCollection(r))
-						 .Select(c => c.GetInstance<TInstance>(selector))
+						 .Select(c => c.GetInstance(selector))
 				// ReSharper disable once CompareNonConstrainedGenericWithNull
 						 .FirstOrDefault(i => i != null);
 		}
