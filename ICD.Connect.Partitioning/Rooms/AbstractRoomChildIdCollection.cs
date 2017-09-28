@@ -43,8 +43,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public void Clear()
 		{
-			m_Section.Execute(() => m_Ids.Clear());
-			OnChildrenChanged.Raise(this);
+			SetIds(Enumerable.Empty<int>());
 		}
 
 		#region Ids
@@ -55,7 +54,18 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public IEnumerable<int> GetIds()
 		{
-			return m_Section.Execute(() => m_Ids.Order().ToArray());
+			m_Section.Enter();
+
+			try
+			{
+				return m_Ids.Count == 0
+					       ? Enumerable.Empty<int>()
+					       : m_Ids.ToArray();
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -70,13 +80,19 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				Clear();
-				ids.ForEach(id => Add(id));
+				IcdHashSet<int> idsSet = ids.ToHashSet();
+				if (m_Ids.NonIntersection(idsSet).Count == 0)
+					return;
+
+				m_Ids.Clear();
+				m_Ids.AddRange(idsSet);
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
+
+			OnChildrenChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -115,7 +131,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				int count = m_Ids.Count;
 
 				m_Ids.AddRange(ids);
-
+				
 				if (m_Ids.Count == count)
 					return;
 			}
@@ -216,7 +232,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
 			where TInstance : TChild
 		{
-			return m_Section.Execute(() => Originators.GetChild(m_Ids, selector));
+			m_Section.Enter();
+
+			try
+			{
+				return m_Ids.Count == 0 ? default(TInstance) : Originators.GetChild(m_Ids, selector);
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -237,7 +262,19 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public IEnumerable<TChild> GetInstances()
 		{
-			return GetIds().Select(id => GetInstance(id));
+			m_Section.Enter();
+
+			try
+			{
+				return m_Ids.Count == 0
+					       ? Enumerable.Empty<TChild>()
+					       : m_Ids.Select(id => GetInstance(id))
+					              .ToArray();
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -247,7 +284,20 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<TInstance> GetInstances<TInstance>()
 			where TInstance : TChild
 		{
-			return m_Section.Execute(() => Originators.GetChildren<TInstance>(m_Ids));
+			m_Section.Enter();
+
+			try
+			{
+				if (m_Ids.Count == 0)
+					return Enumerable.Empty<TInstance>();
+
+				IEnumerable<TInstance> output = Originators.GetChildren<TInstance>(m_Ids);
+				return output as TInstance[] ?? output.ToArray();
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		#endregion
