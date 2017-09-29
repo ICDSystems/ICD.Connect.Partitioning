@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-[assembly: AssemblyTitle("ICD.Connect.Rooms")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ICD.Connect.Rooms")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyTitle("ICD.Connect.Partitioning")]
+[assembly: AssemblyCompany("ICD Systems")]
+[assembly: AssemblyProduct("ICD.Connect.Partitioning")]
+[assembly: AssemblyCopyright("Copyright © ICD Systems 2017")]
 [assembly: AssemblyVersion("1.0.0.*")]
 
