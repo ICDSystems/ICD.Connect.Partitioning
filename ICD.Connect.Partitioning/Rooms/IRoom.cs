@@ -8,7 +8,9 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
+using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Routing.Connections;
+using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
@@ -39,13 +41,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		int CombinePriority { get; set; }
 
-		RoomDeviceIdCollection Devices { get; }
-		RoomPortIdCollection Ports { get; }
-		RoomPanelIdCollection Panels { get; }
-		RoomSourceIdCollection Sources { get; }
-		RoomDestinationIdCollection Destinations { get; }
-		RoomDestinationGroupIdCollection DestinationGroups { get; }
-		RoomPartitionIdCollection Partitions { get; }
+		RoomOriginatorIdCollection Originators { get; }
 
 		/// <summary>
 		/// Informs the room it is part of a combined room.
@@ -76,10 +72,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			// TODO - Janky, controls can be on IDeviceBase, IDeviceBase lives in Ports, Devices and Panels
-			return extends.Ports.Contains(controlInfo.DeviceId) ||
-			       extends.Devices.Contains(controlInfo.DeviceId) ||
-			       extends.Panels.Contains(controlInfo.DeviceId);
+			return extends.Originators.Contains(controlInfo.DeviceId);
 		}
 
 		/// <summary>
@@ -153,14 +146,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			// TODO - Janky, controls can be on IDeviceBase, IDeviceBase lives in Ports, Devices and Panels
-			IEnumerable<IDeviceBase> devices = extends.Devices.GetInstances().Cast<IDeviceBase>();
-			IEnumerable<IDeviceBase> ports = extends.Ports.GetInstances().Cast<IDeviceBase>();
-			IEnumerable<IDeviceBase> panels = extends.Panels.GetInstances().Cast<IDeviceBase>();
-
-			return devices.Concat(ports)
-			              .Concat(panels)
-			              .SelectMany(d => d.Controls.GetControls<T>());
+			return extends.Originators.GetInstances<IDeviceBase>().SelectMany(o => o.Controls.GetControls<T>());
 		}
 
 		/// <summary>
@@ -349,7 +335,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Partitions.Count > 0;
+			return extends.Originators.GetInstances<IPartition>().Any();
 		}
 
 		/// <summary>
@@ -363,8 +349,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			IEnumerable<int> ids = extends.Partitions
-			                              .GetInstances()
+			IEnumerable<int> ids = extends.Originators
+			                              .GetInstances<IPartition>()
 			                              .SelectMany(p => p.GetRooms())
 			                              .Distinct();
 
@@ -398,8 +384,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Destinations
-			              .GetInstancesRecursive()
+			return extends.Originators
+			              .GetInstancesRecursive<IDestination>()
 			              .Any(d => d.ConnectionType.HasFlags(type));
 		}
 	}

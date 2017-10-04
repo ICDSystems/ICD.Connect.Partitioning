@@ -7,6 +7,13 @@ using ICD.Common.Services;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices;
+using ICD.Connect.Panels;
+using ICD.Connect.Partitioning.Partitions;
+using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Routing.Endpoints.Destinations;
+using ICD.Connect.Routing.Endpoints.Groups;
+using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 
@@ -21,13 +28,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
-		private readonly RoomDeviceIdCollection m_DeviceIds;
-		private readonly RoomPortIdCollection m_PortIds;
-		private readonly RoomPanelIdCollection m_PanelIds;
-		private readonly RoomSourceIdCollection m_SourceIds;
-		private readonly RoomDestinationIdCollection m_DestinationIds;
-		private readonly RoomDestinationGroupIdCollection m_DestinationGroupIds;
-		private readonly RoomPartitionIdCollection m_PartitionIds;
+		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
 		private bool m_CombineState;
 
@@ -59,13 +60,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public int CombinePriority { get; set; }
 
-		public RoomDeviceIdCollection Devices { get { return m_DeviceIds; } }
-		public RoomPortIdCollection Ports { get { return m_PortIds; } }
-		public RoomPanelIdCollection Panels { get { return m_PanelIds; } }
-		public RoomSourceIdCollection Sources { get { return m_SourceIds; } }
-		public RoomDestinationIdCollection Destinations { get { return m_DestinationIds; } }
-		public RoomDestinationGroupIdCollection DestinationGroups { get { return m_DestinationGroupIds; } }
-		public RoomPartitionIdCollection Partitions { get { return m_PartitionIds; } }
+		public RoomOriginatorIdCollection Originators { get { return m_OriginatorIds; } }
 
 		/// <summary>
 		/// Gets the name of the node in the console.
@@ -86,13 +81,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		protected AbstractRoom()
 		{
-			m_DeviceIds = new RoomDeviceIdCollection(this);
-			m_PortIds = new RoomPortIdCollection(this);
-			m_PanelIds = new RoomPanelIdCollection(this);
-			m_SourceIds = new RoomSourceIdCollection(this);
-			m_DestinationIds = new RoomDestinationIdCollection(this);
-			m_DestinationGroupIds = new RoomDestinationGroupIdCollection(this);
-			m_PartitionIds = new RoomPartitionIdCollection(this);
+			m_OriginatorIds = new RoomOriginatorIdCollection(this);
 		}
 
 		#endregion
@@ -108,13 +97,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			base.DisposeFinal(disposing);
 
-			m_DeviceIds.Clear();
-			m_PortIds.Clear();
-			m_PanelIds.Clear();
-			m_SourceIds.Clear();
-			m_DestinationIds.Clear();
-			m_DestinationGroupIds.Clear();
-			m_PartitionIds.Clear();
+			m_OriginatorIds.Clear();
 		}
 
 		/// <summary>
@@ -147,13 +130,13 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			settings.CombinePriority = CombinePriority;
 
-			settings.Ports.AddRange(m_PortIds.GetIds());
-			settings.Devices.AddRange(m_DeviceIds.GetIds());
-			settings.Panels.AddRange(m_PanelIds.GetIds());
-			settings.Sources.AddRange(m_SourceIds.GetIds());
-			settings.Destinations.AddRange(m_DestinationIds.GetIds());
-			settings.DestinationGroups.AddRange(m_DestinationGroupIds.GetIds());
-			settings.Partitions.AddRange(m_PartitionIds.GetIds());
+			settings.Ports.AddRange(Originators.GetInstances<IPort>().Select(p => p.Id));
+			settings.Devices.AddRange(Originators.GetInstances<IDevice>().Select(p => p.Id));
+			settings.Panels.AddRange(Originators.GetInstances<IPanelDevice>().Select(p => p.Id));
+			settings.Sources.AddRange(Originators.GetInstances<ISource>().Select(p => p.Id));
+			settings.Destinations.AddRange(Originators.GetInstances<IDestination>().Select(p => p.Id));
+			settings.DestinationGroups.AddRange(Originators.GetInstances<IDestinationGroup>().Select(p => p.Id));
+			settings.Partitions.AddRange(Originators.GetInstances<IPartition>().Select(p => p.Id));
 		}
 
 		/// <summary>
@@ -165,13 +148,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = 0;
 
-			m_DeviceIds.Clear();
-			m_PortIds.Clear();
-			m_PanelIds.Clear();
-			m_SourceIds.Clear();
-			m_DestinationIds.Clear();
-			m_DestinationGroupIds.Clear();
-			m_PartitionIds.Clear();
+			m_OriginatorIds.Clear();
 		}
 
 		/// <summary>
@@ -194,13 +171,13 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = settings.CombinePriority;
 
-			m_DeviceIds.SetIds(settings.Devices);
-			m_PortIds.SetIds(settings.Ports);
-			m_PanelIds.SetIds(settings.Panels);
-			m_SourceIds.SetIds(settings.Sources);
-			m_DestinationIds.SetIds(settings.Destinations);
-			m_DestinationGroupIds.SetIds(settings.DestinationGroups);
-			m_PartitionIds.SetIds(settings.Partitions);
+			Originators.AddRange(settings.Devices);
+			Originators.AddRange(settings.Ports);
+			Originators.AddRange(settings.Panels);
+			Originators.AddRange(settings.Sources);
+			Originators.AddRange(settings.Destinations);
+			Originators.AddRange(settings.DestinationGroups);
+			Originators.AddRange(settings.Partitions);
 		}
 
 		#endregion
@@ -214,14 +191,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("Combine Priority", CombinePriority);
-
-			addRow("Panel count", m_PanelIds.Count);
-			addRow("Device count", m_DeviceIds.Count);
-			addRow("Port count", m_PortIds.Count);
-			addRow("Source count", m_SourceIds.Count);
-			addRow("Destination count", m_DestinationIds.Count);
-			addRow("Destination Group count", m_DestinationGroupIds.Count);
-			addRow("Partition count", m_PartitionIds.Count);
 		}
 
 		/// <summary>
@@ -230,12 +199,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public virtual IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			yield return ConsoleNodeGroup.IndexNodeMap("Panels", m_PanelIds.GetInstancesRecursive().OfType<IConsoleNode>());
-			yield return ConsoleNodeGroup.IndexNodeMap("Devices", m_DeviceIds.GetInstancesRecursive().OfType<IConsoleNode>());
-			yield return ConsoleNodeGroup.IndexNodeMap("Ports", m_PortIds.GetInstancesRecursive().OfType<IConsoleNode>());
-			//yield return ConsoleNodeGroup.IndexNodeMap("Sources", m_SourceIds.GetInstances().OfType<IConsoleNode>());
-			//yield return ConsoleNodeGroup.IndexNodeMap("Destinations", m_DestinationIds.GetInstances().OfType<IConsoleNode>());
-			//yield return ConsoleNodeGroup.IndexNodeMap("DestinationGroups", m_DestinationGroupIds.GetInstances().OfType<IConsoleNode>());
+			yield return ConsoleNodeGroup.KeyNodeMap("Panels", Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(), p => (uint)((IPanelDevice)p).Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("Devices", Originators.GetInstances<IDevice>().OfType<IConsoleNode>(), p => (uint)((IDevice)p).Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("Ports", Originators.GetInstances<IPort>().OfType<IConsoleNode>(), p => (uint)((IPort)p).Id);
 		}
 
 		/// <summary>

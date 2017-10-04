@@ -9,9 +9,7 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
-	public abstract class AbstractRoomChildIdCollection<TCollection, TChild>
-		where TCollection : AbstractRoomChildIdCollection<TCollection, TChild>
-		where TChild : IOriginator
+	public sealed class RoomOriginatorIdCollection
 	{
 		public event EventHandler OnChildrenChanged;
 
@@ -29,7 +27,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		protected AbstractRoomChildIdCollection(IRoom room)
+		public RoomOriginatorIdCollection(IRoom room)
 		{
 			m_Ids = new IcdHashSet<int>();
 			m_Section = new SafeCriticalSection();
@@ -187,16 +185,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="id"></param>
 		/// <returns></returns>
 		[NotNull]
-		public TChild GetInstance(int id)
+		public IOriginator GetInstance(int id)
 		{
 			m_Section.Enter();
 
 			try
 			{
 				if (m_Ids.Contains(id))
-					return Originators.GetChild<TChild>(id);
+					return Originators.GetChild<IOriginator>(id);
 
-				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(TChild).Name, id);
+				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
 				throw new InvalidOperationException(message);
 			}
 			finally
@@ -213,9 +211,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[NotNull]
 		public TInstance GetInstance<TInstance>(int id)
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
-			TChild child = GetInstance(id);
+			IOriginator child = GetInstance(id);
 
 			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
 				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
@@ -230,7 +228,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			m_Section.Enter();
 
@@ -251,7 +249,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstance<TInstance>()
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			return GetInstance<TInstance>(i => true);
 		}
@@ -260,16 +258,15 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets all of the orignator instances from the core.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<TChild> GetInstances()
+		public IEnumerable<IOriginator> GetInstances()
 		{
 			m_Section.Enter();
 
 			try
 			{
 				return m_Ids.Count == 0
-					       ? Enumerable.Empty<TChild>()
-					       : m_Ids.Select(id => GetInstance(id))
-					              .ToArray();
+					       ? Enumerable.Empty<IOriginator>()
+					       : Originators.GetChildren(m_Ids);
 			}
 			finally
 			{
@@ -282,7 +279,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstances<TInstance>()
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			m_Section.Enter();
 
@@ -312,7 +309,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool ContainsRecursive(int id)
 		{
 			return m_Room.GetRoomsRecursive()
-			             .Select(r => GetCollection(r))
+			             .Select(r => r.Originators)
 			             .Any(c => c.Contains(id));
 		}
 
@@ -323,7 +320,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<int> GetIdsRecursive()
 		{
 			return m_Room.GetRoomsRecursive()
-			             .SelectMany(r => GetCollection(r).GetIds())
+			             .SelectMany(r => r.Originators.GetIds())
 			             .Distinct();
 		}
 
@@ -332,17 +329,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		[NotNull]
-		public TChild GetInstanceRecursive(int id)
+		public IOriginator GetInstanceRecursive(int id)
 		{
-			TCollection collection = m_Room.GetRoomsRecursive()
-			                               .Select(r => GetCollection(r))
-			                               .FirstOrDefault(c => c.Contains(id));
+			RoomOriginatorIdCollection collection = m_Room.GetRoomsRecursive()
+			                                              .Select(r => r.Originators)
+			                                              .FirstOrDefault(c => c.Contains(id));
 
 			if (collection != null)
 				return collection.GetInstance(id);
 
 			string message = string.Format("{0} does not recursively contain a {1} with id {2}", GetType().Name,
-			                               typeof(TChild).Name, id);
+			                               typeof(IOriginator).Name, id);
 			throw new InvalidOperationException(message);
 		}
 
@@ -352,9 +349,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[NotNull]
 		public TInstance GetInstanceRecursive<TInstance>(int id)
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
-			TChild child = GetInstanceRecursive(id);
+			IOriginator child = GetInstanceRecursive(id);
 
 			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
 				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
@@ -368,7 +365,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>()
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			return GetInstanceRecursive<TInstance>(i => true);
 		}
@@ -379,13 +376,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
 			return m_Room.GetRoomsRecursive()
-						 .Select(r => GetCollection(r))
+						 .Select(r => r.Originators)
 						 .Select(c => c.GetInstance(selector))
 				// ReSharper disable once CompareNonConstrainedGenericWithNull
 						 .FirstOrDefault(i => i != null);
@@ -395,10 +392,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets all instances of the given type recursively as defined by partitions.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<TChild> GetInstancesRecursive()
+		public IEnumerable<IOriginator> GetInstancesRecursive()
 		{
 			return m_Room.GetRoomsRecursive()
-			             .Select(r => GetCollection(r))
+			             .Select(r => r.Originators)
 			             .SelectMany(c => c.GetInstances())
 			             .Distinct();
 		}
@@ -408,20 +405,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>()
-			where TInstance : TChild
+			where TInstance : IOriginator
 		{
 			return m_Room.GetRoomsRecursive()
-						 .Select(r => GetCollection(r))
+						 .Select(r => r.Originators)
 						 .SelectMany(c => c.GetInstances<TInstance>())
 						 .Distinct();
 		}
-
-		/// <summary>
-		/// Gets the equivalent collection from the given room.
-		/// </summary>
-		/// <param name="room"></param>
-		/// <returns></returns>
-		protected abstract TCollection GetCollection(IRoom room);
 
 		#endregion
 
