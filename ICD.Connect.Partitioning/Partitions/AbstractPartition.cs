@@ -131,6 +131,10 @@ namespace ICD.Connect.Partitioning.Partitions
 			// Load the rooms
 			factory.LoadOriginators(settings.GetRooms());
 
+			// Load the partition control
+			if (settings.Device != 0)
+				factory.LoadOriginator(settings.Device);
+
 			base.ApplySettingsFinal(settings, factory);
 
 			PartitionControl = new DeviceControlInfo(settings.Device, settings.Control);
