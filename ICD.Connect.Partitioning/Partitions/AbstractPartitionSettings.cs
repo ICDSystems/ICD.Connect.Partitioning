@@ -2,7 +2,9 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.Partitions
@@ -11,13 +13,14 @@ namespace ICD.Connect.Partitioning.Partitions
 	{
 		private const string PARTITION_ELEMENT = "Partition";
 
-		private const string PARTITION_DEVICE_ELEMENT = "Device";
-		private const string PARTITION_CONTROL_ELEMENT = "Control";
+		private const string PARTITION_CONTROLS_ELEMENT = "PartitionControls";
+		private const string PARTITION_CONTROL_ELEMENT = "PartitionControl";
 		private const string ROOMS_ELEMENT = "Rooms";
 		private const string ROOM_ELEMENT = "Room";
 
-		private readonly IcdHashSet<int> m_Rooms; 
-		private readonly SafeCriticalSection m_RoomsSection;
+		private readonly IcdHashSet<int> m_Rooms;
+		private readonly IcdHashSet<DeviceControlInfo> m_Controls; 
+		private readonly SafeCriticalSection m_Section;
 
 		/// <summary>
 		/// Gets the xml element.
@@ -25,22 +28,13 @@ namespace ICD.Connect.Partitioning.Partitions
 		protected override string Element { get { return PARTITION_ELEMENT; } }
 
 		/// <summary>
-		/// Gets/sets the optional device for the partition.
-		/// </summary>
-		public int Device { get; set; }
-
-		/// <summary>
-		/// Gets/sets the optional device control for the partition.
-		/// </summary>
-		public int Control { get; set; }
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractPartitionSettings()
 		{
 			m_Rooms = new IcdHashSet<int>();
-			m_RoomsSection = new SafeCriticalSection();
+			m_Controls = new IcdHashSet<DeviceControlInfo>();
+			m_Section = new SafeCriticalSection();
 		}
 
 		/// <summary>
@@ -49,7 +43,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <param name="roomIds"></param>
 		public void SetRooms(IEnumerable<int> roomIds)
 		{
-			m_RoomsSection.Enter();
+			m_Section.Enter();
 
 			try
 			{
@@ -58,7 +52,26 @@ namespace ICD.Connect.Partitioning.Partitions
 			}
 			finally
 			{
-				m_RoomsSection.Leave();
+				m_Section.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Sets the controls associated with this partition.
+		/// </summary>
+		/// <param name="partitionControls"></param>
+		public void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				m_Controls.Clear();
+				m_Controls.AddRange(partitionControls);
+			}
+			finally
+			{
+				m_Section.Leave();
 			}
 		}
 
@@ -68,7 +81,16 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public IEnumerable<int> GetRooms()
 		{
-			return m_RoomsSection.Execute(() => m_Rooms.ToArray());
+			return m_Section.Execute(() => m_Rooms.ToArray());
+		}
+
+		/// <summary>
+		/// Returns the controls that are associated with thr
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DeviceControlInfo> GetPartitionControls()
+		{
+			return m_Section.Execute(() => m_Controls.ToArray());
 		}
 
 		/// <summary>
@@ -79,8 +101,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public override IEnumerable<int> GetDeviceDependencies()
 		{
-			if (Device != 0)
-				yield return Device;
+			return m_Section.Execute(() => m_Controls.Select(c => c.DeviceId).Distinct().ToArray());
 		}
 
 		/// <summary>
@@ -91,24 +112,35 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(PARTITION_DEVICE_ELEMENT, IcdXmlConvert.ToString(Device));
-			writer.WriteElementString(PARTITION_CONTROL_ELEMENT, IcdXmlConvert.ToString(Control));
-
+			XmlUtils.WriteListToXml(writer, GetPartitionControls(), PARTITION_CONTROLS_ELEMENT,
+			                        (w, d) => d.WriteToXml(w, PARTITION_CONTROL_ELEMENT));
 			XmlUtils.WriteListToXml(writer, GetRooms(), ROOMS_ELEMENT, ROOM_ELEMENT);
 		}
 
 		/// <summary>
 		/// Parses the xml and configures the settings instance.
-		/// </summary>
+		/// </summary>c =
 		/// <param name="instance"></param>
 		/// <param name="xml"></param>
 		protected static void ParseXml(AbstractPartitionSettings instance, string xml)
 		{
 			IEnumerable<int> roomIds = XmlUtils.ReadListFromXml(xml, ROOMS_ELEMENT, ROOM_ELEMENT,
 																x => XmlUtils.ReadElementContentAsInt(x));
+			IEnumerable<DeviceControlInfo> partitionControls =
+				XmlUtils.ReadListFromXml(xml, PARTITION_CONTROLS_ELEMENT, PARTITION_CONTROL_ELEMENT,
+				                         e => DeviceControlInfo.ReadFromXml(e));
 
-			instance.Device = XmlUtils.TryReadChildElementContentAsInt(xml, PARTITION_DEVICE_ELEMENT) ?? 0;
-			instance.Control = XmlUtils.TryReadChildElementContentAsInt(xml, PARTITION_CONTROL_ELEMENT) ?? 0;
+			// Migration
+			int? deviceId = XmlUtils.TryReadChildElementContentAsInt(xml, "Device");
+			int? controlId = XmlUtils.TryReadChildElementContentAsInt(xml, "Control");
+
+			if (deviceId.HasValue || controlId.HasValue)
+			{
+				DeviceControlInfo deviceControl = new DeviceControlInfo(deviceId ?? 0, controlId ?? 0);
+				partitionControls = partitionControls.Append(deviceControl);
+			}
+
+			instance.SetPartitionControls(partitionControls);
 			instance.SetRooms(roomIds);
 
 			ParseXml((AbstractSettings)instance, xml);

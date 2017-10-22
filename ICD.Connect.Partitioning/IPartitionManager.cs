@@ -28,8 +28,7 @@ namespace ICD.Connect.Partitioning
 		/// </summary>
 		/// <param name="partition"></param>
 		/// <returns></returns>
-		[CanBeNull]
-		IPartitionDeviceControl GetControl(IPartition partition);
+		IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition);
 
 		/// <summary>
 		/// Returns true if the given partition is currently part of a combine room.

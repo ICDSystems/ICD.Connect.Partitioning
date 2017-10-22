@@ -11,26 +11,23 @@ namespace ICD.Connect.Partitioning.Partitions
 	public abstract class AbstractPartition<TSettings> : AbstractOriginator<TSettings>, IPartition
 		where TSettings : IPartitionSettings, new()
 	{
+		private readonly IcdHashSet<DeviceControlInfo> m_Controls; 
 		private readonly IcdHashSet<int> m_Rooms;
-		private readonly SafeCriticalSection m_RoomsSection;
-
-		/// <summary>
-		/// Gets/sets the optional control for this partition.
-		/// </summary>
-		public DeviceControlInfo PartitionControl { get; set; }
+		private readonly SafeCriticalSection m_Section;
 
 		/// <summary>
 		/// Gets the number of rooms the partition is adjacent to.
 		/// </summary>
-		public int RoomsCount { get { return m_RoomsSection.Execute(() => m_Rooms.Count); } }
+		public int RoomsCount { get { return m_Section.Execute(() => m_Rooms.Count); } }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractPartition()
 		{
+			m_Controls = new IcdHashSet<DeviceControlInfo>();
 			m_Rooms = new IcdHashSet<int>();
-			m_RoomsSection = new SafeCriticalSection();
+			m_Section = new SafeCriticalSection();
 		}
 
 		#region Methods
@@ -42,7 +39,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public bool AddRoom(int roomId)
 		{
-			return m_RoomsSection.Execute(() => m_Rooms.Add(roomId));
+			return m_Section.Execute(() => m_Rooms.Add(roomId));
 		}
 
 		/// <summary>
@@ -52,7 +49,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public bool RemoveRoom(int roomId)
 		{
-			return m_RoomsSection.Execute(() => m_Rooms.Remove(roomId));
+			return m_Section.Execute(() => m_Rooms.Remove(roomId));
 		}
 
 		/// <summary>
@@ -62,7 +59,16 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public bool ContainsRoom(int roomId)
 		{
-			return m_RoomsSection.Execute(() => m_Rooms.Contains(roomId));
+			return m_Section.Execute(() => m_Rooms.Contains(roomId));
+		}
+
+		/// <summary>
+		/// Gets the controls that are associated with this partition.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<DeviceControlInfo> GetPartitionControls()
+		{
+			return m_Section.Execute(() => m_Controls.ToArray());
 		}
 
 		/// <summary>
@@ -71,7 +77,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public IEnumerable<int> GetRooms()
 		{
-			return m_RoomsSection.Execute(() => m_Rooms.ToArray());
+			return m_Section.Execute(() => m_Rooms.ToArray());
 		}
 
 		/// <summary>
@@ -80,7 +86,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <param name="roomIds"></param>
 		public void SetRooms(IEnumerable<int> roomIds)
 		{
-			m_RoomsSection.Enter();
+			m_Section.Enter();
 
 			try
 			{
@@ -89,7 +95,26 @@ namespace ICD.Connect.Partitioning.Partitions
 			}
 			finally
 			{
-				m_RoomsSection.Leave();
+				m_Section.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Sets the controls that are associated with this partition.
+		/// </summary>
+		/// <param name="partitionControls"></param>
+		public void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				m_Controls.Clear();
+				m_Controls.AddRange(partitionControls);
+			}
+			finally
+			{
+				m_Section.Leave();
 			}
 		}
 
@@ -104,8 +129,17 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.ClearSettingsFinal();
 
-			PartitionControl = default(DeviceControlInfo);
-			m_RoomsSection.Execute(() => m_Rooms.Clear());
+			m_Section.Enter();
+
+			try
+			{
+				m_Controls.Clear();
+				m_Rooms.Clear();
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -116,8 +150,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Device = PartitionControl.DeviceId;
-			settings.Control = PartitionControl.ControlId;
+			settings.SetPartitionControls(GetPartitionControls());
 			settings.SetRooms(GetRooms());
 		}
 
@@ -132,12 +165,11 @@ namespace ICD.Connect.Partitioning.Partitions
 			factory.LoadOriginators(settings.GetRooms());
 
 			// Load the partition control
-			if (settings.Device != 0)
-				factory.LoadOriginator(settings.Device);
+			factory.LoadOriginators(settings.GetPartitionControls().Select(c => c.DeviceId));
 
 			base.ApplySettingsFinal(settings, factory);
 
-			PartitionControl = new DeviceControlInfo(settings.Device, settings.Control);
+			SetPartitionControls(settings.GetPartitionControls());
 			SetRooms(settings.GetRooms());
 		}
 

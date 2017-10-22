@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.Partitions
@@ -6,14 +7,16 @@ namespace ICD.Connect.Partitioning.Partitions
 	public interface IPartitionSettings : ISettings
 	{
 		/// <summary>
-		/// Gets/sets the optional device for the partition.
+		/// Sets the controls associated with this partition.
 		/// </summary>
-		int Device { get; set; }
+		/// <param name="partitionControls"></param>
+		void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls);
 
 		/// <summary>
-		/// Gets/sets the optional device control for the partition.
+		/// Returns the controls that are associated with thr
 		/// </summary>
-		int Control { get; set; }
+		/// <returns></returns>
+		IEnumerable<DeviceControlInfo> GetPartitionControls();
 
 		/// <summary>
 		/// Sets the rooms that are adjacent to the partition.
