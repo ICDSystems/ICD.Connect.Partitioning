@@ -75,6 +75,14 @@ namespace ICD.Connect.Partitioning
 		void CombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
+		/// Creates a new room instance, or expands an existing room instance, to contain the given partition controls.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="controls"></param>
+		/// <param name="constructor"></param>
+		void CombineRooms<TRoom>(IEnumerable<IPartitionDeviceControl> controls, Func<TRoom> constructor) where TRoom : IRoom;
+
+		/// <summary>
 		/// Creates a new room instance, or expands an existing room instance, to contain the given partition.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
