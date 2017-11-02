@@ -83,7 +83,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public override IEnumerable<int> GetDeviceDependencies()
 		{
-			return m_Devices;
+			// The room can exist even if the devices do not.
+			yield break;
 		}
 
 		#endregion
