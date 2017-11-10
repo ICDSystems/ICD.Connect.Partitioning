@@ -75,18 +75,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#region Methods
 
-		/// <summary>
-		/// Returns the collection of ids that the settings will depend on.
-		/// For example, to instantiate an IR Port from settings, the device the physical port
-		/// belongs to will need to be instantiated first.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<int> GetDeviceDependencies()
-		{
-			// The room can exist even if the devices do not.
-			yield break;
-		}
-
 		#endregion
 
 		/// <summary>
