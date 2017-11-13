@@ -1,6 +1,7 @@
 using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
+using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Devices
@@ -12,7 +13,7 @@ namespace ICD.Connect.Partitioning.Devices
 		private const string IO_PORT_ELEMENT = "IoPort";
 		private const string INVERT_INPUT_ELEMENT = "InvertInput";
 
-		[SettingsProperty(SettingsProperty.ePropertyType.PortId)]
+		[SettingsProperty(SettingsProperty.ePropertyType.Id, typeof(IDigitalInputPort))]
 		public int? IoPort { get; set; }
 
 		public bool InvertInput { get; set; }
