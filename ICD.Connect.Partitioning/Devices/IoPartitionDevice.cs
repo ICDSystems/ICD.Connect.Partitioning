@@ -5,6 +5,7 @@ using ICD.Common.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Protocol.Ports.IoPort;
 using ICD.Connect.Settings.Core;
 
@@ -12,7 +13,7 @@ namespace ICD.Connect.Partitioning.Devices
 {
 	public sealed class IoPartitionDevice : AbstractPartitionDevice<IoPartitionDeviceSettings>
 	{
-		private IIoPort m_Port;
+		private IDigitalInputPort m_Port;
 		private bool m_InvertInput;
 
 		/// <summary>
@@ -99,10 +100,11 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		private void UpdatePortConfiguration()
 		{
-			if (m_Port == null)
+			IIoPort ioPort = m_Port as IIoPort;
+			if (ioPort == null)
 				return;
 
-			m_Port.SetConfiguration(eIoPortConfiguration.DigitalIn);
+			ioPort.SetConfiguration(eIoPortConfiguration.DigitalIn);
 		}
 
 		#endregion
@@ -172,7 +174,7 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		private void UpdateIsOpen()
 		{
-			IsOpen = m_Port != null && (m_Port.DigitalIn ^ InvertInput);
+			IsOpen = m_Port != null && (m_Port.State ^ InvertInput);
 		}
 
 		#endregion
