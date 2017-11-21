@@ -158,26 +158,36 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="factory"></param>
 		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
 		{
-			// Ensure all dependencies are loaded first.
-			factory.LoadOriginators(settings.Devices);
-			factory.LoadOriginators(settings.Ports);
-			factory.LoadOriginators(settings.Panels);
-			factory.LoadOriginators(settings.Sources);
-			factory.LoadOriginators(settings.Destinations);
-			factory.LoadOriginators(settings.DestinationGroups);
-			factory.LoadOriginators(settings.Partitions);
-
 			base.ApplySettingsFinal(settings, factory);
 
 			CombinePriority = settings.CombinePriority;
 
-			Originators.AddRange(settings.Devices);
-			Originators.AddRange(settings.Ports);
-			Originators.AddRange(settings.Panels);
-			Originators.AddRange(settings.Sources);
-			Originators.AddRange(settings.Destinations);
-			Originators.AddRange(settings.DestinationGroups);
-			Originators.AddRange(settings.Partitions);
+			AddOriginatorsSkipExceptions<IDevice>(settings.Devices, factory);
+			AddOriginatorsSkipExceptions<IPort>(settings.Ports, factory);
+			AddOriginatorsSkipExceptions<IPanelDevice>(settings.Panels, factory);
+			AddOriginatorsSkipExceptions<ISource>(settings.Sources, factory);
+			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
+			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
+			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
+		}
+
+		private void AddOriginatorsSkipExceptions<T>(IEnumerable<int> originatorIds, IDeviceFactory factory)
+			where T : class, IOriginator
+		{
+			foreach (int id in originatorIds)
+			{
+				try
+				{
+					factory.GetOriginatorById<T>(id);
+				}
+				catch (Exception e)
+				{
+					Logger.AddEntry(eSeverity.Error, "{0} failed to add {1} with id {2} - {3}", this, typeof(T).Name, id, e.Message);
+					continue;
+				}
+
+				Originators.Add(id);
+			}
 		}
 
 		#endregion
