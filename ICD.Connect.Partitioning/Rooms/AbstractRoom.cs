@@ -22,9 +22,9 @@ namespace ICD.Connect.Partitioning.Rooms
 	/// <summary>
 	/// Base class for rooms.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public abstract class AbstractRoom<T> : AbstractOriginator<T>, IRoom, IConsoleNode
-		where T : IRoomSettings, new()
+	/// <typeparam name="TSettings"></typeparam>
+	public abstract class AbstractRoom<TSettings> : AbstractOriginator<TSettings>, IRoom, IConsoleNode
+		where TSettings : IRoomSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
@@ -124,7 +124,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Override to apply properties to the settings instance.
 		/// </summary>
 		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(T settings)
+		protected override void CopySettingsFinal(TSettings settings)
 		{
 			base.CopySettingsFinal(settings);
 
@@ -156,7 +156,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
 		{
 			// Ensure all dependencies are loaded first.
 			factory.LoadOriginators(settings.Devices);
