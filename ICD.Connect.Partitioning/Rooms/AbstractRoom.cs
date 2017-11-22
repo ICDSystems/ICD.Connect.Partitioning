@@ -130,6 +130,14 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			settings.CombinePriority = CombinePriority;
 
+			settings.Ports.Clear();
+			settings.Devices.Clear();
+			settings.Panels.Clear();
+			settings.Sources.Clear();
+			settings.Destinations.Clear();
+			settings.DestinationGroups.Clear();
+			settings.Partitions.Clear();
+
 			settings.Ports.AddRange(Originators.GetInstances<IPort>().Select(p => p.Id));
 			settings.Devices.AddRange(Originators.GetInstances<IDevice>().Select(p => p.Id));
 			settings.Panels.AddRange(Originators.GetInstances<IPanelDevice>().Select(p => p.Id));
