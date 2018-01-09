@@ -78,7 +78,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				IcdHashSet<int> idsSet = ids.ToHashSet();
+				IcdHashSet<int> idsSet = ids.ToIcdHashSet();
 				if (m_Ids.NonIntersection(idsSet).Count == 0)
 					return;
 
