@@ -64,7 +64,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
 		/// <param name="func"></param>
-		void ToggleCombineRooms<TRoom>(IPartition partition, Func<TRoom> func) where TRoom: IRoom;
+		void ToggleCombineRooms<TRoom>(IPartition partition, Func<TRoom> func) where TRoom : IRoom;
 
 		/// <summary>
 		/// Creates a new room instance, or expands an existing room instance, to contain the given partitions.

@@ -214,9 +214,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			// Get the complete set of partitions through the new combine space
 			// ToArray() because room partitions are cleared on dispose.
 			IEnumerable<IPartition> partitions = rooms.SelectMany(r => r.Originators.GetInstancesRecursive<IPartition>())
-													  .Append(partition)
-													  .Distinct()
-													  .ToArray();
+			                                          .Append(partition)
+			                                          .Distinct()
+			                                          .ToArray();
 
 			DestroyCombineRooms(rooms);
 			CreateCombineRoom(partitions, constructor);
@@ -421,7 +421,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			IPartition[] partitions = room.Originators
 			                              .GetInstancesRecursive<IPartition>()
 			                              .Except(partition)
-										  .Distinct()
+			                              .Distinct()
 			                              .ToArray();
 
 			return m_Partitions.SplitAdjacentPartitionsByPartition(partitions, partition);
@@ -633,7 +633,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			return GetOriginatorsSkipExceptions<IPartition>(settings.PartitionSettings, factory);
 		}
 
-		private IEnumerable<T> GetOriginatorsSkipExceptions<T>(IEnumerable<ISettings> originatorSettings, IDeviceFactory factory)
+		private IEnumerable<T> GetOriginatorsSkipExceptions<T>(IEnumerable<ISettings> originatorSettings,
+		                                                       IDeviceFactory factory)
 			where T : class, IOriginator
 		{
 			foreach (ISettings settings in originatorSettings)

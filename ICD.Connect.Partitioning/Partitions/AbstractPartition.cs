@@ -11,7 +11,7 @@ namespace ICD.Connect.Partitioning.Partitions
 	public abstract class AbstractPartition<TSettings> : AbstractOriginator<TSettings>, IPartition
 		where TSettings : IPartitionSettings, new()
 	{
-		private readonly IcdHashSet<DeviceControlInfo> m_Controls; 
+		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
 		private readonly IcdHashSet<int> m_Rooms;
 		private readonly SafeCriticalSection m_Section;
 

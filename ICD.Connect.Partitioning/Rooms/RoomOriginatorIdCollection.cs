@@ -129,7 +129,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				int count = m_Ids.Count;
 
 				m_Ids.AddRange(ids);
-				
+
 				if (m_Ids.Count == count)
 					return;
 			}
@@ -382,10 +382,10 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("selector");
 
 			return m_Room.GetRoomsRecursive()
-						 .Select(r => r.Originators)
-						 .Select(c => c.GetInstance(selector))
+			             .Select(r => r.Originators)
+			             .Select(c => c.GetInstance(selector))
 				// ReSharper disable once CompareNonConstrainedGenericWithNull
-						 .FirstOrDefault(i => i != null);
+			             .FirstOrDefault(i => i != null);
 		}
 
 		/// <summary>
@@ -408,9 +408,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			where TInstance : IOriginator
 		{
 			return m_Room.GetRoomsRecursive()
-						 .Select(r => r.Originators)
-						 .SelectMany(c => c.GetInstances<TInstance>())
-						 .Distinct();
+			             .Select(r => r.Originators)
+			             .SelectMany(c => c.GetInstances<TInstance>())
+			             .Distinct();
 		}
 
 		#endregion

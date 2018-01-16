@@ -150,7 +150,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partitions"></param>
 		/// <param name="split"></param>
 		/// <returns></returns>
-		public IEnumerable<IPartition[]> SplitAdjacentPartitionsByPartition(IEnumerable<IPartition> partitions, IPartition split)
+		public IEnumerable<IPartition[]> SplitAdjacentPartitionsByPartition(IEnumerable<IPartition> partitions,
+		                                                                    IPartition split)
 		{
 			// Unique partitions except the split
 			IPartition[] partitionsArray = partitions.Except(split)
@@ -159,7 +160,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			// First build a map of how the partitions are adjacent to each other.
 			Dictionary<IPartition, IcdHashSet<IPartition>> adjacency = new Dictionary<IPartition, IcdHashSet<IPartition>>();
-			
+
 			foreach (IPartition partition in partitionsArray)
 			{
 				// Workaround for compiler warning
@@ -175,8 +176,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			Dictionary<IPartition, IcdHashSet<IPartition>> groups = new Dictionary<IPartition, IcdHashSet<IPartition>>();
 			RecurseAdjacencyMap(adjacency, (root, node) =>
 			                               {
-											   if (!groups.ContainsKey(root))
-												   groups.Add(root, new IcdHashSet<IPartition>());
+				                               if (!groups.ContainsKey(root))
+					                               groups.Add(root, new IcdHashSet<IPartition>());
 				                               groups[root].Add(node);
 			                               });
 

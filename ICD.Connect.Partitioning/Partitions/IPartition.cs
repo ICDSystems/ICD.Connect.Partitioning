@@ -28,7 +28,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		/// <returns></returns>
 		IEnumerable<DeviceControlInfo> GetPartitionControls();
-		
+
 		/// <summary>
 		/// Returns the rooms that are added as adjacent to this partition.
 		/// </summary>

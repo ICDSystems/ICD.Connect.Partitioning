@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
@@ -25,7 +25,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Raised when the room combine state changes.
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnCombineStateChanged;
-		
+
 		/// <summary>
 		/// Gets the parent core instance.
 		/// </summary>
@@ -165,7 +165,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			control = null;
 			if (!extends.ContainsControl(controlInfo))
 				return false;
-			
+
 			control = extends.Core.GetControl(controlInfo);
 			return true;
 		}
@@ -279,7 +279,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
+		public static bool TryGetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo,
+		                                          out IDeviceControl control)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
