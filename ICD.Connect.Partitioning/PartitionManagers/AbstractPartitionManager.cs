@@ -10,7 +10,7 @@ using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitioning
+namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public abstract class AbstractPartitionManager<TSettings> : AbstractOriginator<TSettings>, IPartitionManager, IConsoleNode
 		where TSettings : IPartitionManagerSettings, new()

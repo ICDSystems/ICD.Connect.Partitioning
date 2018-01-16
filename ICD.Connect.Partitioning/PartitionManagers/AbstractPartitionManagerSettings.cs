@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitioning
+namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public abstract class AbstractPartitionManagerSettings : AbstractSettings, IPartitionManagerSettings
 	{

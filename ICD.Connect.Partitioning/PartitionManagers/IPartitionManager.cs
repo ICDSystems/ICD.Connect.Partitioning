@@ -6,7 +6,7 @@ using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitioning
+namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public delegate void PartitionControlOpenStateCallback(IPartitionDeviceControl control, bool open);
 

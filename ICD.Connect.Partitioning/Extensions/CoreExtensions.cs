@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Partitioning.PartitionManagers;
 using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Partitioning.Extensions
