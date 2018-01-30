@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 
@@ -49,9 +51,22 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			IEnumerable<ISettings> partitions = PluginFactory.GetSettingsFromXml(xml, PARTITIONS_ELEMENT);
 
-			instance.PartitionSettings.SetRange(partitions);
+			AddSettingsLogDuplicates(instance, instance.PartitionSettings, partitions);
 
 			AbstractSettings.ParseXml(instance, xml);
+		}
+
+		private static void AddSettingsLogDuplicates(AbstractPartitionManagerSettings instance, SettingsCollection collection,
+		                                             IEnumerable<ISettings> settings)
+		{
+			foreach (ISettings item in settings)
+			{
+				if (collection.Add(item))
+					continue;
+
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} failed to add duplicate {1}", instance.GetType().Name, item);
+			}
 		}
 
 		#endregion
