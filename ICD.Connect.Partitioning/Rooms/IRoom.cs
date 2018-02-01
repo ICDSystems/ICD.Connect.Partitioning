@@ -350,6 +350,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
+			if (!extends.IsCombineRoom())
+				return Enumerable.Empty<IRoom>();
+
 			IEnumerable<int> ids = extends.Originators
 			                              .GetInstances<IPartition>()
 			                              .SelectMany(p => p.GetRooms())

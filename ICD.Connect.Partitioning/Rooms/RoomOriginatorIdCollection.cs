@@ -281,6 +281,19 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<TInstance> GetInstances<TInstance>()
 			where TInstance : IOriginator
 		{
+			return GetInstances<TInstance>(i => true);
+		}
+
+		/// <summary>
+		/// Gets all of the originator instances of the given type from the core.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstances<TInstance>(Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
 			m_Section.Enter();
 
 			try
@@ -288,7 +301,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return Enumerable.Empty<TInstance>();
 
-				IEnumerable<TInstance> output = Originators.GetChildren<TInstance>(m_Ids);
+				IEnumerable<TInstance> output = Originators.GetChildren(m_Ids, selector);
 				return output as TInstance[] ?? output.ToArray();
 			}
 			finally
@@ -405,10 +418,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public IEnumerable<IOriginator> GetInstancesRecursive()
 		{
-			return m_Room.GetRoomsRecursive()
-			             .Select(r => r.Originators)
-			             .SelectMany(c => c.GetInstances())
-			             .Distinct();
+			return GetInstancesRecursive<IOriginator>();
 		}
 
 		/// <summary>
@@ -418,10 +428,23 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>()
 			where TInstance : IOriginator
 		{
+			return GetInstancesRecursive<TInstance>(i => true);
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
 			return m_Room.GetRoomsRecursive()
-			             .Select(r => r.Originators)
-			             .SelectMany(c => c.GetInstances<TInstance>())
-			             .Distinct();
+						 .Select(r => r.Originators)
+						 .SelectMany(c => c.GetInstances(selector))
+						 .Distinct();
 		}
 
 		#endregion
