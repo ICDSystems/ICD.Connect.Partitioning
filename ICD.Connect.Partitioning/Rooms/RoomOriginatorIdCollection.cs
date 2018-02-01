@@ -297,6 +297,17 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 		}
 
+		/// <summary>
+		/// Returns true if instances of the given type exist.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <returns></returns>
+		public bool HasInstances<TInstance>()
+			where TInstance : IOriginator
+		{
+			return m_Section.Execute(() => Originators.HasChildren<TInstance>(m_Ids));
+		}
+
 		#endregion
 
 		#region Recursion
