@@ -55,7 +55,7 @@ namespace ICD.Connect.Partitioning.Devices
 				InvertInput = XmlUtils.TryReadChildElementContentAsBoolean(xml, INVERT_INPUT_ELEMENT) ?? false
 			};
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

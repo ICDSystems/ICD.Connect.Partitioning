@@ -27,7 +27,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		public static PartitionSettings FromXml(string xml)
 		{
 			PartitionSettings output = new PartitionSettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

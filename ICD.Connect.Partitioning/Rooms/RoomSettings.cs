@@ -26,7 +26,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public static RoomSettings FromXml(string xml)
 		{
 			RoomSettings output = new RoomSettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

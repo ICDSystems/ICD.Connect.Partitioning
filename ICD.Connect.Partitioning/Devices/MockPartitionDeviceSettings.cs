@@ -27,7 +27,7 @@ namespace ICD.Connect.Partitioning.Devices
 		public static MockPartitionDeviceSettings FromXml(string xml)
 		{
 			MockPartitionDeviceSettings output = new MockPartitionDeviceSettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

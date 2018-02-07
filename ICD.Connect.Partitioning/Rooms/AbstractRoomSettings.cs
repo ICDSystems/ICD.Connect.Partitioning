@@ -96,18 +96,15 @@ namespace ICD.Connect.Partitioning.Rooms
 			XmlUtils.WriteListToXml(writer, Partitions.Order(), PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 		}
 
-		#region Protected Methods
-
 		/// <summary>
-		/// Parses the xml and applies the properties to the instance.
+		/// Updates the settings from xml.
 		/// </summary>
-		/// <param name="instance"></param>
 		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractRoomSettings instance, string xml)
+		public override void ParseXml(string xml)
 		{
-			AbstractSettings.ParseXml(instance, xml);
+			base.ParseXml(xml);
 
-			instance.CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
+			CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
 
 			IEnumerable<int> panels = XmlUtils.ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 			IEnumerable<int> ports = XmlUtils.ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
@@ -117,15 +114,13 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<int> destinationGroups = XmlUtils.ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 			IEnumerable<int> partitions = XmlUtils.ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
 
-			instance.Panels.AddRange(panels);
-			instance.Ports.AddRange(ports);
-			instance.Devices.AddRange(devices);
-			instance.Sources.AddRange(sources);
-			instance.Destinations.AddRange(destinations);
-			instance.DestinationGroups.AddRange(destinationGroups);
-			instance.Partitions.AddRange(partitions);
+			Panels.AddRange(panels);
+			Ports.AddRange(ports);
+			Devices.AddRange(devices);
+			Sources.AddRange(sources);
+			Destinations.AddRange(destinations);
+			DestinationGroups.AddRange(destinationGroups);
+			Partitions.AddRange(partitions);
 		}
-
-		#endregion
 	}
 }

@@ -126,17 +126,18 @@ namespace ICD.Connect.Partitioning.Partitions
 		}
 
 		/// <summary>
-		/// Parses the xml and configures the settings instance.
-		/// </summary>c =
-		/// <param name="instance"></param>
+		/// Updates the settings from xml.
+		/// </summary>
 		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractPartitionSettings instance, string xml)
+		public override void ParseXml(string xml)
 		{
+			base.ParseXml(xml);
+
 			IEnumerable<int> roomIds = XmlUtils.ReadListFromXml(xml, ROOMS_ELEMENT, ROOM_ELEMENT,
-			                                                    x => XmlUtils.ReadElementContentAsInt(x));
+																x => XmlUtils.ReadElementContentAsInt(x));
 			IEnumerable<DeviceControlInfo> partitionControls =
 				XmlUtils.ReadListFromXml(xml, PARTITION_CONTROLS_ELEMENT, PARTITION_CONTROL_ELEMENT,
-				                         e => DeviceControlInfo.ReadFromXml(e));
+										 e => DeviceControlInfo.ReadFromXml(e));
 
 			// Migration
 			int? deviceId = XmlUtils.TryReadChildElementContentAsInt(xml, "Device");
@@ -148,10 +149,8 @@ namespace ICD.Connect.Partitioning.Partitions
 				partitionControls = partitionControls.Append(deviceControl);
 			}
 
-			instance.SetPartitionControls(partitionControls);
-			instance.SetRooms(roomIds);
-
-			ParseXml((AbstractSettings)instance, xml);
+			SetPartitionControls(partitionControls);
+			SetRooms(roomIds);
 		}
 	}
 }
