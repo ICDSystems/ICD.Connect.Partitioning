@@ -1,9 +1,9 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class PartitionSettings : AbstractPartitionSettings
 	{
 		private const string FACTORY_NAME = "Partition";
@@ -17,18 +17,5 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(Partition); } }
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static PartitionSettings FromXml(string xml)
-		{
-			PartitionSettings output = new PartitionSettings();
-			output.ParseXml(xml);
-			return output;
-		}
 	}
 }

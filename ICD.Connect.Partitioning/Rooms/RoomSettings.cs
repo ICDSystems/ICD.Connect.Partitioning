@@ -3,6 +3,7 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class RoomSettings : AbstractRoomSettings
 	{
 		private const string FACTORY_NAME = "Room";
@@ -16,18 +17,5 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(Room); } }
-
-		/// <summary>
-		/// Instantiates room settings from an xml element.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[XmlFactoryMethod(FACTORY_NAME)]
-		public static RoomSettings FromXml(string xml)
-		{
-			RoomSettings output = new RoomSettings();
-			output.ParseXml(xml);
-			return output;
-		}
 	}
 }

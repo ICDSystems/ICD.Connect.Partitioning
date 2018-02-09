@@ -1,9 +1,9 @@
 using System;
-using ICD.Common.Properties;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Partitioning.Devices
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class MockPartitionDeviceSettings : AbstractPartitionDeviceSettings
 	{
 		private const string FACTORY_NAME = "MockPartition";
@@ -17,18 +17,5 @@ namespace ICD.Connect.Partitioning.Devices
 		/// Gets the type of the originator for this settings instance.
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(MockPartitionDevice); } }
-
-		/// <summary>
-		/// Loads the settings from XML.
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static MockPartitionDeviceSettings FromXml(string xml)
-		{
-			MockPartitionDeviceSettings output = new MockPartitionDeviceSettings();
-			output.ParseXml(xml);
-			return output;
-		}
 	}
 }

@@ -1,5 +1,4 @@
 using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Settings.Attributes;
@@ -7,6 +6,7 @@ using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.Devices
 {
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class IoPartitionDeviceSettings : AbstractPartitionDeviceSettings
 	{
 		private const string FACTORY_NAME = "IoPartition";
@@ -42,21 +42,15 @@ namespace ICD.Connect.Partitioning.Devices
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static IoPartitionDeviceSettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			IoPartitionDeviceSettings output = new IoPartitionDeviceSettings
-			{
-				IoPort = XmlUtils.TryReadChildElementContentAsInt(xml, IO_PORT_ELEMENT),
-				InvertInput = XmlUtils.TryReadChildElementContentAsBoolean(xml, INVERT_INPUT_ELEMENT) ?? false
-			};
+			base.ParseXml(xml);
 
-			output.ParseXml(xml);
-			return output;
+			IoPort = XmlUtils.TryReadChildElementContentAsInt(xml, IO_PORT_ELEMENT);
+			InvertInput = XmlUtils.TryReadChildElementContentAsBoolean(xml, INVERT_INPUT_ELEMENT) ?? false;
 		}
 	}
 }
