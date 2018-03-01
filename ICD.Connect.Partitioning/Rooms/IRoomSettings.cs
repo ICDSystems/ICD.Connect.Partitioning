@@ -1,4 +1,4 @@
-using ICD.Common.Utils.Collections;
+using System.Collections.Generic;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.Rooms
@@ -10,24 +10,24 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Gets the device settings.
 		/// </summary>
-		IcdHashSet<int> Devices { get; }
+		Dictionary<int, eCombineMode> Devices { get; }
 
 		/// <summary>
 		/// Gets the port settings.
 		/// </summary>
-		IcdHashSet<int> Ports { get; }
+		Dictionary<int, eCombineMode> Ports { get; }
 
 		/// <summary>
 		/// Gets the panel settings.
 		/// </summary>
-		IcdHashSet<int> Panels { get; }
+		Dictionary<int, eCombineMode> Panels { get; }
 
-		IcdHashSet<int> Sources { get; }
+		Dictionary<int, eCombineMode> Sources { get; }
 
-		IcdHashSet<int> Destinations { get; }
+		Dictionary<int, eCombineMode> Destinations { get; }
 
-		IcdHashSet<int> DestinationGroups { get; }
+		Dictionary<int, eCombineMode> DestinationGroups { get; }
 
-		IcdHashSet<int> Partitions { get; }
+		Dictionary<int, eCombineMode> Partitions { get; }
 	}
 }
