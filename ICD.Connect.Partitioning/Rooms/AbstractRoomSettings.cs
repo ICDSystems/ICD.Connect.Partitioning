@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Collections;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
@@ -13,7 +13,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	[PublicAPI]
 	public abstract class AbstractRoomSettings : AbstractSettings, IRoomSettings
 	{
-		public const string ROOM_ELEMENT = "Room";
+		private const string ROOM_ELEMENT = "Room";
 
 		private const string COMBINE_PRIORITY_ELEMENT = "CombinePriority";
 
@@ -32,25 +32,27 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string PARTITION_ELEMENT = "Partition";
 		private const string PARTITIONS_ELEMENT = "Partitions";
 
-		private readonly IcdHashSet<int> m_Devices;
-		private readonly IcdHashSet<int> m_Ports;
-		private readonly IcdHashSet<int> m_Panels;
-		private readonly IcdHashSet<int> m_Sources;
-		private readonly IcdHashSet<int> m_Destinations;
-		private readonly IcdHashSet<int> m_DestinationGroups;
-		private readonly IcdHashSet<int> m_Partitions;
+		private const string COMBINE_ATTRIBUTE = "combine";
+
+		private readonly Dictionary<int, eCombineMode> m_Devices;
+		private readonly Dictionary<int, eCombineMode> m_Ports;
+		private readonly Dictionary<int, eCombineMode> m_Panels;
+		private readonly Dictionary<int, eCombineMode> m_Sources;
+		private readonly Dictionary<int, eCombineMode> m_Destinations;
+		private readonly Dictionary<int, eCombineMode> m_DestinationGroups;
+		private readonly Dictionary<int, eCombineMode> m_Partitions;
 
 		#region Properties
 
 		public int CombinePriority { get; set; }
 
-		public IcdHashSet<int> Devices { get { return m_Devices; } }
-		public IcdHashSet<int> Ports { get { return m_Ports; } }
-		public IcdHashSet<int> Panels { get { return m_Panels; } }
-		public IcdHashSet<int> Sources { get { return m_Sources; } }
-		public IcdHashSet<int> Destinations { get { return m_Destinations; } }
-		public IcdHashSet<int> DestinationGroups { get { return m_DestinationGroups; } }
-		public IcdHashSet<int> Partitions { get { return m_Partitions; } }
+		public Dictionary<int, eCombineMode> Devices { get { return m_Devices; } }
+		public Dictionary<int, eCombineMode> Ports { get { return m_Ports; } }
+		public Dictionary<int, eCombineMode> Panels { get { return m_Panels; } }
+		public Dictionary<int, eCombineMode> Sources { get { return m_Sources; } }
+		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
+		public Dictionary<int, eCombineMode> DestinationGroups { get { return m_DestinationGroups; } }
+		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
 
 		/// <summary>
 		/// Gets the xml element.
@@ -64,18 +66,14 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		protected AbstractRoomSettings()
 		{
-			m_Devices = new IcdHashSet<int>();
-			m_Ports = new IcdHashSet<int>();
-			m_Panels = new IcdHashSet<int>();
-			m_Sources = new IcdHashSet<int>();
-			m_Destinations = new IcdHashSet<int>();
-			m_DestinationGroups = new IcdHashSet<int>();
-			m_Partitions = new IcdHashSet<int>();
+			m_Devices = new Dictionary<int, eCombineMode>();
+			m_Ports = new Dictionary<int, eCombineMode>();
+			m_Panels = new Dictionary<int, eCombineMode>();
+			m_Sources = new Dictionary<int, eCombineMode>();
+			m_Destinations = new Dictionary<int, eCombineMode>();
+			m_DestinationGroups = new Dictionary<int, eCombineMode>();
+			m_Partitions = new Dictionary<int, eCombineMode>();
 		}
-
-		#region Methods
-
-		#endregion
 
 		/// <summary>
 		/// Writes property elements to xml.
@@ -87,13 +85,13 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			writer.WriteElementString(COMBINE_PRIORITY_ELEMENT, IcdXmlConvert.ToString(CombinePriority));
 
-			XmlUtils.WriteListToXml(writer, Devices.Order(), DEVICES_ELEMENT, DEVICE_ELEMENT);
-			XmlUtils.WriteListToXml(writer, Panels.Order(), PANELS_ELEMENT, PANEL_ELEMENT);
-			XmlUtils.WriteListToXml(writer, Ports.Order(), PORTS_ELEMENT, PORT_ELEMENT);
-			XmlUtils.WriteListToXml(writer, Sources.Order(), SOURCES_ELEMENT, SOURCE_ELEMENT);
-			XmlUtils.WriteListToXml(writer, Destinations.Order(), DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
-			XmlUtils.WriteListToXml(writer, DestinationGroups.Order(), DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
-			XmlUtils.WriteListToXml(writer, Partitions.Order(), PARTITIONS_ELEMENT, PARTITION_ELEMENT);
+			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
+			WriteChildrenToXml(writer, m_Panels, PANELS_ELEMENT, PANEL_ELEMENT);
+			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
+			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
+			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
+			WriteChildrenToXml(writer, m_DestinationGroups, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
+			WriteChildrenToXml(writer, m_Partitions, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 		}
 
 		/// <summary>
@@ -106,21 +104,58 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
 
-			IEnumerable<int> panels = XmlUtils.ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> ports = XmlUtils.ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> devices = XmlUtils.ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> sources = XmlUtils.ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> destinations = XmlUtils.ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> destinationGroups = XmlUtils.ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
-			IEnumerable<int> partitions = XmlUtils.ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT, content => XmlUtils.ReadElementContentAsInt(content));
+			IEnumerable<KeyValuePair<int, eCombineMode>> panels = ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> ports = ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> devices = ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> sources = ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> destinationGroups = ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> partitions = ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 
-			Panels.AddRange(panels);
-			Ports.AddRange(ports);
-			Devices.AddRange(devices);
-			Sources.AddRange(sources);
-			Destinations.AddRange(destinations);
-			DestinationGroups.AddRange(destinationGroups);
-			Partitions.AddRange(partitions);
+			Panels.Update(panels);
+			Ports.Update(ports);
+			Devices.Update(devices);
+			Sources.Update(sources);
+			Destinations.Update(destinations);
+			DestinationGroups.Update(destinationGroups);
+			Partitions.Update(partitions);
+		}
+
+		private void WriteChildrenToXml(IcdXmlTextWriter writer, Dictionary<int, eCombineMode> children, string listElement, string childElement)
+		{
+			XmlUtils.WriteListToXml(writer, children.OrderByKey(), listElement, (w, kvp) => WriteChildToXml(w, kvp, childElement));
+		}
+
+		private void WriteChildToXml(IcdXmlTextWriter writer, KeyValuePair<int, eCombineMode> kvp, string childElement)
+		{
+			writer.WriteStartElement(childElement);
+			{
+				writer.WriteAttributeString(COMBINE_ATTRIBUTE, kvp.Value.ToString());
+				writer.WriteString(IcdXmlConvert.ToString(kvp.Key));
+			}
+			writer.WriteEndElement();
+		}
+
+		private IEnumerable<KeyValuePair<int, eCombineMode>> ReadListFromXml(string xml, string listElement, string childElement)
+		{
+			return XmlUtils.ReadListFromXml<KeyValuePair<int, eCombineMode>>(xml, listElement, childElement, ReadChildFromXml);
+		}
+
+		private KeyValuePair<int, eCombineMode> ReadChildFromXml(string xml)
+		{
+			string attribute =
+				XmlUtils.HasAttribute(xml, COMBINE_ATTRIBUTE)
+					? XmlUtils.GetAttribute(xml, COMBINE_ATTRIBUTE).Value
+					: null;
+
+			eCombineMode combine =
+				attribute == null
+					? eCombineMode.Always
+					: EnumUtils.Parse<eCombineMode>(attribute, false);
+
+			int id = XmlUtils.ReadElementContentAsInt(xml);
+
+			return new KeyValuePair<int, eCombineMode>(id, combine);
 		}
 	}
 }
