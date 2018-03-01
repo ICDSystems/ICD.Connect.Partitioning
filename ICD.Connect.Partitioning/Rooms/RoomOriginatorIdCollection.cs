@@ -179,6 +179,33 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#endregion
 
+		#region Combine
+
+		/// <summary>
+		/// Gets the combine mode for the child with the given id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public eCombineMode GetCombineMode(int id)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				if (m_Ids.ContainsKey(id))
+					return m_Ids[id];
+
+				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
+				throw new InvalidOperationException(message);
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
+		}
+
+		#endregion
+
 		#region Instances
 
 		/// <summary>

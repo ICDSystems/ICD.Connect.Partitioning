@@ -138,13 +138,13 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.DestinationGroups.Clear();
 			settings.Partitions.Clear();
 
-			settings.Ports.AddRange(Originators.GetInstances<IPort>().Select(p => p.Id));
-			settings.Devices.AddRange(Originators.GetInstances<IDevice>().Select(p => p.Id));
-			settings.Panels.AddRange(Originators.GetInstances<IPanelDevice>().Select(p => p.Id));
-			settings.Sources.AddRange(Originators.GetInstances<ISource>().Select(p => p.Id));
-			settings.Destinations.AddRange(Originators.GetInstances<IDestination>().Select(p => p.Id));
-			settings.DestinationGroups.AddRange(Originators.GetInstances<IDestinationGroup>().Select(p => p.Id));
-			settings.Partitions.AddRange(Originators.GetInstances<IPartition>().Select(p => p.Id));
+			settings.Ports.AddRange(GetChildren<IPort>());
+			settings.Devices.AddRange(GetChildren<IDevice>());
+			settings.Panels.AddRange(GetChildren<IPanelDevice>());
+			settings.Sources.AddRange(GetChildren<ISource>());
+			settings.Destinations.AddRange(GetChildren<IDestination>());
+			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
+			settings.Partitions.AddRange(GetChildren<IPartition>());
 		}
 
 		/// <summary>
@@ -177,6 +177,13 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
+		}
+
+		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
+			where TInstance : IOriginator
+		{
+			return m_OriginatorIds.GetInstances<TInstance>()
+			                      .Select(p => new KeyValuePair<int, eCombineMode>(p.Id, m_OriginatorIds.GetCombineMode(p.Id)));
 		}
 
 		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory)
