@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Core;
@@ -9,6 +10,12 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 	[TestFixture]
 	public sealed class RoomExtensionsTest
 	{
+		[TearDown]
+		public void TearDown()
+		{
+			ServiceProvider.RemoveAllServices();
+		}
+
 		#region Controls
 
 		[Test]
@@ -100,7 +107,44 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void IsCombineRoomTest()
 		{
-			Assert.Inconclusive();
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			Room a = new Room
+			{
+				Id = 2
+			};
+
+			Room b = new Room
+			{
+				Id = 3
+			};
+
+			Room c = new Room
+			{
+				Id = 4
+			};
+
+			Partition partition = new Partition
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(a);
+			core.Originators.AddChild(b);
+			core.Originators.AddChild(c);
+			core.Originators.AddChild(partition);
+
+			partition.AddRoom(a.Id);
+			partition.AddRoom(b.Id);
+
+			c.Originators.Add(partition.Id, eCombineMode.Always);
+
+			Assert.IsFalse(a.IsCombineRoom());
+			Assert.IsFalse(b.IsCombineRoom());
+			Assert.IsTrue(c.IsCombineRoom());
 		}
 
 		[Test]
@@ -156,7 +200,56 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetRoomsRecursiveTest()
 		{
-			Assert.Inconclusive();
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			Room a = new Room
+			{
+				Id = 2
+			};
+
+			Room b = new Room
+			{
+				Id = 3
+			};
+
+			Room c = new Room
+			{
+				Id = 4
+			};
+
+			Partition partition = new Partition
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(a);
+			core.Originators.AddChild(b);
+			core.Originators.AddChild(c);
+			core.Originators.AddChild(partition);
+
+			partition.AddRoom(a.Id);
+			partition.AddRoom(b.Id);
+
+			c.Originators.Add(partition.Id, eCombineMode.Always);
+
+			IRoom[] aRooms = a.GetRoomsRecursive().ToArray();
+			IRoom[] bRooms = b.GetRoomsRecursive().ToArray();
+			IRoom[] cRooms = c.GetRoomsRecursive().ToArray();
+
+			Assert.AreEqual(1, aRooms.Length);
+			Assert.AreEqual(1, bRooms.Length);
+			Assert.AreEqual(3, cRooms.Length);
+
+			Assert.IsTrue(aRooms.Contains(a));
+
+			Assert.IsTrue(bRooms.Contains(b));
+
+			Assert.IsTrue(cRooms.Contains(a));
+			Assert.IsTrue(cRooms.Contains(b));
+			Assert.IsTrue(cRooms.Contains(c));
 		}
 
 		#endregion
