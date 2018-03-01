@@ -360,7 +360,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id));
 			Core.Originators.AddChild(room);
 
-			room.Originators.AddRange(partitions.Select(p => p.Id));
+			room.Originators.AddRange(partitions.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
 			OpenPartitions(room.Originators.GetInstances<IPartition>());
 

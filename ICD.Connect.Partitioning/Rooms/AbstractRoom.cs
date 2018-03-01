@@ -179,22 +179,22 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
 		}
 
-		private void AddOriginatorsSkipExceptions<T>(IEnumerable<int> originatorIds, IDeviceFactory factory)
+		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory)
 			where T : class, IOriginator
 		{
-			foreach (int id in originatorIds)
+			foreach (KeyValuePair<int, eCombineMode> kvp in originatorIds)
 			{
 				try
 				{
-					factory.GetOriginatorById<T>(id);
+					factory.GetOriginatorById<T>(kvp.Key);
 				}
 				catch (Exception e)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to add {1} with id {2} - {3}", this, typeof(T).Name, id, e.Message);
+					Logger.AddEntry(eSeverity.Error, "{0} failed to add {1} with id {2} - {3}", this, typeof(T).Name, kvp, e.Message);
 					continue;
 				}
 
-				Originators.Add(id);
+				Originators.Add(kvp.Key, kvp.Value);
 			}
 		}
 
