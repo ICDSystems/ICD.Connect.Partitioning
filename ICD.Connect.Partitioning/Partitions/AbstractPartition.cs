@@ -5,6 +5,7 @@ using ICD.Common.Utils.Collections;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
+using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
@@ -12,6 +13,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		where TSettings : IPartitionSettings, new()
 	{
 		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
+		private readonly List<int> m_RoomsOrdered;
 		private readonly IcdHashSet<int> m_Rooms;
 		private readonly SafeCriticalSection m_Section;
 
@@ -26,6 +28,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		protected AbstractPartition()
 		{
 			m_Controls = new IcdHashSet<DeviceControlInfo>();
+			m_RoomsOrdered = new List<int>();
 			m_Rooms = new IcdHashSet<int>();
 			m_Section = new SafeCriticalSection();
 		}
@@ -39,7 +42,20 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public bool AddRoom(int roomId)
 		{
-			return m_Section.Execute(() => m_Rooms.Add(roomId));
+			m_Section.Enter();
+
+			try
+			{
+				if (!m_Rooms.Add(roomId))
+					return false;
+
+				m_RoomsOrdered.AddSorted(roomId);
+				return true;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -49,7 +65,20 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public bool RemoveRoom(int roomId)
 		{
-			return m_Section.Execute(() => m_Rooms.Remove(roomId));
+			m_Section.Enter();
+
+			try
+			{
+				if (!m_Rooms.Remove(roomId))
+					return false;
+
+				m_RoomsOrdered.Remove(roomId);
+				return true;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -68,7 +97,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public IEnumerable<DeviceControlInfo> GetPartitionControls()
 		{
-			return m_Section.Execute(() => m_Controls.ToArray());
+			return m_Section.Execute(() => m_Controls.ToArray(m_Controls.Count));
 		}
 
 		/// <summary>
@@ -77,7 +106,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public IEnumerable<int> GetRooms()
 		{
-			return m_Section.Execute(() => m_Rooms.ToArray());
+			return m_Section.Execute(() => m_RoomsOrdered.ToArray(m_RoomsOrdered.Count));
 		}
 
 		/// <summary>
@@ -91,7 +120,10 @@ namespace ICD.Connect.Partitioning.Partitions
 			try
 			{
 				m_Rooms.Clear();
+				m_RoomsOrdered.Clear();
+
 				m_Rooms.AddRange(roomIds);
+				m_RoomsOrdered.AddRange(m_Rooms.Order());
 			}
 			finally
 			{
@@ -129,17 +161,8 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.ClearSettingsFinal();
 
-			m_Section.Enter();
-
-			try
-			{
-				m_Controls.Clear();
-				m_Rooms.Clear();
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
+			SetRooms(Enumerable.Empty<int>());
+			SetPartitionControls(Enumerable.Empty<DeviceControlInfo>());
 		}
 
 		/// <summary>
@@ -164,7 +187,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			// Load the rooms
 			factory.LoadOriginators(settings.GetRooms());
 
-			// Load the partition control
+			// Load the partition controls
 			factory.LoadOriginators(settings.GetPartitionControls().Select(c => c.DeviceId));
 
 			base.ApplySettingsFinal(settings, factory);
