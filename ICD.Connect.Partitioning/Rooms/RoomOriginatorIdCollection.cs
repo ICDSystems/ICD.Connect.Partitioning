@@ -222,7 +222,7 @@ namespace ICD.Connect.Partitioning.Rooms
 					return m_Ids[id];
 
 				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
-				throw new InvalidOperationException(message);
+				throw new KeyNotFoundException(message);
 			}
 			finally
 			{

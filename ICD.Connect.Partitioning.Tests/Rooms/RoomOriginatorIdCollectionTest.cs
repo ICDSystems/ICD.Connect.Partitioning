@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Rooms;
 using NUnit.Framework;
@@ -23,7 +24,14 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void CountTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.Add(1, eCombineMode.Always);
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(2, eCombineMode.Always);
+
+			Assert.AreEqual(3, room.Originators.Count);
 		}
 
 		#region Methods
@@ -31,7 +39,16 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void ClearTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.Add(1, eCombineMode.Always);
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(2, eCombineMode.Always);
+
+			room.Originators.Clear();
+
+			Assert.AreEqual(0, room.Originators.GetIds().Count());
 		}
 
 		#region Ids
@@ -53,41 +70,96 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void SetIdsTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.Add(1, eCombineMode.Always);
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(2, eCombineMode.Always);
+
+			room.Originators.SetIds(new []
+			{
+				new KeyValuePair<int, eCombineMode>(10, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(12, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(11, eCombineMode.Always),
+			});
+
+			Assert.AreEqual(3, room.Originators.GetIds().Count());
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 10, 11, 12 }));
 		}
 
 		[Test]
 		public void AddTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			Assert.IsTrue(room.Originators.Add(1, eCombineMode.Always));
+			Assert.IsTrue(room.Originators.Add(1, eCombineMode.Combine));
+			Assert.IsFalse(room.Originators.Add(1, eCombineMode.Combine));
+
+			Assert.IsTrue(room.Originators.Contains(1));
 		}
 
 		[Test]
 		public void AddRangeTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.AddRange(new[]
+			{
+				new KeyValuePair<int, eCombineMode>(10, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(12, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(11, eCombineMode.Always),
+			});
+
+			Assert.AreEqual(3, room.Originators.GetIds().Count());
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 10, 11, 12 }));
 		}
 
-		[Test]
-		public void RemoveTest()
+		[TestCase(1, eCombineMode.Always)]
+		public void RemoveTest(int id, eCombineMode combineMode)
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.Add(id, combineMode);
+
+			Assert.IsTrue(room.Originators.Remove(id));
+			Assert.IsFalse(room.Originators.Remove(id));
+
+			Assert.IsFalse(room.Originators.Contains(id));
 		}
 
-		[Test]
-		public void ContainsTest()
+		[TestCase(1, eCombineMode.Always)]
+		public void ContainsTest(int id, eCombineMode combineMode)
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			Assert.IsFalse(room.Originators.Contains(id));
+
+			room.Originators.Add(id, combineMode);
+
+			Assert.IsTrue(room.Originators.Contains(id));
 		}
 
 		#endregion
 
 		#region Combine
 
-		[Test]
-		public void GetCombineModeTest()
+		[TestCase(1, eCombineMode.Always)]
+		public void GetCombineModeTest(int id, eCombineMode combineMode)
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			Assert.Throws<KeyNotFoundException>(() => room.Originators.GetCombineMode(id));
+
+			room.Originators.Add(id, combineMode);
+
+			Assert.AreEqual(combineMode, room.Originators.GetCombineMode(id));
 		}
 
 		#endregion
