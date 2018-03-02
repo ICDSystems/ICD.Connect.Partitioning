@@ -84,6 +84,8 @@ namespace ICD.Connect.Partitioning.Rooms
 					return;
 
 				m_Ids.Clear();
+				m_OrderedIds.Clear();
+
 				m_Ids.AddRange(newIds);
 				m_OrderedIds.AddRange(m_Ids.Keys.Order());
 			}
