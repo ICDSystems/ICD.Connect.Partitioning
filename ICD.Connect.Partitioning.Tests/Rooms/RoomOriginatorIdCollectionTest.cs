@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Services;
+using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
+using ICD.Connect.Settings;
+using ICD.Connect.Settings.Core;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms
@@ -169,19 +173,70 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetInstanceIdTest()
 		{
-			Assert.Inconclusive();
+			ICore core = new Core();
+
+			TestRoom roomA = new TestRoom {Id = 1, Core = core};
+			TestRoom roomB = new TestRoom {Id = 2, Core = core};
+
+			core.Originators.AddChild(roomA);
+			core.Originators.AddChild(roomB);
+
+			roomA.Originators = new RoomOriginatorIdCollection(roomA);
+
+			Assert.Throws<KeyNotFoundException>(() => roomA.Originators.GetInstance(roomB.Id));
+
+			roomA.Originators.Add(roomB.Id, eCombineMode.Always);
+
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance(roomB.Id));
 		}
 
 		[Test]
 		public void GetInstanceIdGenericTest()
 		{
-			Assert.Inconclusive();
+			ICore core = new Core();
+
+			TestRoom roomA = new TestRoom { Id = 1, Core = core };
+			TestRoom roomB = new TestRoom { Id = 2, Core = core };
+
+			core.Originators.AddChild(roomA);
+			core.Originators.AddChild(roomB);
+
+			roomA.Originators = new RoomOriginatorIdCollection(roomA);
+
+			Assert.Throws<KeyNotFoundException>(() => roomA.Originators.GetInstance<TestRoom>(roomB.Id));
+
+			roomA.Originators.Add(roomB.Id, eCombineMode.Always);
+
+			Assert.Throws<InvalidCastException>(() => roomA.Originators.GetInstance<ICore>(roomB.Id));
+
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance<TestRoom>(roomB.Id));
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance<IRoom>(roomB.Id));
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance<IOriginator>(roomB.Id));
 		}
 
 		[Test]
 		public void GetInstanceSelectorTest()
 		{
-			Assert.Inconclusive();
+			ICore core = new Core();
+
+			TestRoom roomA = new TestRoom { Id = 1, Core = core, Name = "A" };
+			TestRoom roomB = new TestRoom { Id = 2, Core = core, Name = "B" };
+			TestRoom roomC = new TestRoom { Id = 3, Core = core, Name = "C" };
+
+			core.Originators.AddChild(roomA);
+			core.Originators.AddChild(roomB);
+			core.Originators.AddChild(roomC);
+
+			roomA.Originators = new RoomOriginatorIdCollection(roomA);
+
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(o => o.Name == "B"));
+
+			roomA.Originators.Add(roomB.Id, eCombineMode.Always);
+			roomA.Originators.Add(roomC.Id, eCombineMode.Always);
+
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance<TestRoom>(o => o.Name == "B"));
+			Assert.AreEqual(roomC, roomA.Originators.GetInstance<TestRoom>(o => o.Name == "C"));
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(o => o.Name == "D"));
 		}
 
 		[Test]
