@@ -12,6 +12,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler OnChildrenChanged;
 
+		private readonly List<int> m_OrderedIds;
 		private readonly Dictionary<int, eCombineMode> m_Ids;
 		private readonly SafeCriticalSection m_Section;
 		private readonly IRoom m_Room;
@@ -28,6 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public RoomOriginatorIdCollection(IRoom room)
 		{
+			m_OrderedIds = new List<int>();
 			m_Ids = new Dictionary<int, eCombineMode>();
 			m_Section = new SafeCriticalSection();
 			m_Room = room;
@@ -49,15 +51,15 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the child ids.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<KeyValuePair<int, eCombineMode>> GetIds()
+		public IEnumerable<int> GetIds()
 		{
 			m_Section.Enter();
 
 			try
 			{
-				return m_Ids.Count == 0
-					       ? Enumerable.Empty<KeyValuePair<int, eCombineMode>>()
-					       : m_Ids.ToArray();
+				return m_OrderedIds.Count == 0
+					       ? Enumerable.Empty<int>()
+					       : m_OrderedIds.ToArray(m_OrderedIds.Count);
 			}
 			finally
 			{
@@ -83,6 +85,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_Ids.Clear();
 				m_Ids.AddRange(newIds);
+				m_OrderedIds.AddRange(m_Ids.Keys.Order());
 			}
 			finally
 			{
@@ -97,25 +100,14 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="combine"></param>
-		/// <returns>False if the collection already contains the given id.</returns>
+		/// <returns>False if the collection already contains the given id and it has the given combine mode.</returns>
 		public bool Add(int id, eCombineMode combine)
 		{
-			m_Section.Enter();
+			bool output = AddInternal(id, combine);
+			if (output)
+				OnChildrenChanged.Raise(this);
 
-			try
-			{
-				if (m_Ids.ContainsKey(id) && combine == m_Ids[id])
-					return false;
-
-				m_Ids[id] = combine;
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
-
-			OnChildrenChanged.Raise(this);
-			return true;
+			return output;
 		}
 
 		/// <summary>
@@ -124,23 +116,53 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="ids"></param>
 		public void AddRange(IEnumerable<KeyValuePair<int, eCombineMode>> ids)
 		{
+			bool output;
+			
 			m_Section.Enter();
 
 			try
 			{
-				int count = m_Ids.Count;
+				output = ids.Aggregate(false, (current, kvp) => current | AddInternal(kvp.Key, kvp.Value));
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
+			
+			if (output)
+				OnChildrenChanged.Raise(this);
+		}
 
-				m_Ids.AddRange(ids);
+		/// <summary>
+		/// Adds the id to the collection.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="combine"></param>
+		/// <returns>False if the collection already contains the given id and it has the given combine mode.</returns>
+		private bool AddInternal(int id, eCombineMode combine)
+		{
+			m_Section.Enter();
 
-				if (m_Ids.Count == count)
-					return;
+			try
+			{
+				if (m_Ids.ContainsKey(id))
+				{
+					if (combine == m_Ids[id])
+						return false;
+				}
+				else
+				{
+					m_OrderedIds.AddSorted(id);
+				}
+
+				m_Ids[id] = combine;
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
 
-			OnChildrenChanged.Raise(this);
+			return true;
 		}
 
 		/// <summary>
@@ -156,6 +178,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				if (!m_Ids.Remove(id))
 					return false;
+
+				m_OrderedIds.Remove(id);
 			}
 			finally
 			{
@@ -265,7 +289,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				return m_Ids.Count == 0
 					? default(TInstance)
-					: Originators.GetChild(m_Ids.Keys, selector);
+					: Originators.GetChild(m_OrderedIds, selector);
 			}
 			finally
 			{
@@ -321,7 +345,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return Enumerable.Empty<TInstance>();
 
-				IEnumerable<TInstance> output = Originators.GetChildren(m_Ids.Keys, selector);
+				IEnumerable<TInstance> output = Originators.GetChildren(m_OrderedIds, selector);
 				return output as TInstance[] ?? output.ToArray();
 			}
 			finally
@@ -338,7 +362,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool HasInstances<TInstance>()
 			where TInstance : IOriginator
 		{
-			return m_Section.Execute(() => Originators.HasChildren<TInstance>(m_Ids.Keys));
+			return m_Section.Execute(() => Originators.HasChildren<TInstance>(m_OrderedIds));
 		}
 
 		#endregion
@@ -361,7 +385,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets all of the ids recursively as defined by partitions.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<KeyValuePair<int, eCombineMode>> GetIdsRecursive()
+		public IEnumerable<int> GetIdsRecursive()
 		{
 			return m_Room.GetRoomsRecursive()
 			             .SelectMany(r => r.Originators.GetIds())
