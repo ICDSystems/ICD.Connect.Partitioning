@@ -1,4 +1,6 @@
-﻿using ICD.Common.Utils.Services;
+﻿using System.Linq;
+using ICD.Common.Utils.Services;
+using ICD.Connect.Partitioning.Rooms;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms
@@ -37,7 +39,15 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetIdsTest()
 		{
-			Assert.Inconclusive();
+			TestRoom room = new TestRoom();
+			room.Originators = new RoomOriginatorIdCollection(room);
+
+			room.Originators.Add(1, eCombineMode.Always);
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(2, eCombineMode.Always);
+
+			Assert.AreEqual(3, room.Originators.GetIds().Count());
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] {1, 2, 3}));
 		}
 
 		[Test]

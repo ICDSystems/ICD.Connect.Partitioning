@@ -25,6 +25,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Logging\ICD.Common.Logging.Console\ICD.Common.Logging.Console_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings.Tests\ICD.Connect.Settings.Tests_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Partitioning\ICD.Connect.Partitioning_NetStandard.csproj" />
   </ItemGroup>
 
