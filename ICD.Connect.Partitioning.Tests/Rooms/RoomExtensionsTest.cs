@@ -315,7 +315,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			IRoom[] masterAndSlaves = parent.GetMasterAndSlaveRooms().ToArray();
 
 			Assert.AreEqual(3, masterAndSlaves.Length);
-			Assert.AreEqual(b, masterAndSlaves[1]);
+			Assert.AreEqual(b, masterAndSlaves[0]);
 			Assert.IsTrue(masterAndSlaves.Contains(a));
 			Assert.IsTrue(masterAndSlaves.Contains(c));
 		}
