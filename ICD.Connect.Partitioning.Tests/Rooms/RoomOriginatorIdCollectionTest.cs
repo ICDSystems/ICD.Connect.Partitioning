@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
-using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
 using NUnit.Framework;
 
@@ -216,6 +214,33 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		[Test]
+		public void GetInstanceMaskSelectorTest()
+		{
+			ICore core = new Core();
+
+			TestRoom roomA = new TestRoom { Id = 1, Core = core, Name = "A" };
+			TestRoom roomB = new TestRoom { Id = 2, Core = core, Name = "B" };
+			TestRoom roomC = new TestRoom { Id = 3, Core = core, Name = "C" };
+
+			core.Originators.AddChild(roomA);
+			core.Originators.AddChild(roomB);
+			core.Originators.AddChild(roomC);
+
+			roomA.Originators = new RoomOriginatorIdCollection(roomA);
+
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(o => o.Name == "B"));
+
+			roomA.Originators.Add(roomB.Id, eCombineMode.Combine);
+			roomA.Originators.Add(roomC.Id, eCombineMode.Single);
+
+			Assert.AreEqual(roomB, roomA.Originators.GetInstance<TestRoom>(eCombineMode.Combine, o => o.Name == "B"));
+			Assert.AreEqual(roomC, roomA.Originators.GetInstance<TestRoom>(eCombineMode.Single, o => o.Name == "C"));
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(eCombineMode.Single, o => o.Name == "B"));
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(eCombineMode.Combine, o => o.Name == "C"));
+			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(eCombineMode.Always, o => o.Name == "D"));
+		}
+
+		[Test]
 		public void GetInstanceGenericTest()
 		{
 			Assert.Inconclusive();
@@ -245,6 +270,50 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 		[Test]
 		public void ContainsRecursiveTest()
+		{
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			Room parent = new Room
+			{
+				Id = 2
+			};
+
+			Room a = new Room
+			{
+				Id = 3,
+				CombinePriority = 5
+			};
+
+			Room b = new Room
+			{
+				Id = 4,
+				CombinePriority = 1
+			};
+
+			Partition partition = new Partition
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(parent);
+			core.Originators.AddChild(a);
+			core.Originators.AddChild(b);
+			core.Originators.AddChild(partition);
+
+			partition.AddRoom(a.Id);
+			partition.AddRoom(b.Id);
+
+			parent.Originators.Add(partition.Id, eCombineMode.Always);
+
+			
+			Assert.Inconclusive();
+		}
+
+		[Test]
+		public void ContainsRecursiveMaskTest()
 		{
 			Assert.Inconclusive();
 		}

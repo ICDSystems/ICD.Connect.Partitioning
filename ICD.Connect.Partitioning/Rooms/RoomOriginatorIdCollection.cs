@@ -143,6 +143,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns>False if the collection already contains the given id and it has the given combine mode.</returns>
 		private bool AddInternal(int id, eCombineMode combine)
 		{
+			if (combine == eCombineMode.None)
+				return false;
+
 			m_Section.Enter();
 
 			try
@@ -200,7 +203,29 @@ namespace ICD.Connect.Partitioning.Rooms
 		[PublicAPI]
 		public bool Contains(int id)
 		{
-			return m_Section.Execute(() => m_Ids.ContainsKey(id));
+			return Contains(id, eCombineMode.Always);
+		}
+
+		/// <summary>
+		/// Returns true if the collection contains the given id intersecting with the given mask.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="mask"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public bool Contains(int id, eCombineMode mask)
+		{
+			m_Section.Enter();
+
+			try
+			{
+				eCombineMode mode = m_Ids.GetDefault(id, eCombineMode.None);
+				return EnumUtils.GetFlagsIntersection(mode, mask) != eCombineMode.None;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		#endregion
@@ -267,13 +292,38 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
 			where TInstance : IOriginator
 		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
+			return GetInstance(eCombineMode.Always, selector);
+		}
+
+		/// <summary>
+		/// Gets the first originator instance with the given type.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <returns></returns>
+		[CanBeNull]
+		public TInstance GetInstance<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
+			if (mask == eCombineMode.None)
+				return default(TInstance);
+
 			m_Section.Enter();
 
 			try
 			{
-				return m_Ids.Count == 0
-					? default(TInstance)
-					: Originators.GetChild(m_OrderedIds, selector);
+				if (m_Ids.Count == 0)
+					return default(TInstance);
+
+				IEnumerable<int> ids =
+					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
+
+				return Originators.GetChild(ids, selector);
 			}
 			finally
 			{
@@ -313,6 +363,19 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
+			return GetInstances(eCombineMode.Always, selector);
+		}
+
+		/// <summary>
+		/// Gets all of the originator instances of the given type from the core.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstances<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
 			m_Section.Enter();
 
 			try
@@ -320,8 +383,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return Enumerable.Empty<TInstance>();
 
-				IEnumerable<TInstance> output = Originators.GetChildren(m_OrderedIds, selector);
-				return output as TInstance[] ?? output.ToArray();
+				IEnumerable<int> ids =
+					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
+				return Originators.GetChildren(ids, selector);
 			}
 			finally
 			{
@@ -351,44 +415,36 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public bool ContainsRecursive(int id)
 		{
-			return m_Room.GetRoomsRecursive()
-			             .Select(r => r.Originators)
-			             .Any(c => c.Contains(id));
+			return ContainsRecursive(id, eCombineMode.Always);
 		}
 
 		/// <summary>
-		/// Gets the instance for the given id recursively as defined by partitions.
+		/// Returns true if the given id is contained in this collection or any child collection recursively.
 		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		[NotNull]
-		public IOriginator GetInstanceRecursive(int id)
+		public bool ContainsRecursive(int id, eCombineMode mask)
 		{
-			RoomOriginatorIdCollection collection = m_Room.GetRoomsRecursive()
-			                                              .Select(r => r.Originators)
-			                                              .FirstOrDefault(c => c.Contains(id));
+			if (mask == eCombineMode.None)
+				return false;
 
-			if (collection != null)
-				return collection.GetInstance(id);
+			// Combine room
+			if (Contains(id, mask))
+				return true;
 
-			string message = string.Format("{0} does not recursively contain a {1} with id {2}", GetType().Name,
-			                               typeof(IOriginator).Name, id);
-			throw new InvalidOperationException(message);
-		}
+			// Master and slaves
+			bool master = true;
+			foreach (IRoom room in m_Room.GetMasterAndSlaveRooms())
+			{
+				eCombineMode childMask = mask & (master ? eCombineMode.Master : eCombineMode.Slave);
+				if (room.Originators.Contains(id, childMask))
+					return true;
 
-		/// <summary>
-		/// Gets the instance of the given type and id recursively as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
-		[NotNull]
-		public TInstance GetInstanceRecursive<TInstance>(int id)
-			where TInstance : IOriginator
-		{
-			IOriginator child = GetInstanceRecursive(id);
+				master = false;
+			}
 
-			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
-				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
-
-			return (TInstance)child;
+			return false;
 		}
 
 		/// <summary>
@@ -399,7 +455,18 @@ namespace ICD.Connect.Partitioning.Rooms
 		public TInstance GetInstanceRecursive<TInstance>()
 			where TInstance : IOriginator
 		{
-			return GetInstanceRecursive<TInstance>(i => true);
+			return GetInstanceRecursive<TInstance>(eCombineMode.Always);
+		}
+
+		/// <summary>
+		/// Gets the first instance of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[CanBeNull]
+		public TInstance GetInstanceRecursive<TInstance>(eCombineMode mask)
+			where TInstance : IOriginator
+		{
+			return GetInstanceRecursive<TInstance>(mask, i => true);
 		}
 
 		/// <summary>
@@ -413,11 +480,42 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
-			return m_Room.GetRoomsRecursive()
-			             .Select(r => r.Originators)
-			             .Select(c => c.GetInstance(selector))
-				// ReSharper disable once CompareNonConstrainedGenericWithNull
-			             .FirstOrDefault(i => i != null);
+			return GetInstanceRecursive(eCombineMode.Always, selector);
+		}
+
+		/// <summary>
+		/// Gets the first instance of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		[CanBeNull]
+		public TInstance GetInstanceRecursive<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
+			if (mask == eCombineMode.None)
+				return default(TInstance);
+
+			// Combine room
+			TInstance instance = GetInstance(mask, selector);
+			if (instance != null)
+				return instance;
+
+			// Master and slaves
+			bool master = true;
+			foreach (IRoom room in m_Room.GetMasterAndSlaveRooms())
+			{
+				eCombineMode childMask = mask & (master ? eCombineMode.Master : eCombineMode.Slave);
+
+				instance = room.Originators.GetInstance(childMask, selector);
+				if (instance != null)
+					return instance;
+
+				master = false;
+			}
+
+			return default(TInstance);
 		}
 
 		/// <summary>
@@ -426,7 +524,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		public IEnumerable<IOriginator> GetInstancesRecursive()
 		{
-			return GetInstancesRecursive<IOriginator>();
+			return GetInstancesRecursive(eCombineMode.Always);
+		}
+
+		/// <summary>
+		/// Gets all instances recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IOriginator> GetInstancesRecursive(eCombineMode mask)
+		{
+			return GetInstancesRecursive<IOriginator>(mask);
 		}
 
 		/// <summary>
@@ -436,7 +543,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>()
 			where TInstance : IOriginator
 		{
-			return GetInstancesRecursive<TInstance>(i => true);
+			return GetInstancesRecursive<TInstance>(eCombineMode.Always);
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(eCombineMode mask)
+			where TInstance : IOriginator
+		{
+			return GetInstancesRecursive<TInstance>(mask, i => true);
 		}
 
 		/// <summary>
@@ -449,10 +566,37 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
-			return m_Room.GetRoomsRecursive()
-						 .Select(r => r.Originators)
-						 .SelectMany(c => c.GetInstances(selector))
-						 .Distinct();
+			return GetInstancesRecursive(eCombineMode.Always, selector);
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
+			if (selector == null)
+				throw new ArgumentNullException("selector");
+
+			if (mask == eCombineMode.None)
+				yield break;
+
+			// Combine room
+			foreach (TInstance instance in GetInstances(mask, selector))
+				yield return instance;
+
+			// Master and slaves
+			bool master = true;
+			foreach (IRoom room in m_Room.GetMasterAndSlaveRooms())
+			{
+				eCombineMode childMask = mask & (master ? eCombineMode.Master : eCombineMode.Slave);
+
+				foreach (TInstance instance in room.Originators.GetInstances(childMask, selector))
+					yield return instance;
+
+				master = false;
+			}
 		}
 
 		#endregion
