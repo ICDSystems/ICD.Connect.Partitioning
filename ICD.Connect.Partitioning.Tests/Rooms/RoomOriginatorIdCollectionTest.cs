@@ -191,30 +191,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		[Test]
-		public void GetInstanceIdGenericTest()
-		{
-			ICore core = new Core();
-
-			TestRoom roomA = new TestRoom { Id = 1, Core = core };
-			TestRoom roomB = new TestRoom { Id = 2, Core = core };
-
-			core.Originators.AddChild(roomA);
-			core.Originators.AddChild(roomB);
-
-			roomA.Originators = new RoomOriginatorIdCollection(roomA);
-
-			Assert.Throws<KeyNotFoundException>(() => roomA.Originators.GetInstance<TestRoom>(roomB.Id));
-
-			roomA.Originators.Add(roomB.Id, eCombineMode.Always);
-
-			Assert.Throws<InvalidCastException>(() => roomA.Originators.GetInstance<ICore>(roomB.Id));
-
-			Assert.AreEqual(roomB, roomA.Originators.GetInstance<TestRoom>(roomB.Id));
-			Assert.AreEqual(roomB, roomA.Originators.GetInstance<IRoom>(roomB.Id));
-			Assert.AreEqual(roomB, roomA.Originators.GetInstance<IOriginator>(roomB.Id));
-		}
-
-		[Test]
 		public void GetInstanceSelectorTest()
 		{
 			ICore core = new Core();
@@ -246,12 +222,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		[Test]
-		public void GetInstancesTest()
-		{
-			Assert.Inconclusive();
-		}
-
-		[Test]
 		public void GetInstancesGenericTest()
 		{
 			Assert.Inconclusive();
@@ -275,12 +245,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 		[Test]
 		public void ContainsRecursiveTest()
-		{
-			Assert.Inconclusive();
-		}
-
-		[Test]
-		public void GetIdsRecursiveTest()
 		{
 			Assert.Inconclusive();
 		}

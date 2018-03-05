@@ -259,24 +259,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
-		/// Gets the originator instance with the given type and id.
-		/// </summary>
-		/// <typeparam name="TInstance"></typeparam>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		[NotNull]
-		public TInstance GetInstance<TInstance>(int id)
-			where TInstance : IOriginator
-		{
-			IOriginator child = GetInstance(id);
-
-			if (!child.GetType().IsAssignableTo(typeof(TInstance)))
-				throw new InvalidCastException(string.Format("{0} is not of type {1}", child.GetType().Name, typeof(TInstance).Name));
-
-			return (TInstance)child;
-		}
-
-		/// <summary>
 		/// Gets the first originator instance with the given type.
 		/// </summary>
 		/// <typeparam name="TInstance"></typeparam>
@@ -309,15 +291,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			where TInstance : IOriginator
 		{
 			return GetInstance<TInstance>(i => true);
-		}
-
-		/// <summary>
-		/// Gets all of the orignator instances from the core.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<IOriginator> GetInstances()
-		{
-			return GetInstances<IOriginator>();
 		}
 
 		/// <summary>
@@ -381,17 +354,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			return m_Room.GetRoomsRecursive()
 			             .Select(r => r.Originators)
 			             .Any(c => c.Contains(id));
-		}
-
-		/// <summary>
-		/// Gets all of the ids recursively as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<int> GetIdsRecursive()
-		{
-			return m_Room.GetRoomsRecursive()
-			             .SelectMany(r => r.Originators.GetIds())
-			             .Distinct();
 		}
 
 		/// <summary>
@@ -459,7 +421,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
-		/// Gets all instances of the given type recursively as defined by partitions.
+		/// Gets all instances recursively as defined by partitions.
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<IOriginator> GetInstancesRecursive()
