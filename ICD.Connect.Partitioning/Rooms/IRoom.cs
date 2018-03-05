@@ -327,6 +327,41 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Rooms
 
 		/// <summary>
+		/// Returns the child room with the lowest combine priority.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static IRoom GetMasterRoom(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetMasterRoom<IRoom>();
+		}
+
+		/// <summary>
+		/// Returns the child room of the given type with the lowest combine priority.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static T GetMasterRoom<T>(this IRoom extends)
+			where T : IRoom
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetRoomsRecursive()
+			              .Except(extends)
+			              .OfType<T>()
+			              .Distinct()
+			              .OrderBy(r => r.CombinePriority)
+			              .ThenBy(r => r.Id)
+			              .FirstOrDefault();
+		}
+
+		/// <summary>
 		/// Returns true if the room is made up of child rooms.
 		/// </summary>
 		/// <param name="extends"></param>
@@ -362,7 +397,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
-		/// Returns this room, and all child rooms as defined by the partitions.
+		/// Returns this room, and all child rooms recursively as defined by the partitions.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
