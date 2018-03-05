@@ -337,24 +337,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.GetMasterRoom<IRoom>();
-		}
-
-		/// <summary>
-		/// Returns the child room of the given type with the lowest combine priority.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		[CanBeNull]
-		public static T GetMasterRoom<T>(this IRoom extends)
-			where T : IRoom
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
 			return extends.GetRoomsRecursive()
 			              .Except(extends)
-			              .OfType<T>()
 			              .Distinct()
 			              .OrderBy(r => r.CombinePriority)
 			              .ThenBy(r => r.Id)

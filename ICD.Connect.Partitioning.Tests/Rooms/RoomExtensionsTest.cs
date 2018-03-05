@@ -159,62 +159,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		[Test]
-		public void GetMasterRoomGenericTest()
-		{
-			Core core = new Core
-			{
-				Id = 1
-			};
-
-			Room parent = new Room
-			{
-				Id = 10
-			};
-
-			Room a = new Room
-			{
-				Id = 2,
-				CombinePriority = 5
-			};
-
-			Room b = new Room
-			{
-				Id = 3,
-				CombinePriority = 1
-			};
-
-			TestRoom c = new TestRoom
-			{
-				Core = core,
-				Id = 4,
-				CombinePriority = 1
-			};
-			c.Originators = new RoomOriginatorIdCollection(c);
-
-			Partition partition = new Partition
-			{
-				Id = 5
-			};
-
-			core.Originators.AddChild(parent);
-			core.Originators.AddChild(a);
-			core.Originators.AddChild(b);
-			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
-
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-			partition.AddRoom(c.Id);
-
-			parent.Originators.Add(partition.Id, eCombineMode.Always);
-
-			Assert.IsNull(a.GetMasterRoom());
-			Assert.IsNull(b.GetMasterRoom());
-			Assert.IsNull(c.GetMasterRoom());
-			Assert.AreEqual(c, parent.GetMasterRoom<TestRoom>());
-		}
-
-		[Test]
 		public void IsCombineRoomTest()
 		{
 			Core core = new Core
