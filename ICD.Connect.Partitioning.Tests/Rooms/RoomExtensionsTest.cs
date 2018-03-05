@@ -105,6 +105,49 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		#region Rooms
 
 		[Test]
+		public void IsCombineRoomTest()
+		{
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			Room a = new Room
+			{
+				Id = 2
+			};
+
+			Room b = new Room
+			{
+				Id = 3
+			};
+
+			Room c = new Room
+			{
+				Id = 4
+			};
+
+			Partition partition = new Partition
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(a);
+			core.Originators.AddChild(b);
+			core.Originators.AddChild(c);
+			core.Originators.AddChild(partition);
+
+			partition.AddRoom(a.Id);
+			partition.AddRoom(b.Id);
+
+			c.Originators.Add(partition.Id, eCombineMode.Always);
+
+			Assert.IsFalse(a.IsCombineRoom());
+			Assert.IsFalse(b.IsCombineRoom());
+			Assert.IsTrue(c.IsCombineRoom());
+		}
+
+		[Test]
 		public void GetMasterRoomTest()
 		{
 			Core core = new Core
@@ -159,26 +202,34 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		[Test]
-		public void IsCombineRoomTest()
+		public void GetSlaveRoomsTest()
 		{
 			Core core = new Core
 			{
 				Id = 1
 			};
 
+			Room parent = new Room
+			{
+				Id = 10
+			};
+
 			Room a = new Room
 			{
-				Id = 2
+				Id = 2,
+				CombinePriority = 5
 			};
 
 			Room b = new Room
 			{
-				Id = 3
+				Id = 3,
+				CombinePriority = 1
 			};
 
 			Room c = new Room
 			{
-				Id = 4
+				Id = 4,
+				CombinePriority = 1
 			};
 
 			Partition partition = new Partition
@@ -186,6 +237,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 5
 			};
 
+			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
@@ -193,12 +245,79 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
+			partition.AddRoom(c.Id);
 
-			c.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partition.Id, eCombineMode.Always);
 
-			Assert.IsFalse(a.IsCombineRoom());
-			Assert.IsFalse(b.IsCombineRoom());
-			Assert.IsTrue(c.IsCombineRoom());
+			Assert.IsEmpty(a.GetSlaveRooms());
+			Assert.IsEmpty(b.GetSlaveRooms());
+			Assert.IsEmpty(c.GetSlaveRooms());
+
+			IRoom[] slaves = parent.GetSlaveRooms().ToArray();
+			
+			Assert.AreEqual(2, slaves.Length);
+			Assert.IsTrue(slaves.Contains(a));
+			Assert.IsTrue(slaves.Contains(c));
+		}
+
+		[Test]
+		public void GetMasterAndSlaveRoomsTest()
+		{
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			Room parent = new Room
+			{
+				Id = 10
+			};
+
+			Room a = new Room
+			{
+				Id = 2,
+				CombinePriority = 5
+			};
+
+			Room b = new Room
+			{
+				Id = 3,
+				CombinePriority = 1
+			};
+
+			Room c = new Room
+			{
+				Id = 4,
+				CombinePriority = 1
+			};
+
+			Partition partition = new Partition
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(parent);
+			core.Originators.AddChild(a);
+			core.Originators.AddChild(b);
+			core.Originators.AddChild(c);
+			core.Originators.AddChild(partition);
+
+			partition.AddRoom(a.Id);
+			partition.AddRoom(b.Id);
+			partition.AddRoom(c.Id);
+
+			parent.Originators.Add(partition.Id, eCombineMode.Always);
+
+			Assert.IsEmpty(a.GetSlaveRooms());
+			Assert.IsEmpty(b.GetSlaveRooms());
+			Assert.IsEmpty(c.GetSlaveRooms());
+
+			IRoom[] masterAndSlaves = parent.GetMasterAndSlaveRooms().ToArray();
+
+			Assert.AreEqual(3, masterAndSlaves.Length);
+			Assert.AreEqual(b, masterAndSlaves[1]);
+			Assert.IsTrue(masterAndSlaves.Contains(a));
+			Assert.IsTrue(masterAndSlaves.Contains(c));
 		}
 
 		[Test]

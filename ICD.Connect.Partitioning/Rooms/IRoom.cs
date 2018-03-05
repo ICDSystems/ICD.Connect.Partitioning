@@ -327,25 +327,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Rooms
 
 		/// <summary>
-		/// Returns the child room with the lowest combine priority.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		[CanBeNull]
-		public static IRoom GetMasterRoom(this IRoom extends)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.GetRoomsRecursive()
-			              .Except(extends)
-			              .Distinct()
-			              .OrderBy(r => r.CombinePriority)
-			              .ThenBy(r => r.Id)
-			              .FirstOrDefault();
-		}
-
-		/// <summary>
 		/// Returns true if the room is made up of child rooms.
 		/// </summary>
 		/// <param name="extends"></param>
@@ -356,6 +337,50 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("extends");
 
 			return extends.Originators.HasInstances<IPartition>();
+		}
+
+		/// <summary>
+		/// Returns the child room with the lowest combine priority.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static IRoom GetMasterRoom(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetMasterAndSlaveRooms().FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Returns all child rooms except the master room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static IEnumerable<IRoom> GetSlaveRooms(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetMasterAndSlaveRooms().Skip(1);
+		}
+
+		/// <summary>
+		/// Returns all distinct child rooms recursively, prepended by the master room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static IEnumerable<IRoom> GetMasterAndSlaveRooms(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetRoomsRecursive()
+			              .Except(extends)
+			              .Distinct()
+			              .OrderBy(r => r.CombinePriority)
+			              .ThenBy(r => r.Id);
 		}
 
 		/// <summary>
