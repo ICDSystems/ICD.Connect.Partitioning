@@ -20,6 +20,7 @@ namespace ICD.Connect.Partitioning.Devices
 		public event EventHandler<BoolEventArgs> OnOpenStatusChanged;
 
 		private readonly PartitionDeviceControl m_PartitionControl;
+
 		private bool m_IsOpen;
 
 		#region Properties
