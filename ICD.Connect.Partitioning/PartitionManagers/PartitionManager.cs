@@ -152,6 +152,30 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
+		/// Performs a pass of the partitions, creating combine rooms where partitions are open and
+		/// destroying combine rooms where partitions are closed.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="constructor"></param>
+		public override void InitializeCombineRooms<TRoom>(Func<TRoom> constructor)
+		{
+			if (constructor == null)
+				throw new ArgumentNullException("constructor");
+
+			foreach (IPartition partition in Partitions)
+			{
+				bool open = partition.GetPartitionControls()
+				                     .Select(c => Core.GetControl<IPartitionDeviceControl>(c))
+				                     .Any(c => c.IsOpen);
+
+				if (open)
+					CombineRooms(partition, constructor);
+				else
+					UncombineRooms(partition, constructor);
+			}
+		}
+
+		/// <summary>
 		/// Creates a new room instance, or expands an existing room instance, to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
@@ -328,7 +352,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			Logger.AddEntry(eSeverity.Informational, "{0} destroying combined room {1}", this, room);
 
-			ClosePartitions(room.Originators.GetInstances<IPartition>());
+			IPartition[] partitions = room.Originators.GetInstances<IPartition>().ToArray();
+			foreach (IPartition partition in partitions)
+				room.Originators.Remove(partition.Id);
+
+			ClosePartitions(partitions);
 
 			IRoom[] childRooms = room.GetRoomsRecursive().Except(room).ToArray();
 

@@ -63,8 +63,16 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
-		/// <param name="func"></param>
-		void ToggleCombineRooms<TRoom>(IPartition partition, Func<TRoom> func) where TRoom : IRoom;
+		/// <param name="constructor"></param>
+		void ToggleCombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
+
+		/// <summary>
+		/// Performs a pass of the partitions, creating combine rooms where partitions are open and
+		/// destroying combine rooms where partitions are closed.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="constructor"></param>
+		void InitializeCombineRooms<TRoom>(Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
 		/// Creates a new room instance, or expands an existing room instance, to contain the given partitions.
