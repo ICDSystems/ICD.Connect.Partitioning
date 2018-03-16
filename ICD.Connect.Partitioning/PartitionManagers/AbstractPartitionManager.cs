@@ -85,7 +85,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract void InitializeCombineRooms<TRoom>(Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance, or expands an existing room instance, to contain the given partitions.
+		/// Creates a new room instance to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partitions"></param>
@@ -94,7 +94,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance, or expands an existing room instance, to contain the given partition controls.
+		/// Creates a new room instance to contain the given partition controls.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="controls"></param>
@@ -103,7 +103,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance, or expands an existing room instance, to contain the given partition.
+		/// Creates a new room instance to contain the given partition.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
@@ -111,8 +111,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract void CombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance, or expands an existing room instance, to contain the partitions
-		/// tied to the control.
+		/// Creates a new room instance to contain the partitions tied to the control.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partitionControl"></param>
