@@ -16,6 +16,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 	{
 		private readonly Dictionary<DeviceControlInfo, IcdHashSet<IPartition>> m_ControlPartitions;
 		private readonly Dictionary<int, IcdHashSet<IPartition>> m_RoomAdjacentPartitions;
+		private readonly Dictionary<IPartition, IcdHashSet<IPartition>> m_PartitionAdjacentPartitions; 
 
 		private readonly SafeCriticalSection m_PartitionsSection;
 
@@ -31,6 +32,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			m_RoomAdjacentPartitions = new Dictionary<int, IcdHashSet<IPartition>>();
 			m_ControlPartitions = new Dictionary<DeviceControlInfo, IcdHashSet<IPartition>>();
+			m_PartitionAdjacentPartitions = new Dictionary<IPartition, IcdHashSet<IPartition>>();
 
 			m_PartitionsSection = new SafeCriticalSection();
 		}
@@ -90,14 +92,16 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <returns></returns>
 		public IEnumerable<IPartition> GetAdjacentPartitions(IPartition partition)
 		{
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
 			m_PartitionsSection.Enter();
 
 			try
 			{
-				return partition.GetRooms()
-				                .SelectMany(r => GetRoomAdjacentPartitions(r))
-				                .Except(partition)
-				                .Distinct();
+				return m_PartitionAdjacentPartitions.ContainsKey(partition)
+					? m_PartitionAdjacentPartitions[partition].ToArray()
+					: Enumerable.Empty<IPartition>();
 			}
 			finally
 			{
@@ -143,68 +147,10 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partitions"></param>
 		/// <param name="split"></param>
 		/// <returns></returns>
-		public IEnumerable<IPartition[]> SplitAdjacentPartitionsByPartition(IEnumerable<IPartition> partitions,
+		public IEnumerable<IEnumerable<IPartition>> SplitAdjacentPartitionsByPartition(IEnumerable<IPartition> partitions,
 		                                                                    IPartition split)
 		{
-			// Unique partitions except the split
-			IPartition[] partitionsArray = partitions.Except(split)
-			                                         .Distinct()
-			                                         .ToArray();
-
-			// First build a map of how the partitions are adjacent to each other.
-			Dictionary<IPartition, IcdHashSet<IPartition>> adjacency = new Dictionary<IPartition, IcdHashSet<IPartition>>();
-
-			foreach (IPartition partition in partitionsArray)
-			{
-				// Workaround for compiler warning
-				IPartition localEnclosurePartition = partition;
-
-				IcdHashSet<IPartition> adjacent = partitionsArray.Except(partition)
-				                                                 .Where(p => p.IsAdjacent(localEnclosurePartition))
-				                                                 .ToIcdHashSet();
-				adjacency.Add(partition, adjacent);
-			}
-
-			// Loop over the keys and find groups
-			Dictionary<IPartition, IcdHashSet<IPartition>> groups = new Dictionary<IPartition, IcdHashSet<IPartition>>();
-			RecurseAdjacencyMap(adjacency, (root, node) =>
-			                               {
-				                               if (!groups.ContainsKey(root))
-					                               groups.Add(root, new IcdHashSet<IPartition>());
-				                               groups[root].Add(node);
-			                               });
-
-			return groups.Values.Select(v => v.ToArray());
-		}
-
-		/// <summary>
-		/// Loops through the map calling the callback for each distinct node.
-		/// </summary>
-		/// <param name="map"></param>
-		/// <param name="rootAndNodeCallback"></param>
-		private static void RecurseAdjacencyMap(IDictionary<IPartition, IcdHashSet<IPartition>> map,
-		                                        Action<IPartition, IPartition> rootAndNodeCallback)
-		{
-			Queue<IPartition> processing = new Queue<IPartition>();
-			IcdHashSet<IPartition> visited = new IcdHashSet<IPartition>();
-
-			foreach (IPartition root in map.Keys)
-			{
-				processing.Enqueue(root);
-
-				while (processing.Count > 0)
-				{
-					IPartition node = processing.Dequeue();
-					if (visited.Contains(node))
-						continue;
-
-					visited.Add(node);
-
-					rootAndNodeCallback(root, node);
-
-					processing.EnqueueRange(map[node]);
-				}
-			}
+			return RecursionUtils.GetCliques(partitions.Except(split), GetAdjacentPartitions);
 		}
 
 		#endregion
@@ -232,6 +178,23 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 						m_ControlPartitions.Add(partitionControl, new IcdHashSet<IPartition>());
 					m_ControlPartitions[partitionControl].Add(child);
 				}
+
+				// Build partition adjacency lookup
+				if (!m_PartitionAdjacentPartitions.ContainsKey(child))
+					m_PartitionAdjacentPartitions.Add(child, new IcdHashSet<IPartition>());
+
+				IEnumerable<IPartition> adjacent =
+					GetChildren().Except(child)
+					             .Where(partition =>
+					                    partition.GetRooms()
+					                             .Intersect(child.GetRooms())
+					                             .Any());
+
+				foreach (IPartition partition in adjacent)
+				{
+					m_PartitionAdjacentPartitions[child].Add(partition);
+					m_PartitionAdjacentPartitions[partition].Add(child);
+				}
 			}
 			finally
 			{
@@ -255,6 +218,10 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 					kvp.Value.Remove(child);
 
 				foreach (KeyValuePair<DeviceControlInfo, IcdHashSet<IPartition>> kvp in m_ControlPartitions)
+					kvp.Value.Remove(child);
+
+				m_PartitionAdjacentPartitions.Remove(child);
+				foreach (KeyValuePair<IPartition, IcdHashSet<IPartition>> kvp in m_PartitionAdjacentPartitions)
 					kvp.Value.Remove(child);
 			}
 			finally

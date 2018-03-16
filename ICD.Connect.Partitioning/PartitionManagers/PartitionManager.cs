@@ -421,13 +421,13 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (!room.Originators.ContainsRecursive(partition.Id))
 				return;
 
-			IEnumerable<IPartition[]> split = SplitPartitions(room, partition);
+			IEnumerable<IEnumerable<IPartition>> split = SplitPartitions(room, partition);
 
 			// Destroy the combine room
 			DestroyCombineRoom(room);
 
 			// Build the new combine rooms
-			foreach (IPartition[] group in split)
+			foreach (IEnumerable<IPartition> group in split)
 				CombineRooms(group, constructor);
 		}
 
@@ -438,7 +438,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="room"></param>
 		/// <param name="partition"></param>
 		/// <returns></returns>
-		private IEnumerable<IPartition[]> SplitPartitions(IRoom room, IPartition partition)
+		private IEnumerable<IEnumerable<IPartition>> SplitPartitions(IRoom room, IPartition partition)
 		{
 			if (room == null)
 				throw new ArgumentNullException("room");

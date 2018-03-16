@@ -26,5 +26,12 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <param name="deviceControls"></param>
 		/// <returns></returns>
 		IEnumerable<IPartition> GetPartitions(IEnumerable<IPartitionDeviceControl> deviceControls);
+
+		/// <summary>
+		/// Gets the partitions that are adjacent to the given partition.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		IEnumerable<IPartition> GetAdjacentPartitions(IPartition partition);
 	}
 }
