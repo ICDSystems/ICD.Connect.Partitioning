@@ -162,17 +162,18 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			foreach (IPartition partition in Partitions)
-			{
-				bool open = partition.GetPartitionControls()
-				                     .Select(c => Core.GetControl<IPartitionDeviceControl>(c))
-				                     .Any(c => c.IsOpen);
+			IcdHashSet<IPartition> open =
+				Partitions.Where(p => p.GetPartitionControls()
+				                       .Select(c => Core.GetControl<IPartitionDeviceControl>(c))
+				                       .Any(c => c.IsOpen))
+				          .ToIcdHashSet();
 
-				if (open)
-					CombineRooms(partition, constructor);
-				else
-					UncombineRooms(partition, constructor);
-			}
+			IcdHashSet<IPartition> closed =
+				Partitions.Where(p => !open.Contains(p))
+				          .ToIcdHashSet();
+
+			UncombineRooms(closed, constructor);
+			CombineRooms(open, constructor);
 		}
 
 		/// <summary>
@@ -189,8 +190,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			foreach (IPartition partition in partitions)
-				CombineRooms(partition, constructor);
+			IPartition[] partitionsArray = partitions as IPartition[] ?? partitions.ToArray();
+
+			// Clear out any existing combine spaces
+			UncombineRooms(partitionsArray, constructor);
+
+			// Build a sequence of continguous partitions
+			foreach (IEnumerable<IPartition> adjacent in GetContiguous(partitionsArray))
+				CreateCombineRoom(adjacent, constructor);
 		}
 
 		/// <summary>
@@ -225,25 +232,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			// Partition doesn't actually join any rooms
-			if (partition.RoomsCount <= 1)
-				return;
-
-			// Partition is already combining rooms
-			if (GetCombineRoom(partition) != null)
-				return;
-
-			IRoom[] rooms = GetAdjacentCombineRooms(partition).ToArray();
-
-			// Get the complete set of partitions through the new combine space
-			// ToArray() because room partitions are cleared on dispose.
-			IEnumerable<IPartition> partitions = rooms.SelectMany(r => r.Originators.GetInstancesRecursive<IPartition>())
-			                                          .Append(partition)
-			                                          .Distinct()
-			                                          .ToArray();
-
-			DestroyCombineRooms(rooms);
-			CreateCombineRoom(partitions, constructor);
+			CombineRooms(new[] {partition}, constructor);
 		}
 
 		/// <summary>
@@ -500,6 +489,19 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		private static IEnumerable<IRoom> GetRooms()
 		{
 			return Core.Originators.GetChildren<IRoom>();
+		}
+
+		/// <summary>
+		/// Returns a sequence of contiguous partition groups.
+		/// </summary>
+		/// <param name="partitions"></param>
+		/// <returns></returns>
+		private IEnumerable<IEnumerable<IPartition>> GetContiguous(IEnumerable<IPartition> partitions)
+		{
+			if (partitions == null)
+				throw new ArgumentNullException("partitions");
+
+			return RecursionUtils.GetCliques(partitions, p => Partitions.GetAdjacentPartitions(p));
 		}
 
 		/// <summary>
