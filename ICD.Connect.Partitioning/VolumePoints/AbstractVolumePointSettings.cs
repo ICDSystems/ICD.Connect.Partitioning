@@ -9,7 +9,6 @@ namespace ICD.Connect.Partitioning.VolumePoints
 	[PublicAPI]
 	public abstract class AbstractVolumePointSettings : AbstractSettings, IVolumePointSettings
 	{
-
 		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
 		private const string DEVICE_ELEMENT = "Device";
 		private const string CONTROL_ELEMENT = "Control";
@@ -56,6 +55,20 @@ namespace ICD.Connect.Partitioning.VolumePoints
 			DeviceId = XmlUtils.TryReadChildElementContentAsInt(xml, DEVICE_ELEMENT) ?? 0;
 			ControlId = XmlUtils.TryReadChildElementContentAsInt(xml, CONTROL_ELEMENT) ?? 0;
 		}
+
 		#endregion
+
+		public override int DependencyCount { get { return DeviceId == 0 ? 0 : 1; } }
+
+		/// <summary>
+		/// Returns true if the settings depend on a device with the given ID.
+		/// For example, to instantiate an IR Port from settings, the device the physical port
+		/// belongs to will need to be instantiated first.
+		/// </summary>
+		/// <returns></returns>
+		public override bool HasDeviceDependency(int id)
+		{
+			return id != 0 && id == DeviceId;
+		}
 	}
 }
