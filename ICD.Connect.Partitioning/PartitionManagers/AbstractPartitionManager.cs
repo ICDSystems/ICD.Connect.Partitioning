@@ -63,6 +63,13 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract IRoom GetCombineRoom(IPartition partition);
 
 		/// <summary>
+		/// Gets the combine rooms containing any of the given partitions.
+		/// </summary>
+		/// <param name="partitions"></param>
+		/// <returns></returns>
+		public abstract IEnumerable<IRoom> GetCombineRooms(IEnumerable<IPartition> partitions);
+
+		/// <summary>
 		/// Returns combine rooms and any individual rooms that are not part of a combined space.
 		/// </summary>
 		/// <returns></returns>
