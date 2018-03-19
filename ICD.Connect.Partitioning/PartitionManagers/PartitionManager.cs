@@ -205,24 +205,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			// Take the partitions that are not already combining rooms
-			IcdHashSet<IPartition> partitionsSet = partitions.Where(p => !CombinesRoom(p)).ToIcdHashSet();
-			if (partitionsSet.Count == 0)
-				return;
-
-			// Add the partitions from any adjacent combine spaces
-			foreach (IPartition partition in partitionsSet.ToArray())
-			{
-				foreach (IRoom room in GetAdjacentCombineRooms(partition))
-					partitionsSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>());
-			}
-
-			// Clear out any existing combine spaces
-			UncombineRooms(partitionsSet, constructor);
-
-			// Build a sequence of continguous partitions
-			foreach (IEnumerable<IPartition> adjacent in GetContiguous(partitionsSet))
-				CreateCombineRoom(adjacent, constructor);
+			CombineRooms(partitions, constructor, true);
 		}
 
 		/// <summary>
@@ -291,25 +274,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			// We only need to close partitions that are currently combining rooms
-			IcdHashSet<IPartition> closePartitions = partitions.Where(CombinesRoom).ToIcdHashSet();
-			if (closePartitions.Count == 0)
-				return;
-
-			// Get the partitions that need to be re-opened after the close
-			IcdHashSet<IPartition> openPartitions =
-				GetCombineRooms(closePartitions).SelectMany(r => r.Originators
-				                                                  .GetInstances<IPartition>())
-				                                .Except(closePartitions)
-				                                .ToIcdHashSet();
-
-			// Destroy the combine rooms
-			IEnumerable<IRoom> combineRooms = GetCombineRooms(closePartitions);
-			DestroyCombineRooms(combineRooms);
-
-			// Rebuild combine rooms around the open partitions
-			if (openPartitions.Count > 0)
-				CombineRooms(openPartitions, constructor);
+			UncombineRooms(partitions, constructor, true);
 		}
 
 		/// <summary>
@@ -351,6 +316,94 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		#region Private Methods
 
 		/// <summary>
+		/// Creates a new room instance to contain the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="partitions"></param>
+		/// <param name="constructor"></param>
+		/// <param name="update"></param>
+		private void CombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor, bool update)
+			where TRoom : IRoom
+		{
+			if (partitions == null)
+				throw new ArgumentNullException("partitions");
+
+			if (constructor == null)
+				throw new ArgumentNullException("constructor");
+
+			// Take the partitions that are not already combining rooms
+			IcdHashSet<IPartition> partitionsSet = partitions.Where(p => !CombinesRoom(p)).ToIcdHashSet();
+			if (partitionsSet.Count == 0)
+				return;
+
+			// Add the partitions from any adjacent combine spaces
+			foreach (IPartition partition in partitionsSet.ToArray())
+			{
+				foreach (IRoom room in GetAdjacentCombineRooms(partition))
+					partitionsSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>());
+			}
+
+			// Clear out any existing combine spaces
+			UncombineRooms(partitionsSet, constructor, false);
+
+			// Build a sequence of continguous partitions
+			IEnumerable<IEnumerable<IPartition>> groups = GetContiguous(partitionsSet);
+			CreateCombineRooms(groups, constructor);
+
+			if (!update)
+				return;
+
+			// Update the partitions and the rooms
+			// TODO - Extremely lazy, should only update anything we touched
+			UpdateRoomCombineState(GetRooms());
+			UpdatePartitions(Partitions);
+		}
+
+		/// <summary>
+		/// Removes the partitions from existing rooms.
+		/// </summary>
+		/// <param name="partitions"></param>
+		/// <param name="constructor"></param>
+		/// <param name="update"></param>
+		private void UncombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor, bool update)
+			where TRoom : IRoom
+		{
+			if (partitions == null)
+				throw new ArgumentNullException("partitions");
+
+			if (constructor == null)
+				throw new ArgumentNullException("constructor");
+
+			// We only need to close partitions that are currently combining rooms
+			IcdHashSet<IPartition> closePartitions = partitions.Where(CombinesRoom).ToIcdHashSet();
+			if (closePartitions.Count == 0)
+				return;
+
+			// Get the partitions that need to be re-opened after the close
+			IcdHashSet<IPartition> openPartitions =
+				GetCombineRooms(closePartitions).SelectMany(r => r.Originators
+				                                                  .GetInstances<IPartition>())
+				                                .Except(closePartitions)
+				                                .ToIcdHashSet();
+
+			// Destroy the combine rooms
+			IEnumerable<IRoom> combineRooms = GetCombineRooms(closePartitions);
+			DestroyCombineRooms(combineRooms);
+
+			// Rebuild combine rooms around the open partitions
+			if (openPartitions.Count > 0)
+				CombineRooms(openPartitions, constructor, false);
+
+			if (!update)
+				return;
+
+			// Update the partitions and the rooms
+			// TODO - Extremely lazy, should only update anything we touched
+			UpdateRoomCombineState(GetRooms());
+			UpdatePartitions(Partitions);
+		}
+
+		/// <summary>
 		/// Removes the rooms from the core and disposes them.
 		/// </summary>
 		/// <param name="rooms"></param>
@@ -384,12 +437,16 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			IDisposable disposable = room as IDisposable;
 			if (disposable != null)
 				disposable.Dispose();
+		}
 
-			// Update the partition open state
-			UpdatePartitions(partitions);
+		private void CreateCombineRooms<TRoom>(IEnumerable<IEnumerable<IPartition>> groups, Func<TRoom> constructor)
+			where TRoom : IRoom
+		{
+			if (groups == null)
+				throw new ArgumentNullException("groups");
 
-			// Update the child combine state
-			UpdateRoomCombineState(room.GetRoomsRecursive());
+			foreach (IEnumerable<IPartition> group in groups)
+				CreateCombineRoom(group, constructor);
 		}
 
 		/// <summary>
@@ -416,12 +473,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			// Add to the core
 			Core.Originators.AddChild(room);
-
-			// Update the partition open state
-			UpdatePartitions(partitionsSet);
-
-			// Update the child combine state
-			UpdateRoomCombineState(room.GetRoomsRecursive());
 
 			Logger.AddEntry(eSeverity.Informational, "{0} created new combine room {1}", this, room);
 		}
