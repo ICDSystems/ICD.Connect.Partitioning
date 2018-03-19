@@ -16,6 +16,7 @@ using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
+using ICD.Connect.Partitioning.VolumePoints;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -137,6 +138,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Destinations.Clear();
 			settings.DestinationGroups.Clear();
 			settings.Partitions.Clear();
+            settings.VolumePoints.Clear();
 
 			settings.Ports.AddRange(GetChildren<IPort>());
 			settings.Devices.AddRange(GetChildren<IDevice>());
@@ -145,6 +147,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Destinations.AddRange(GetChildren<IDestination>());
 			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
 			settings.Partitions.AddRange(GetChildren<IPartition>());
+            settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
 		}
 
 		/// <summary>
@@ -177,6 +180,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
+            AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
 		}
 
 		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
