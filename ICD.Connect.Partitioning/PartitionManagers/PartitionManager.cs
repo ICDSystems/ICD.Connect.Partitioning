@@ -405,14 +405,18 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
+			// Build the room.
 			TRoom room = constructor();
 			room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id));
-			Core.Originators.AddChild(room);
-
 			room.Originators.AddRange(partitions.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
+			// Add to the core
+			Core.Originators.AddChild(room);
+
+			// Open the partitions
 			OpenPartitions(room.Originators.GetInstances<IPartition>());
 
+			// Set combine state
 			IRoom[] childRooms = room.GetRoomsRecursive().Except(room).ToArray();
 			foreach (IRoom childRoom in childRooms)
 				childRoom.EnterCombineState();
