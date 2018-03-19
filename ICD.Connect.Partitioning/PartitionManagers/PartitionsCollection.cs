@@ -141,18 +141,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			}
 		}
 
-		/// <summary>
-		/// Given a sequence of partitions and a partition to split on, returns the remaining congruous groups of adjacent partitions.
-		/// </summary>
-		/// <param name="partitions"></param>
-		/// <param name="split"></param>
-		/// <returns></returns>
-		public IEnumerable<IEnumerable<IPartition>> SplitAdjacentPartitionsByPartition(IEnumerable<IPartition> partitions,
-		                                                                    IPartition split)
-		{
-			return RecursionUtils.GetCliques(partitions.Except(split), GetAdjacentPartitions);
-		}
-
 		#endregion
 
 		protected override void ChildAdded(IPartition child)
