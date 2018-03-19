@@ -374,21 +374,22 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			Logger.AddEntry(eSeverity.Informational, "{0} destroying combined room {1}", this, room);
 
+			// Remove the partitions from the room.
 			IPartition[] partitions = room.Originators.GetInstances<IPartition>().ToArray();
 			foreach (IPartition partition in partitions)
 				room.Originators.Remove(partition.Id);
 
-			ClosePartitions(partitions);
-
-			IRoom[] childRooms = room.GetRoomsRecursive().Except(room).ToArray();
-
+			// Remove the room from the core
 			Core.Originators.RemoveChild(room);
 			IDisposable disposable = room as IDisposable;
 			if (disposable != null)
 				disposable.Dispose();
 
-			foreach (IRoom childRoom in childRooms)
-				childRoom.LeaveCombineState();
+			// Update the partition open state
+			UpdatePartitions(partitions);
+
+			// Update the child combine state
+			UpdateRoomCombineState(room.GetRoomsRecursive());
 		}
 
 		/// <summary>
@@ -406,31 +407,23 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
+			IcdHashSet<IPartition> partitionsSet = partitions.ToIcdHashSet();
+
 			// Build the room.
 			TRoom room = constructor();
 			room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id));
-			room.Originators.AddRange(partitions.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
+			room.Originators.AddRange(partitionsSet.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
 			// Add to the core
 			Core.Originators.AddChild(room);
 
-			// Open the partitions
-			OpenPartitions(room.Originators.GetInstances<IPartition>());
+			// Update the partition open state
+			UpdatePartitions(partitionsSet);
 
-			// Set combine state
-			IRoom[] childRooms = room.GetRoomsRecursive().Except(room).ToArray();
-			foreach (IRoom childRoom in childRooms)
-				childRoom.EnterCombineState();
+			// Update the child combine state
+			UpdateRoomCombineState(room.GetRoomsRecursive());
 
 			Logger.AddEntry(eSeverity.Informational, "{0} created new combine room {1}", this, room);
-		}
-
-		private static IEnumerable<IRoom> GetAdjacentCombineRooms(IEnumerable<IPartition> partitions)
-		{
-			if (partitions == null)
-				throw new ArgumentNullException("partitions");
-
-			return partitions.SelectMany(p => GetAdjacentCombineRooms(p)).Distinct();
 		}
 
 		/// <summary>
@@ -495,16 +488,44 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
-		/// Gets the control for each partition and sets it closed.
+		/// Sets the open/close state for the given partitions based on the combined rooms.
 		/// </summary>
 		/// <param name="partitions"></param>
-		private void ClosePartitions(IEnumerable<IPartition> partitions)
+		private void UpdatePartitions(IEnumerable<IPartition> partitions)
 		{
 			if (partitions == null)
 				throw new ArgumentNullException("partitions");
 
 			foreach (IPartition partition in partitions)
-				ClosePartition(partition);
+			{
+				bool combinesRoom = CombinesRoom(partition);
+
+				if (combinesRoom)
+					OpenPartition(partition);
+				else
+					ClosePartition(partition);
+			}
+		}
+
+		/// <summary>
+		/// Sets the combined state for the given rooms based on the partitions.
+		/// </summary>
+		private void UpdateRoomCombineState(IEnumerable<IRoom> rooms)
+		{
+			if (rooms == null)
+				throw new ArgumentNullException("rooms");
+
+			foreach (IRoom room in rooms)
+			{
+				bool isCombineRoom = room.IsCombineRoom();
+				if (isCombineRoom == room.CombineState)
+					continue;
+
+				if (isCombineRoom)
+					room.LeaveCombineState();
+				else
+					room.EnterCombineState();
+			}
 		}
 
 		/// <summary>
@@ -516,21 +537,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition))
+			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => c.IsOpen))
 				control.Close();
-		}
-
-		/// <summary>
-		/// Gets the control for each partition and sets it open.
-		/// </summary>
-		/// <param name="partitions"></param>
-		private void OpenPartitions(IEnumerable<IPartition> partitions)
-		{
-			if (partitions == null)
-				throw new ArgumentNullException("partitions");
-
-			foreach (IPartition partition in partitions)
-				OpenPartition(partition);
 		}
 
 		/// <summary>
@@ -542,7 +550,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition))
+			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => !c.IsOpen))
 				control.Open();
 		}
 
