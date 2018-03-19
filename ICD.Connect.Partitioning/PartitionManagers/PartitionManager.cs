@@ -298,9 +298,10 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			// Get the partitions that need to be re-opened after the close
 			IcdHashSet<IPartition> openPartitions =
-				GetAdjacentCombineRooms(closePartitions).SelectMany(r => r.Originators
-				                                                          .GetInstances<IPartition>())
-				                                        .ToIcdHashSet();
+				GetCombineRooms(closePartitions).SelectMany(r => r.Originators
+				                                                  .GetInstances<IPartition>())
+				                                .Except(closePartitions)
+				                                .ToIcdHashSet();
 
 			// Destroy the combine rooms
 			IEnumerable<IRoom> combineRooms = GetCombineRooms(closePartitions);
