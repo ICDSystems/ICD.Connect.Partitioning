@@ -2,7 +2,6 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
@@ -17,8 +16,6 @@ namespace ICD.Connect.Partitioning.Partitions
 		private const string PARTITION_CONTROL_ELEMENT = "PartitionControl";
 		private const string ROOMS_ELEMENT = "Rooms";
 		private const string ROOM_ELEMENT = "Room";
-
-		private IEnumerable<int> m_Dependencies;
 
 		private readonly IcdHashSet<int> m_Rooms;
 		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
@@ -70,7 +67,6 @@ namespace ICD.Connect.Partitioning.Partitions
 			{
 				m_Controls.Clear();
 				m_Controls.AddRange(partitionControls);
-				m_Dependencies = m_Section.Execute(() => m_Controls.Select(c => c.DeviceId).Distinct());
 			}
 			finally
 			{
@@ -104,13 +100,13 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <returns></returns>
 		public override bool HasDeviceDependency(int id)
 		{
-			return m_Dependencies.Contains(id);
+			return m_Controls.Select(c => c.DeviceId).Contains(id);
 		}
 
 		/// <summary>
 		/// Returns the count from the collection of ids that the settings depends on.
 		/// </summary>
-		public override int DependencyCount { get { return m_Dependencies.Count(); } }
+		public override int DependencyCount { get { return m_Controls.Select(c => c.DeviceId).Distinct().Count(); } }
 
 		/// <summary>
 		/// Writes property elements to xml.
