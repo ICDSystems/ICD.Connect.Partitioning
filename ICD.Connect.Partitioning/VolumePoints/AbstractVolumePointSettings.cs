@@ -6,56 +6,56 @@ using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.VolumePoints
 {
-    [PublicAPI]
-    public abstract class AbstractVolumePointSettings : AbstractSettings, IVolumePointSettings
-    {
+	[PublicAPI]
+	public abstract class AbstractVolumePointSettings : AbstractSettings, IVolumePointSettings
+	{
 
-        private const string VOLUME_POINT_ELEMENT = "VolumePoint";
-        private const string DEVICE_ELEMENT = "Device";
-        private const string CONTROL_ELEMENT = "Control";
+		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
+		private const string DEVICE_ELEMENT = "Device";
+		private const string CONTROL_ELEMENT = "Control";
 
-        protected override string Element { get { return VOLUME_POINT_ELEMENT; } }
+		protected override string Element { get { return VOLUME_POINT_ELEMENT; } }
 
-        #region Properties
+		#region Properties
 
-        /// <summary>
-        /// Device id for this volume point
-        /// </summary>
-        [OriginatorIdSettingsProperty(typeof(IDeviceBase))]
-        public int DeviceId { get; set; }
+		/// <summary>
+		/// Device id for this volume point
+		/// </summary>
+		[OriginatorIdSettingsProperty(typeof(IDeviceBase))]
+		public int DeviceId { get; set; }
 
-        /// <summary>
-        /// Control id for an IVolumeControl on this volume point's device
-        /// </summary>
-        public int? ControlId { get; set; }
+		/// <summary>
+		/// Control id for an IVolumeControl on this volume point's device
+		/// </summary>
+		public int ControlId { get; set; }
 
-        #endregion
+		#endregion
 
-        #region Methods
+		#region Methods
 
-        /// <summary>
-        /// Write property elements to xml
-        /// </summary>
-        /// <param name="writer"></param>
-        protected override void WriteElements(IcdXmlTextWriter writer)
-        {
-            base.WriteElements(writer);
+		/// <summary>
+		/// Write property elements to xml
+		/// </summary>
+		/// <param name="writer"></param>
+		protected override void WriteElements(IcdXmlTextWriter writer)
+		{
+			base.WriteElements(writer);
 
-            writer.WriteElementString(DEVICE_ELEMENT, IcdXmlConvert.ToString(DeviceId));
-            writer.WriteElementString(CONTROL_ELEMENT, IcdXmlConvert.ToString(ControlId ?? 0));
-        }
+			writer.WriteElementString(DEVICE_ELEMENT, IcdXmlConvert.ToString(DeviceId));
+			writer.WriteElementString(CONTROL_ELEMENT, IcdXmlConvert.ToString(ControlId));
+		}
 
-        /// <summary>
-        /// Instantiate volume point settings from an xml element
-        /// </summary>
-        /// <param name="xml"></param>
-        public override void ParseXml(string xml)
-        {
-            base.ParseXml(xml);
+		/// <summary>
+		/// Instantiate volume point settings from an xml element
+		/// </summary>
+		/// <param name="xml"></param>
+		public override void ParseXml(string xml)
+		{
+			base.ParseXml(xml);
 
-            DeviceId = XmlUtils.TryReadChildElementContentAsInt(xml, DEVICE_ELEMENT) ?? 0;
-            ControlId = XmlUtils.TryReadChildElementContentAsInt(xml, CONTROL_ELEMENT);
-        }
-        #endregion
-    }
+			DeviceId = XmlUtils.TryReadChildElementContentAsInt(xml, DEVICE_ELEMENT) ?? 0;
+			ControlId = XmlUtils.TryReadChildElementContentAsInt(xml, CONTROL_ELEMENT) ?? 0;
+		}
+		#endregion
+	}
 }

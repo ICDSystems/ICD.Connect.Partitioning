@@ -1,6 +1,6 @@
 ﻿namespace ICD.Connect.Partitioning.VolumePoints
 {
-    public sealed class VolumePoint : AbstractVolumePoint<VolumePointSettings>
-    {
-    }
+	public sealed class VolumePoint : AbstractVolumePoint<VolumePointSettings>
+	{
+	}
 }
