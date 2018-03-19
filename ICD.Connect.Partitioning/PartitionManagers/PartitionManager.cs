@@ -420,62 +420,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			Logger.AddEntry(eSeverity.Informational, "{0} created new combine room {1}", this, room);
 		}
 
-		/// <summary>
-		/// Destroys the room, creating new combine rooms where necessary (e.g. splitting 4 rooms in half)
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="room"></param>
-		/// <param name="partition"></param>
-		/// <param name="constructor"></param>
-		private void UncombineRoom<TRoom>(IRoom room, IPartition partition, Func<TRoom> constructor)
-			where TRoom : IRoom
-		{
-			if (room == null)
-				throw new ArgumentNullException("room");
-
-			if (partition == null)
-				throw new ArgumentNullException("partition");
-
-			if (constructor == null)
-				throw new ArgumentNullException("constructor");
-
-			if (!room.Originators.ContainsRecursive(partition.Id))
-				return;
-
-			IEnumerable<IEnumerable<IPartition>> split = SplitPartitions(room, partition);
-
-			// Destroy the combine room
-			DestroyCombineRoom(room);
-
-			// Build the new combine rooms
-			foreach (IEnumerable<IPartition> group in split)
-				CombineRooms(group, constructor);
-		}
-
-		/// <summary>
-		/// Returns groups of partitions that result from splitting on the given partition.
-		/// E.g. AB-BC-CD being split on BC would result in [AB], [CD].
-		/// </summary>
-		/// <param name="room"></param>
-		/// <param name="partition"></param>
-		/// <returns></returns>
-		private IEnumerable<IEnumerable<IPartition>> SplitPartitions(IRoom room, IPartition partition)
-		{
-			if (room == null)
-				throw new ArgumentNullException("room");
-
-			if (partition == null)
-				throw new ArgumentNullException("partition");
-
-			IPartition[] partitions = room.Originators
-			                              .GetInstancesRecursive<IPartition>()
-			                              .Except(partition)
-			                              .Distinct()
-			                              .ToArray();
-
-			return m_Partitions.SplitAdjacentPartitionsByPartition(partitions, partition);
-		}
-
 		private static IEnumerable<IRoom> GetAdjacentCombineRooms(IEnumerable<IPartition> partitions)
 		{
 			if (partitions == null)
