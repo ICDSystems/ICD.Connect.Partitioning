@@ -4,7 +4,7 @@ using System;
 namespace ICD.Connect.Partitioning.VolumePoints
 {
 	[KrangSettings(FACTORY_NAME)]
-	public class VolumePointSettings : AbstractVolumePointSettings
+	public sealed class VolumePointSettings : AbstractVolumePointSettings
 	{
 		private const string FACTORY_NAME = "VolumePoint";
 
