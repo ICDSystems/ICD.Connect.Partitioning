@@ -4,7 +4,6 @@ using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
-using ICD.Connect.API.Nodes;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
@@ -12,8 +11,7 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
 {
-	public abstract class AbstractPartitionManager<TSettings> : AbstractOriginator<TSettings>, IPartitionManager,
-	                                                            IConsoleNode
+	public abstract class AbstractPartitionManager<TSettings> : AbstractOriginator<TSettings>, IPartitionManager
 		where TSettings : IPartitionManagerSettings, new()
 	{
 		public abstract event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
@@ -24,14 +22,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract IPartitionsCollection Partitions { get; }
 
 		/// <summary>
-		/// Gets the name of the node.
-		/// </summary>
-		public string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().Name : Name; } }
-
-		/// <summary>
 		/// Gets the help information for the node.
 		/// </summary>
-		public string ConsoleHelp { get { return "Tracks the opening and closing of partition walls."; } }
+		public override string ConsoleHelp { get { return "Tracks the opening and closing of partition walls."; } }
 
 		/// <summary>
 		/// Gets the control for the given partition.
@@ -153,29 +146,24 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		#region Console
 
 		/// <summary>
-		/// Gets the child console nodes.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
-		{
-			yield break;
-		}
-
-		/// <summary>
-		/// Calls the delegate for each console status item.
-		/// </summary>
-		/// <param name="addRow"></param>
-		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
-		{
-		}
-
-		/// <summary>
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>
-		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
 			yield return new ConsoleCommand("PrintPartitions", "Prints the list of all partitions.", () => PrintPartitions());
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		private string PrintPartitions()

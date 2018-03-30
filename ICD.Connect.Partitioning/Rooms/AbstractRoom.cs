@@ -23,7 +23,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	/// Base class for rooms.
 	/// </summary>
 	/// <typeparam name="TSettings"></typeparam>
-	public abstract class AbstractRoom<TSettings> : AbstractOriginator<TSettings>, IRoom, IConsoleNode
+	public abstract class AbstractRoom<TSettings> : AbstractOriginator<TSettings>, IRoom
 		where TSettings : IRoomSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
@@ -61,16 +61,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public int CombinePriority { get; set; }
 
 		public RoomOriginatorIdCollection Originators { get { return m_OriginatorIds; } }
-
-		/// <summary>
-		/// Gets the name of the node in the console.
-		/// </summary>
-		public virtual string ConsoleName { get { return string.IsNullOrEmpty(Name) ? GetType().Name : Name; } }
-
-		/// <summary>
-		/// Gets the help information for the node.
-		/// </summary>
-		public virtual string ConsoleHelp { get { return string.Empty; } }
 
 		#endregion
 
@@ -213,8 +203,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
-		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
+			base.BuildConsoleStatus(addRow);
+
 			addRow("Combine Priority", CombinePriority);
 		}
 
@@ -222,21 +214,45 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the child console node groups.
 		/// </summary>
 		/// <returns></returns>
-		public virtual IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
 			yield return ConsoleNodeGroup.KeyNodeMap("Panels", Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(), p => (uint)((IPanelDevice)p).Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Devices", Originators.GetInstances<IDevice>().OfType<IConsoleNode>(), p => (uint)((IDevice)p).Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Ports", Originators.GetInstances<IPort>().OfType<IConsoleNode>(), p => (uint)((IPort)p).Id);
 		}
 
 		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
+		}
+
+		/// <summary>
 		/// Gets the child console commands.
 		/// </summary>
 		/// <returns></returns>
-		public virtual IEnumerable<IConsoleCommand> GetConsoleCommands()
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
 			yield return
 				new GenericConsoleCommand<int>("SetCombinePriority", "SetCombinePriority <PRIORITY>", i => CombinePriority = i);
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
