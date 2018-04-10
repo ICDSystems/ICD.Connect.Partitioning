@@ -4,6 +4,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Protocol.Ports.IoPort;
@@ -154,7 +155,7 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs args)
+		private void PortOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
 		}
