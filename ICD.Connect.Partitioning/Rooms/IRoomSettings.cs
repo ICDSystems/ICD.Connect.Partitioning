@@ -29,5 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		Dictionary<int, eCombineMode> DestinationGroups { get; }
 
 		Dictionary<int, eCombineMode> Partitions { get; }
+
+		Dictionary<int, eCombineMode> VolumePoints { get; }
 	}
 }

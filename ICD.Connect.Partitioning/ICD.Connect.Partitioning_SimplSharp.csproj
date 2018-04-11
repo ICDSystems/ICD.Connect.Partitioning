@@ -106,6 +106,12 @@
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />
+    <Compile Include="VolumePoints\AbstractVolumePoint.cs" />
+    <Compile Include="VolumePoints\AbstractVolumePointSettings.cs" />
+    <Compile Include="VolumePoints\IVolumePoint.cs" />
+    <Compile Include="VolumePoints\IVolumePointSettings.cs" />
+    <Compile Include="VolumePoints\VolumePoint.cs" />
+    <Compile Include="VolumePoints\VolumePointSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
