@@ -31,6 +31,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string DESTINATION_GROUP_ELEMENT = "DestinationGroup";
 		private const string PARTITION_ELEMENT = "Partition";
 		private const string PARTITIONS_ELEMENT = "Partitions";
+		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
+		private const string VOLUME_POINTS_ELEMENT = "VolumePoints";
 
 		private const string COMBINE_ATTRIBUTE = "combine";
 
@@ -41,6 +43,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
 		private readonly Dictionary<int, eCombineMode> m_DestinationGroups;
 		private readonly Dictionary<int, eCombineMode> m_Partitions;
+		private readonly Dictionary<int, eCombineMode> m_VolumePoints;
 
 		#region Properties
 
@@ -53,6 +56,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
 		public Dictionary<int, eCombineMode> DestinationGroups { get { return m_DestinationGroups; } }
 		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
+		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
 
 		/// <summary>
 		/// Gets the xml element.
@@ -73,6 +77,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_Destinations = new Dictionary<int, eCombineMode>();
 			m_DestinationGroups = new Dictionary<int, eCombineMode>();
 			m_Partitions = new Dictionary<int, eCombineMode>();
+			m_VolumePoints = new Dictionary<int, eCombineMode>();
 		}
 
 		/// <summary>
@@ -92,7 +97,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_DestinationGroups, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			WriteChildrenToXml(writer, m_Partitions, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
-		}
+			WriteChildrenToXml(writer, m_VolumePoints, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
+        }
 
 		/// <summary>
 		/// Updates the settings from xml.
@@ -111,6 +117,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinationGroups = ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> partitions = ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
 
 			Panels.Update(panels);
 			Ports.Update(ports);
@@ -119,6 +126,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			Destinations.Update(destinations);
 			DestinationGroups.Update(destinationGroups);
 			Partitions.Update(partitions);
+			VolumePoints.Update(volumePoints);
 		}
 
 		private void WriteChildrenToXml(IcdXmlTextWriter writer, Dictionary<int, eCombineMode> children, string listElement, string childElement)

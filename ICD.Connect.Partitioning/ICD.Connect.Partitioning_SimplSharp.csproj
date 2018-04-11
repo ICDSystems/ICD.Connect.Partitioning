@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ICD.Connect.Partitioning</RootNamespace>
-    <AssemblyName>ICD.Connect.Partitioning_SimplSharp</AssemblyName>
+    <AssemblyName>ICD.Connect.Partitioning</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
@@ -106,6 +106,12 @@
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />
+    <Compile Include="VolumePoints\AbstractVolumePoint.cs" />
+    <Compile Include="VolumePoints\AbstractVolumePointSettings.cs" />
+    <Compile Include="VolumePoints\IVolumePoint.cs" />
+    <Compile Include="VolumePoints\IVolumePointSettings.cs" />
+    <Compile Include="VolumePoints\VolumePoint.cs" />
+    <Compile Include="VolumePoints\VolumePointSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
