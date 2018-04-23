@@ -26,6 +26,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		#region Properties
+
 		/// <summary>
 		/// Gets the parent core instance.
 		/// </summary>
@@ -43,6 +45,12 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		RoomOriginatorIdCollection Originators { get; }
 
+		RoomOriginatorIdCollection AudioDestinations { get; }
+
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		/// Informs the room it is part of a combined room.
 		/// </summary>
@@ -52,6 +60,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Informs the room it is no longer part of a combined room.
 		/// </summary>
 		void LeaveCombineState();
+
+		#endregion
 	}
 
 	/// <summary>
@@ -421,8 +431,10 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#endregion
 
+		#region Destinations
+
 		/// <summary>
-		/// Returns true if the room has a destination with the given connection type
+		/// Returns true if the room has a destination with the given connection type.
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <param name="type"></param>
@@ -436,5 +448,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			              .GetInstancesRecursive<IDestination>()
 			              .Any(d => d.ConnectionType.HasFlags(type));
 		}
+
+		#endregion
 	}
 }
