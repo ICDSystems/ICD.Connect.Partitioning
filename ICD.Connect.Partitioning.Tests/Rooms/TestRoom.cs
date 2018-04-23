@@ -18,6 +18,8 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 		public RoomOriginatorIdCollection Originators { get; set; }
 
+		public RoomOriginatorIdCollection AudioDestinations { get; set; }
+
 		public void EnterCombineState()
 		{
 			throw new NotImplementedException();
