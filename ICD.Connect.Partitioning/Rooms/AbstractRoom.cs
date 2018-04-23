@@ -29,6 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		private readonly RoomOriginatorIdCollection m_AudioDestinations;
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
 		private bool m_CombineState;
@@ -63,6 +64,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		public RoomOriginatorIdCollection Originators { get { return m_OriginatorIds; } }
 
+		public RoomOriginatorIdCollection AudioDestinations { get { return m_AudioDestinations; } }
+
 		/// <summary>
 		/// Gets the name of the node in the console.
 		/// </summary>
@@ -83,6 +86,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected AbstractRoom()
 		{
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
+			m_AudioDestinations = new RoomOriginatorIdCollection(this);
 		}
 
 		#endregion
@@ -145,6 +149,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Panels.AddRange(GetChildren<IPanelDevice>());
 			settings.Sources.AddRange(GetChildren<ISource>());
 			settings.Destinations.AddRange(GetChildren<IDestination>());
+			settings.AudioDestinations.AddRange(GetChildren<IDestination>().Where(kvp => m_AudioDestinations.Contains(kvp.Key)));
 			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
 			settings.Partitions.AddRange(GetChildren<IPartition>());
 			settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
@@ -159,6 +164,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = 0;
 
+			m_AudioDestinations.Clear();
 			m_OriginatorIds.Clear();
 		}
 
@@ -177,10 +183,14 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IPort>(settings.Ports, factory);
 			AddOriginatorsSkipExceptions<IPanelDevice>(settings.Panels, factory);
 			AddOriginatorsSkipExceptions<ISource>(settings.Sources, factory);
+			AddOriginatorsSkipExceptions<IDestination>(settings.AudioDestinations, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
 			AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
+
+			// Audio destinations are loaded like normal destinations and then we keep a seperate list to differentiate them.
+			AddOriginatorsSkipExceptions<IDestination>(settings.AudioDestinations, factory, m_AudioDestinations);
 		}
 
 		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
@@ -191,6 +201,12 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory)
+			where T : class, IOriginator
+		{
+			AddOriginatorsSkipExceptions<T>(originatorIds, factory, Originators);
+		}
+
+		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory, RoomOriginatorIdCollection originators)
 			where T : class, IOriginator
 		{
 			foreach (KeyValuePair<int, eCombineMode> kvp in originatorIds)
@@ -205,7 +221,7 @@ namespace ICD.Connect.Partitioning.Rooms
 					continue;
 				}
 
-				Originators.Add(kvp.Key, kvp.Value);
+				originators.Add(kvp.Key, kvp.Value);
 			}
 		}
 
