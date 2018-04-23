@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.1.0] - 2018-04-23
 ### Added
  - Audio destinations are now specifically listed as part of the room configuration
+
+### Changed
+ - Using new API event args
 
 ## [3.0.0] - 2018-04-11
 ### Added
