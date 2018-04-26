@@ -16,6 +16,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string ROOM_ELEMENT = "Room";
 
 		private const string COMBINE_PRIORITY_ELEMENT = "CombinePriority";
+		private const string DIALINGPLAN_ELEMENT = "DialingPlan";
 
 		private const string PANELS_ELEMENT = "Panels";
 		private const string PANEL_ELEMENT = "Panel";
@@ -51,6 +52,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Properties
 
 		public int CombinePriority { get; set; }
+
+		public DialingPlanInfo DialingPlan { get; set; }
 
 		public Dictionary<int, eCombineMode> Devices { get { return m_Devices; } }
 		public Dictionary<int, eCombineMode> Ports { get { return m_Ports; } }
@@ -95,6 +98,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			writer.WriteElementString(COMBINE_PRIORITY_ELEMENT, IcdXmlConvert.ToString(CombinePriority));
 
+			DialingPlan.WriteToXml(writer, DIALINGPLAN_ELEMENT);
+
 			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Panels, PANELS_ELEMENT, PANEL_ELEMENT);
 			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
@@ -115,6 +120,13 @@ namespace ICD.Connect.Partitioning.Rooms
 			base.ParseXml(xml);
 
 			CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
+
+			string dialingPlan;
+			XmlUtils.TryGetChildElementAsString(xml, DIALINGPLAN_ELEMENT, out dialingPlan);
+
+			DialingPlan = string.IsNullOrEmpty(dialingPlan)
+							  ? new DialingPlanInfo()
+							  : DialingPlanInfo.FromXml(dialingPlan);
 
 			IEnumerable<KeyValuePair<int, eCombineMode>> panels = ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> ports = ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);

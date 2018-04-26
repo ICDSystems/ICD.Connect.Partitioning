@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added DialingPlanInfo to standardize room dialing plans for DeployAV
+ - Adding dialing plan entry to abstract room settings
 
 ## [3.1.0] - 2018-04-23
 ### Added
