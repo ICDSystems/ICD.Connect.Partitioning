@@ -8,6 +8,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		int CombinePriority { get; set; }
 
 		/// <summary>
+		/// Gets the dialing plan.
+		/// </summary>
+		DialingPlanInfo DialingPlan { get; set; }
+
+		/// <summary>
 		/// Gets the device settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> Devices { get; }
