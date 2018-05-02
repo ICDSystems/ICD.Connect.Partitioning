@@ -107,12 +107,6 @@
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />
-    <Compile Include="VolumePoints\AbstractVolumePoint.cs" />
-    <Compile Include="VolumePoints\AbstractVolumePointSettings.cs" />
-    <Compile Include="VolumePoints\IVolumePoint.cs" />
-    <Compile Include="VolumePoints\IVolumePointSettings.cs" />
-    <Compile Include="VolumePoints\VolumePoint.cs" />
-    <Compile Include="VolumePoints\VolumePointSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +117,10 @@
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio\ICD.Connect.Audio_SimplSharp.csproj">
+      <Project>{8ED25D96-E9A5-4E9A-A890-B4EF3AB62041}</Project>
+      <Name>ICD.Connect.Audio_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
