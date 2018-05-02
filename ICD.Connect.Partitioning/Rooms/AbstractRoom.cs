@@ -7,6 +7,7 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 using ICD.Connect.Partitioning.Partitions;
@@ -16,7 +17,6 @@ using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Core;
-using ICD.Connect.Partitioning.VolumePoints;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
