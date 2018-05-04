@@ -8,17 +8,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public abstract class AbstractPartitionManagerSettings : AbstractSettings, IPartitionManagerSettings
 	{
-		private const string ELEMENT_NAME = "Partitioning";
-
 		private const string PARTITIONS_ELEMENT = "Partitions";
+		private const string PARTITION_ELEMENT = "Partition";
 
 		private readonly SettingsCollection m_PartitionSettings;
 
 		#region Properties
 
 		public SettingsCollection PartitionSettings { get { return m_PartitionSettings; } }
-
-		protected override string Element { get { return ELEMENT_NAME; } }
 
 		#endregion
 
@@ -40,7 +37,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			base.WriteElements(writer);
 
-			m_PartitionSettings.ToXml(writer, PARTITIONS_ELEMENT);
+			m_PartitionSettings.ToXml(writer, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 		}
 
 		/// <summary>
