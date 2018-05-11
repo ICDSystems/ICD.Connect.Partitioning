@@ -2,7 +2,7 @@
 using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings.Cores;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms

@@ -16,7 +16,8 @@ using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings.Cores;
+using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
