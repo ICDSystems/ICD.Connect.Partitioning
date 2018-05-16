@@ -13,8 +13,6 @@ namespace ICD.Connect.Partitioning.Rooms
 	[PublicAPI]
 	public abstract class AbstractRoomSettings : AbstractSettings, IRoomSettings
 	{
-		private const string ROOM_ELEMENT = "Room";
-
 		private const string COMBINE_PRIORITY_ELEMENT = "CombinePriority";
 		private const string DIALINGPLAN_ELEMENT = "DialingPlan";
 
@@ -64,11 +62,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> DestinationGroups { get { return m_DestinationGroups; } }
 		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
 		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
-
-		/// <summary>
-		/// Gets the xml element.
-		/// </summary>
-		protected override string Element { get { return ROOM_ELEMENT; } }
 
 		#endregion
 
