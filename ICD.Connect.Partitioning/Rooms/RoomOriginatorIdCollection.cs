@@ -4,7 +4,6 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Settings;
 using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Rooms

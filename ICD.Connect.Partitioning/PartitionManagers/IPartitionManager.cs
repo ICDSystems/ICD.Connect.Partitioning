@@ -4,7 +4,6 @@ using ICD.Common.Properties;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
-using ICD.Connect.Settings;
 using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
