@@ -11,8 +11,6 @@ namespace ICD.Connect.Partitioning.Partitions
 {
 	public abstract class AbstractPartitionSettings : AbstractSettings, IPartitionSettings
 	{
-		private const string PARTITION_ELEMENT = "Partition";
-
 		private const string PARTITION_CONTROLS_ELEMENT = "PartitionControls";
 		private const string PARTITION_CONTROL_ELEMENT = "PartitionControl";
 		private const string ROOMS_ELEMENT = "Rooms";
@@ -21,11 +19,6 @@ namespace ICD.Connect.Partitioning.Partitions
 		private readonly IcdHashSet<int> m_Rooms;
 		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
-
-		/// <summary>
-		/// Gets the xml element.
-		/// </summary>
-		protected override string Element { get { return PARTITION_ELEMENT; } }
 
 		/// <summary>
 		/// Constructor.
