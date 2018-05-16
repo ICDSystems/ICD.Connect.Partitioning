@@ -499,6 +499,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			// Combine room
 			TInstance instance = GetInstance(mask, selector);
+// ReSharper disable once CompareNonConstrainedGenericWithNull
 			if (instance != null)
 				return instance;
 
