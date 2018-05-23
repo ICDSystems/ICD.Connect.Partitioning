@@ -401,7 +401,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool HasInstances<TInstance>()
 			where TInstance : IOriginator
 		{
-			return m_Section.Execute(() => Originators.HasChildren<TInstance>(m_OrderedIds));
+			return m_Section.Execute(() => Originators.ContainsChildAny<TInstance>(m_OrderedIds));
 		}
 
 		#endregion

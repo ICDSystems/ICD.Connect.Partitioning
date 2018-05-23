@@ -143,45 +143,51 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 		#endregion
 
-		protected override void ChildAdded(IPartition child)
+		/// <summary>
+		/// Called when children are added to the collection before any events are raised.
+		/// </summary>
+		/// <param name="children"></param>
+		protected override void ChildrenAdded(IEnumerable<IPartition> children)
 		{
-			base.ChildAdded(child);
-
 			m_PartitionsSection.Enter();
 
 			try
 			{
-				// Build room adjacency lookup
-				foreach (int room in child.GetRooms())
+				foreach (IPartition child in children)
 				{
-					if (!m_RoomAdjacentPartitions.ContainsKey(room))
-						m_RoomAdjacentPartitions.Add(room, new IcdHashSet<IPartition>());
-					m_RoomAdjacentPartitions[room].Add(child);
-				}
+					// Build room adjacency lookup
+					foreach (int room in child.GetRooms())
+					{
+						if (!m_RoomAdjacentPartitions.ContainsKey(room))
+							m_RoomAdjacentPartitions.Add(room, new IcdHashSet<IPartition>());
+						m_RoomAdjacentPartitions[room].Add(child);
+					}
 
-				// Build control to partition lookup
-				foreach (DeviceControlInfo partitionControl in child.GetPartitionControls())
-				{
-					if (!m_ControlPartitions.ContainsKey(partitionControl))
-						m_ControlPartitions.Add(partitionControl, new IcdHashSet<IPartition>());
-					m_ControlPartitions[partitionControl].Add(child);
-				}
+					// Build control to partition lookup
+					foreach (DeviceControlInfo partitionControl in child.GetPartitionControls())
+					{
+						if (!m_ControlPartitions.ContainsKey(partitionControl))
+							m_ControlPartitions.Add(partitionControl, new IcdHashSet<IPartition>());
+						m_ControlPartitions[partitionControl].Add(child);
+					}
 
-				// Build partition adjacency lookup
-				if (!m_PartitionAdjacentPartitions.ContainsKey(child))
-					m_PartitionAdjacentPartitions.Add(child, new IcdHashSet<IPartition>());
+					// Build partition adjacency lookup
+					if (!m_PartitionAdjacentPartitions.ContainsKey(child))
+						m_PartitionAdjacentPartitions.Add(child, new IcdHashSet<IPartition>());
 
-				IEnumerable<IPartition> adjacent =
-					GetChildren().Except(child)
-					             .Where(partition =>
-					                    partition.GetRooms()
-					                             .Intersect(child.GetRooms())
-					                             .Any());
+					IPartition childCopy = child;
+					IEnumerable<IPartition> adjacent =
+						GetChildren().Except(child)
+						             .Where(partition =>
+						                    partition.GetRooms()
+						                             .Intersect(childCopy.GetRooms())
+						                             .Any());
 
-				foreach (IPartition partition in adjacent)
-				{
-					m_PartitionAdjacentPartitions[child].Add(partition);
-					m_PartitionAdjacentPartitions[partition].Add(child);
+					foreach (IPartition partition in adjacent)
+					{
+						m_PartitionAdjacentPartitions[child].Add(partition);
+						m_PartitionAdjacentPartitions[partition].Add(child);
+					}
 				}
 			}
 			finally
@@ -191,26 +197,27 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
-		/// Called each time a child is removed from the collection before any events are raised.
+		/// Called when children are removed from the collection before any events are raised.
 		/// </summary>
-		/// <param name="child"></param>
-		protected override void ChildRemoved(IPartition child)
+		/// <param name="children"></param>
+		protected override void ChildrenRemoved(IEnumerable<IPartition> children)
 		{
-			base.ChildRemoved(child);
-
 			m_PartitionsSection.Enter();
 
 			try
 			{
-				foreach (KeyValuePair<int, IcdHashSet<IPartition>> kvp in m_RoomAdjacentPartitions)
-					kvp.Value.Remove(child);
+				foreach (IPartition child in children)
+				{
+					foreach (KeyValuePair<int, IcdHashSet<IPartition>> kvp in m_RoomAdjacentPartitions)
+						kvp.Value.Remove(child);
 
-				foreach (KeyValuePair<DeviceControlInfo, IcdHashSet<IPartition>> kvp in m_ControlPartitions)
-					kvp.Value.Remove(child);
+					foreach (KeyValuePair<DeviceControlInfo, IcdHashSet<IPartition>> kvp in m_ControlPartitions)
+						kvp.Value.Remove(child);
 
-				m_PartitionAdjacentPartitions.Remove(child);
-				foreach (KeyValuePair<IPartition, IcdHashSet<IPartition>> kvp in m_PartitionAdjacentPartitions)
-					kvp.Value.Remove(child);
+					m_PartitionAdjacentPartitions.Remove(child);
+					foreach (KeyValuePair<IPartition, IcdHashSet<IPartition>> kvp in m_PartitionAdjacentPartitions)
+						kvp.Value.Remove(child);
+				}
 			}
 			finally
 			{
