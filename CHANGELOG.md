@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.0.0] - 2018-05-24
+### Removed
+ - Element name removed from settings classes
+
 ## [5.0.0] - 2018-05-03
 ### Removed
  - Volume points moved into Audio project
