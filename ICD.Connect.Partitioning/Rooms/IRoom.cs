@@ -297,13 +297,10 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			control = null;
 
-			foreach (IRoom room in extends.GetRoomsRecursive().Where(room => room.ContainsControl(controlInfo)))
-			{
-				control = room.GetControl(controlInfo);
-				return true;
-			}
-
-			return false;
+			return extends.GetRoomsRecursive()
+						  .Where(room => room.ContainsControl(controlInfo))
+						  .Select(r => r.GetControl(controlInfo))
+						  .TryFirst(out control);
 		}
 
 		/// <summary>
