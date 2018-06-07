@@ -124,7 +124,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				output = ids.Aggregate(false, (current, kvp) => current | AddInternal(kvp.Key, kvp.Value));
+				output = ids.Aggregate(false, (current, kvp) => current || AddInternal(kvp.Key, kvp.Value));
 			}
 			finally
 			{
