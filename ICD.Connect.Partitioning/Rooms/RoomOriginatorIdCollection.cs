@@ -580,6 +580,16 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
+			return GetInstancesRecursiveIterator(mask, selector);
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<TInstance> GetInstancesRecursiveIterator<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : IOriginator
+		{
 			if (mask == eCombineMode.None)
 				yield break;
 
