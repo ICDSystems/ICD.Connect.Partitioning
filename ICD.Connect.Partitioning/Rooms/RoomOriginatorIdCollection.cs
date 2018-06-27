@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings;
 
@@ -12,8 +13,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler OnChildrenChanged;
 
-		private readonly List<int> m_OrderedIds;
-		private readonly Dictionary<int, eCombineMode> m_Ids;
+		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
 		private readonly SafeCriticalSection m_Section;
 		private readonly IRoom m_Room;
 
@@ -29,8 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public RoomOriginatorIdCollection(IRoom room)
 		{
-			m_OrderedIds = new List<int>();
-			m_Ids = new Dictionary<int, eCombineMode>();
+			m_Ids = new IcdOrderedDictionary<int, eCombineMode>();
 			m_Section = new SafeCriticalSection();
 			m_Room = room;
 		}
@@ -57,9 +56,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				return m_OrderedIds.Count == 0
+				return m_Ids.Count == 0
 					       ? Enumerable.Empty<int>()
-					       : m_OrderedIds.ToArray(m_OrderedIds.Count);
+					       : m_Ids.Keys.ToArray(m_Ids.Count);
 			}
 			finally
 			{
@@ -84,10 +83,8 @@ namespace ICD.Connect.Partitioning.Rooms
 					return;
 
 				m_Ids.Clear();
-				m_OrderedIds.Clear();
 
 				m_Ids.AddRange(newIds);
-				m_OrderedIds.AddRange(m_Ids.Keys.Order());
 			}
 			finally
 			{
@@ -118,13 +115,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="ids"></param>
 		public void AddRange(IEnumerable<KeyValuePair<int, eCombineMode>> ids)
 		{
-			bool output;
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
+			bool output = false;
 			
 			m_Section.Enter();
 
 			try
 			{
-				output = ids.Aggregate(false, (current, kvp) => current || AddInternal(kvp.Key, kvp.Value));
+			    foreach (KeyValuePair<int, eCombineMode> kvp in ids)
+			        output |= AddInternal(kvp.Key, kvp.Value);
 			}
 			finally
 			{
@@ -155,10 +156,6 @@ namespace ICD.Connect.Partitioning.Rooms
 					if (combine == m_Ids[id])
 						return false;
 				}
-				else
-				{
-					m_OrderedIds.AddSorted(id);
-				}
 
 				m_Ids[id] = combine;
 			}
@@ -183,8 +180,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				if (!m_Ids.Remove(id))
 					return false;
-
-				m_OrderedIds.Remove(id);
 			}
 			finally
 			{
@@ -320,8 +315,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return default(TInstance);
 
-				IEnumerable<int> ids =
-					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
+			    IEnumerable<int> ids =
+			        m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+			            .Select(kvp => kvp.Key);
 
 				return Originators.GetChild(ids, selector);
 			}
@@ -383,9 +379,11 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return Enumerable.Empty<TInstance>();
 
-				IEnumerable<int> ids =
-					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
-				return Originators.GetChildren(ids, selector);
+			    IEnumerable<int> ids =
+			        m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+			            .Select(kvp => kvp.Key);
+
+                return Originators.GetChildren(ids, selector);
 			}
 			finally
 			{
@@ -401,7 +399,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool HasInstances<TInstance>()
 			where TInstance : IOriginator
 		{
-			return m_Section.Execute(() => Originators.ContainsChildAny<TInstance>(m_OrderedIds));
+			return m_Section.Execute(() => Originators.ContainsChildAny<TInstance>(m_Ids.Keys));
 		}
 
 		#endregion
