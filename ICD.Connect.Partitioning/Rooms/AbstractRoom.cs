@@ -207,7 +207,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				}
 				catch (Exception e)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to add {1} with id {2} - {3}", this, typeof(T).Name, kvp.Key, e.Message);
+					Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, kvp.Key, e.Message);
 					continue;
 				}
 
