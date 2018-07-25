@@ -51,7 +51,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_CombineState = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} combine state changed to {1}", this, m_CombineState);
+				Log(eSeverity.Informational, "Combine state changed to {0}", m_CombineState);
 
 				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
 			}
@@ -227,7 +227,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Combine Priority", CombinePriority);
+			RoomConsole.BuildConsoleStatus(this, addRow);
 		}
 
 		/// <summary>
@@ -239,9 +239,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
 				yield return node;
 
-			yield return ConsoleNodeGroup.KeyNodeMap("Panels", Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(), p => (uint)((IPanelDevice)p).Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("Devices", Originators.GetInstances<IDevice>().OfType<IConsoleNode>(), p => (uint)((IDevice)p).Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("Ports", Originators.GetInstances<IPort>().OfType<IConsoleNode>(), p => (uint)((IPort)p).Id);
+			foreach (IConsoleNodeBase node in RoomConsole.GetConsoleNodes(this))
+				yield return node;
 		}
 
 		/// <summary>
@@ -262,8 +261,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return
-				new GenericConsoleCommand<int>("SetCombinePriority", "SetCombinePriority <PRIORITY>", i => CombinePriority = i);
+			foreach (IConsoleCommand command in RoomConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>
