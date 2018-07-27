@@ -85,10 +85,37 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		private static void RouteRandom(IEnumerable<IRouteSwitcherControl> switchers)
 		{
-			IRouteSwitcherControl switcher = switchers.Random();
-			ConnectorInfo input = switcher.GetInputs().Random();
-			ConnectorInfo output = switcher.GetOutputs().Random();
+			IRouteSwitcherControl switcher;
+			ConnectorInfo input;
+			ConnectorInfo output;
 
+			try
+			{
+				switcher = switchers.Random();
+			}
+			catch (InvalidOperationException e)
+			{
+				throw new InvalidOperationException("Failed to select switcher - " + e.Message, e);
+			}
+
+			try
+			{
+				input = switcher.GetInputs().Random();
+			}
+			catch (InvalidOperationException e)
+			{
+				throw new InvalidOperationException("Failed to select input - " + e.Message, e);
+			}
+
+			try
+			{
+				output = switcher.GetOutputs().Random();
+			}
+			catch (InvalidOperationException e)
+			{
+				throw new InvalidOperationException("Failed to select output - " + e.Message, e);
+			}
+			
 			eConnectionType type = EnumUtils.GetFlagsIntersection(input.ConnectionType, output.ConnectionType);
 
 			switcher.Route(input.Address, output.Address, type);
