@@ -76,7 +76,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				instance.Originators
 				        .GetInstancesRecursive<IDeviceBase>()
 				        .Select(d => d.Controls.GetControl<IRouteSwitcherControl>())
-				        .Where(c => c != null)
+				        .Where(c => c != null &&
+				                    c.GetInputs().Any() &&
+				                    c.GetOutputs().Any())
 				        .Distinct()
 				        .ToArray();
 
@@ -104,7 +106,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 			catch (InvalidOperationException e)
 			{
-				throw new InvalidOperationException("Failed to select input - " + e.Message, e);
+				throw new InvalidOperationException(string.Format("Failed to select input for {0} - {1}", switcher, e.Message), e);
 			}
 
 			try
@@ -113,7 +115,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 			catch (InvalidOperationException e)
 			{
-				throw new InvalidOperationException("Failed to select output - " + e.Message, e);
+				throw new InvalidOperationException(string.Format("Failed to select output for {0} - {1}", switcher, e.Message), e);
 			}
 			
 			eConnectionType type = EnumUtils.GetFlagsIntersection(input.ConnectionType, output.ConnectionType);
