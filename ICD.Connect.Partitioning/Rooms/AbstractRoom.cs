@@ -32,11 +32,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly RoomOriginatorIdCollection m_AudioDestinations;
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
+		private ICore m_CachedCore;
+
 		private bool m_CombineState;
 
 		#region Properties
 
-		public ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
+		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Returns true if the room is currently behaving as part of a combined room.
