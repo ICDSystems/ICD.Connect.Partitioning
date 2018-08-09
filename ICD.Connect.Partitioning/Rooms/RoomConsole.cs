@@ -68,6 +68,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			yield return new GenericConsoleCommand<int>("ProfileRouting", "ProfileRouting <ITERATIONS>", i => ProfileRouting(instance, i));
 #endif
+
+			yield break;
 		}
 
 		private static void ProfileRouting(IRoom instance, int iterations)
