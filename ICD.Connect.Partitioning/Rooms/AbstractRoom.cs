@@ -186,7 +186,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return m_OriginatorIds.GetInstances<TInstance>()
 			                      .Select(p => new KeyValuePair<int, eCombineMode>(p.Id, m_OriginatorIds.GetCombineMode(p.Id)));
