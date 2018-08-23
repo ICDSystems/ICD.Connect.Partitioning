@@ -93,7 +93,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		[CanBeNull]
 		[PublicAPI]
 		public static T GetControl<T>(this IRoom extends)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -151,7 +151,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		public static IEnumerable<T> GetControls<T>(this IRoom extends)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -189,22 +189,22 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		public static bool TryGetControl<T>(this IRoom extends, DeviceControlInfo controlInfo, out T control)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			control = default(T);
+			control = null;
 
 			IDeviceControl output;
 			bool found = extends.TryGetControl(controlInfo, out output);
 			if (!found)
 				return false;
 
-			if (!(output is T))
-				throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
+			control = output as T;
+			if (control == null)
+				throw new InvalidOperationException(string.Format("{0} is not of type {1}", output, typeof(T).Name));
 
-			control = (T)output;
 			return true;
 		}
 
@@ -220,7 +220,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		[CanBeNull]
 		[PublicAPI]
 		public static T GetControlRecursive<T>(this IRoom extends)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -256,14 +256,15 @@ namespace ICD.Connect.Partitioning.Rooms
 		[PublicAPI]
 		[NotNull]
 		public static T GetControlRecursive<T>(this IRoom extends, DeviceControlInfo controlInfo)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
 			IDeviceControl control = extends.GetControlRecursive(controlInfo);
-			if (control is T)
-				return (T)control;
+			T cast = control as T;
+			if (cast != null)
+				return cast;
 
 			throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
 		}
@@ -274,7 +275,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		public static IEnumerable<T> GetControlsRecursive<T>(this IRoom extends)
-			where T : IDeviceControl
+			where T : class, IDeviceControl
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -294,8 +295,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
-
-			control = null;
 
 			return extends.GetRoomsRecursive()
 						  .Where(room => room.ContainsControl(controlInfo))
