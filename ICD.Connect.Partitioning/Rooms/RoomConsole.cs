@@ -7,7 +7,6 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing;
