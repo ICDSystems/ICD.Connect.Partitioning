@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.0.0] - 2018-09-14
+### Changed
+ - General performance improvements
+ - Originator and control types constrained to class types
+
 ## [6.0.1] - 2018-07-02
 ### Changed
  - Fixed bug where not all items would be added to the room originator collection in a batch
