@@ -151,11 +151,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.ContainsKey(id))
-				{
-					if (combine == m_Ids[id])
-						return false;
-				}
+				eCombineMode existing;
+				if (m_Ids.TryGetValue(id, out existing) && combine == existing)
+					return false;
 
 				m_Ids[id] = combine;
 			}
@@ -238,8 +236,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.ContainsKey(id))
-					return m_Ids[id];
+				eCombineMode mode;
+				if (m_Ids.TryGetValue(id, out mode))
+					return mode;
 
 				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
 				throw new KeyNotFoundException(message);
