@@ -255,30 +255,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Instances
 
 		/// <summary>
-		/// Gets the originator instance with the given id.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		[NotNull]
-		public IOriginator GetInstance(int id)
-		{
-			m_Section.Enter();
-
-			try
-			{
-				if (m_Ids.ContainsKey(id))
-					return Originators.GetChild<IOriginator>(id);
-
-				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
-				throw new KeyNotFoundException(message);
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
-		}
-
-		/// <summary>
 		/// Gets the first originator instance with the given type.
 		/// </summary>
 		/// <typeparam name="TInstance"></typeparam>
@@ -315,9 +291,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return default(TInstance);
 
-			    IEnumerable<int> ids =
-			        m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-			            .Select(kvp => kvp.Key);
+				IEnumerable<int> ids =
+					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+					     .Select(kvp => kvp.Key);
 
 				return Originators.GetChild(ids, selector);
 			}
@@ -379,9 +355,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (m_Ids.Count == 0)
 					return Enumerable.Empty<TInstance>();
 
-			    IEnumerable<int> ids =
-			        m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-			            .Select(kvp => kvp.Key);
+				IEnumerable<int> ids =
+					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+					     .Select(kvp => kvp.Key);
 
                 return Originators.GetChildren(ids, selector);
 			}
@@ -514,15 +490,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 
 			return default(TInstance);
-		}
-
-		/// <summary>
-		/// Gets all instances recursively as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<IOriginator> GetInstancesRecursive()
-		{
-			return GetInstancesRecursive(eCombineMode.Always);
 		}
 
 		/// <summary>
