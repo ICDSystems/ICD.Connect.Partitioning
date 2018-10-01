@@ -425,7 +425,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (room == null)
 				throw new ArgumentNullException("room");
 
-			Logger.AddEntry(eSeverity.Informational, "{0} destroying combined room {1}", this, room);
+			Log(eSeverity.Informational, "Destroying combined room {0}", room);
 
 			// Remove the partitions from the room.
 			IPartition[] partitions = room.Originators.GetInstances<IPartition>().ToArray();
@@ -474,7 +474,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			// Add to the core
 			Core.Originators.AddChild(room);
 
-			Logger.AddEntry(eSeverity.Informational, "{0} created new combine room {1}", this, room);
+			Log(eSeverity.Informational, "Created new combine room {0}", room);
 		}
 
 		/// <summary>
