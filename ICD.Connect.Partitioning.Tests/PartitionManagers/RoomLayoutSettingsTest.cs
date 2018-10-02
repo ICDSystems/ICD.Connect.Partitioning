@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
@@ -45,16 +46,23 @@ namespace ICD.Connect.Partitioning.Tests.PartitionManagers
 		{
 			RoomLayoutSettings settings = new RoomLayoutSettings();
 
-			RoomLayoutInfo[] info =
+			RoomLayoutInfo[] duplicates =
 			{
 				new RoomLayoutInfo(1, 2, 3),
 				new RoomLayoutInfo(1, 2, 3),
 				new RoomLayoutInfo(1, 2, 3)
 			};
 
-			settings.SetRooms(info);
+			Assert.Throws<ArgumentException>(() => settings.SetRooms(duplicates));
 
-			Assert.AreEqual(1, settings.GetRooms().Count());
+			RoomLayoutInfo[] unique =
+			{
+				new RoomLayoutInfo(1, 2, 3),
+				new RoomLayoutInfo(4, 5, 6),
+				new RoomLayoutInfo(7, 8, 9)
+			};
+
+			Assert.DoesNotThrow(() => settings.SetRooms(unique));
 		}
 
 		[Test]
@@ -85,7 +93,7 @@ namespace ICD.Connect.Partitioning.Tests.PartitionManagers
 
 			// Pulled from debug
 			const string expected =
-				"<Layout>\r\n  <Rows>\r\n    <Row index=\"1\">\r\n      <Room index=\"1\">1</Room>\r\n      <Room index=\"2\">2</Room>\r\n    </Row>\r\n    <Row index=\"2\">\r\n      <Room index=\"1\">3</Room>\r\n      <Room index=\"2\">4</Room>\r\n    </Row>\r\n    <Row index=\"3\">\r\n      <Room index=\"1\">5</Room>\r\n      <Room index=\"2\">6</Room>\r\n    </Row>\r\n  </Rows>\r\n</Layout>";
+				"<Layout>\r\n  <Rooms>\r\n    <Room row=\"1\" column=\"1\">1</Room>\r\n    <Room row=\"2\" column=\"1\">3</Room>\r\n    <Room row=\"3\" column=\"1\">5</Room>\r\n    <Room row=\"1\" column=\"2\">2</Room>\r\n    <Room row=\"2\" column=\"2\">4</Room>\r\n    <Room row=\"3\" column=\"2\">6</Room>\r\n  </Rooms>\r\n</Layout>";
 
 			Assert.AreEqual(expected, xml);
 		}
@@ -94,20 +102,14 @@ namespace ICD.Connect.Partitioning.Tests.PartitionManagers
 		public void ParseXmlTest()
 		{
 			const string xml = @"<Layout>
-  <Rows>
-    <Row index=""1"">
-      <Room index=""1"">1</Room>
-      <Room index=""2"">2</Room>
-    </Row>
-    <Row index=""2"">
-      <Room index=""1"">3</Room>
-      <Room index=""2"">4</Room>
-    </Row>
-    <Row index=""3"">
-      <Room index=""1"">5</Room>
-      <Room index=""2"">6</Room>
-    </Row>
-  </Rows>
+  <Rooms>
+      <Room row=""1"" column=""1"">1</Room>
+      <Room row=""1"" column=""2"">2</Room>
+      <Room row=""2"" column=""1"">3</Room>
+      <Room row=""2"" column=""2"">4</Room>
+      <Room row=""3"" column=""1"">5</Room>
+      <Room row=""3"" column=""2"">6</Room>
+  </Rooms>
 <Layout>";
 
 			RoomLayoutInfo[] expected =

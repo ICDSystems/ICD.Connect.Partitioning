@@ -2,26 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public sealed class RoomLayoutSettings
 	{
-		private const string ROWS_ELEMENT = "Rows";
-		private const string ROW_ELEMENT = "Row";
+		private const string ROOMS_ELEMENT = "Rooms";
 		private const string ROOM_ELEMENT = "Room";
 
-		private const string INDEX_ATTRIBUTE = "index";
+		private const string ROW_ATTRIBUTE = "row";
+		private const string COLUMN_ATTRIBUTE = "column";
 
-		private readonly IcdOrderedDictionary<int, IcdOrderedDictionary<int, int>> m_Layout;
+		private readonly BiDictionary<RoomPositionInfo, int> m_Layout;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public RoomLayoutSettings()
 		{
-			m_Layout = new IcdOrderedDictionary<int, IcdOrderedDictionary<int, int>>();
+			m_Layout = new BiDictionary<RoomPositionInfo, int>();
 		}
 
 		#region Methods
@@ -40,8 +41,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <returns></returns>
 		public IEnumerable<RoomLayoutInfo> GetRooms()
 		{
-			return m_Layout.SelectMany(row => row.Value.Select(column => new RoomLayoutInfo(column.Key, row.Key, column.Value)))
-			               .ToArray();
+			return m_Layout.Select(kvp => new RoomLayoutInfo(kvp.Key, kvp.Value)).ToArray(m_Layout.Count);
 		}
 
 		/// <summary>
@@ -55,8 +55,16 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			m_Layout.Clear();
 
-			foreach (RoomLayoutInfo info in layoutInfo)
-				AddRoom(info);
+			try
+			{
+				foreach (RoomLayoutInfo info in layoutInfo)
+					m_Layout.Add(info.Position, info.RoomId);
+			}
+			catch (Exception)
+			{
+				m_Layout.Clear();
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -71,21 +79,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			writer.WriteStartElement(element);
 			{
-				writer.WriteStartElement(ROWS_ELEMENT);
+				writer.WriteStartElement(ROOMS_ELEMENT);
 				{
-					foreach (KeyValuePair<int, IcdOrderedDictionary<int, int>> row in m_Layout)
+					foreach (KeyValuePair<RoomPositionInfo, int> item in m_Layout.OrderByKey())
 					{
-						writer.WriteStartElement(ROW_ELEMENT);
-						writer.WriteAttributeString(INDEX_ATTRIBUTE, IcdXmlConvert.ToString(row.Key));
-						{
-							foreach (KeyValuePair<int, int> column in row.Value)
-							{
-								writer.WriteStartElement(ROOM_ELEMENT);
-								writer.WriteAttributeString(INDEX_ATTRIBUTE, IcdXmlConvert.ToString(column.Key));
-								writer.WriteString(IcdXmlConvert.ToString(column.Value));
-								writer.WriteEndElement();
-							}
-						}
+						writer.WriteStartElement(ROOM_ELEMENT);
+						writer.WriteAttributeString(ROW_ATTRIBUTE, IcdXmlConvert.ToString(item.Key.Row));
+						writer.WriteAttributeString(COLUMN_ATTRIBUTE, IcdXmlConvert.ToString(item.Key.Column));
+						writer.WriteString(IcdXmlConvert.ToString(item.Value));
 						writer.WriteEndElement();
 					}
 				}
@@ -102,37 +103,21 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			Clear();
 
-			string rowsXml;
-			if (!XmlUtils.TryGetChildElementAsString(xml, ROWS_ELEMENT, out rowsXml))
+			string roomsXml;
+			if (!XmlUtils.TryGetChildElementAsString(xml, ROOMS_ELEMENT, out roomsXml))
 				return;
 
-			foreach (string rowXml in XmlUtils.GetChildElementsAsString(rowsXml, ROW_ELEMENT))
+			foreach (string roomXml in XmlUtils.GetChildElementsAsString(roomsXml, ROOM_ELEMENT))
 			{
-				int rowIndex = XmlUtils.GetAttributeAsInt(rowXml, INDEX_ATTRIBUTE);
+				int columnIndex = XmlUtils.GetAttributeAsInt(roomXml, COLUMN_ATTRIBUTE);
+				int rowIndex = XmlUtils.GetAttributeAsInt(roomXml, ROW_ATTRIBUTE);
+				int roomId = XmlUtils.ReadElementContentAsInt(roomXml);
 
-				foreach (string roomXml in XmlUtils.GetChildElementsAsString(rowXml, ROOM_ELEMENT))
-				{
-					int columnIndex = XmlUtils.GetAttributeAsInt(roomXml, INDEX_ATTRIBUTE);
-					int roomId = XmlUtils.ReadElementContentAsInt(roomXml);
-
-					RoomLayoutInfo info = new RoomLayoutInfo(columnIndex, rowIndex, roomId);
-					AddRoom(info);
-				}
+				RoomLayoutInfo info = new RoomLayoutInfo(columnIndex, rowIndex, roomId);
+				m_Layout.Add(info.Position, info.RoomId);
 			}
 		}
 
 		#endregion
-
-		private void AddRoom(RoomLayoutInfo info)
-		{
-			IcdOrderedDictionary<int, int> columns;
-			if (!m_Layout.TryGetValue(info.Position.Row, out columns))
-			{
-				columns = new IcdOrderedDictionary<int, int>();
-				m_Layout[info.Position.Row] = columns;
-			}
-
-			columns[info.Position.Column] = info.RoomId;
-		}
 	}
 }
