@@ -16,15 +16,26 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 	{
 		public abstract event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
 
+		#region Properties
+
 		/// <summary>
 		/// Gets the partitions in the system.
 		/// </summary>
 		public abstract IPartitionsCollection Partitions { get; }
 
 		/// <summary>
+		/// Gets the layout of rooms in the system.
+		/// </summary>
+		public abstract IRoomLayout RoomLayout { get; }
+
+		/// <summary>
 		/// Gets the help information for the node.
 		/// </summary>
 		public override string ConsoleHelp { get { return "Tracks the opening and closing of partition walls."; } }
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Gets the control for the given partition.
@@ -142,6 +153,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="constructor"></param>
 		public abstract void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
 			where TRoom : IRoom;
+
+		#endregion
 
 		#region Console
 

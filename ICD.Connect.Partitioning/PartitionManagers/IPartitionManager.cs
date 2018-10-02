@@ -23,6 +23,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		IPartitionsCollection Partitions { get; }
 
 		/// <summary>
+		/// Gets the layout of rooms in the system.
+		/// </summary>
+		IRoomLayout RoomLayout { get; }
+
+		/// <summary>
 		/// Gets the control for the given partition.
 		/// Returns null if the partition has no control specified.
 		/// </summary>

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
+using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Partitioning.Partitions
+namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public interface IPartitionsCollection : IOriginatorCollection<IPartition>
 	{
