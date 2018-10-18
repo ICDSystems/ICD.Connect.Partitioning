@@ -5,8 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.0.0] - 2018-10-18
 ### Added
  - Added RoomLayout features for aligning rooms to a grid
+ 
+### Changed
+ - Small optimizations to room originator collection
+ - Logging improvements
 
 ## [7.0.0] - 2018-09-14
 ### Changed
