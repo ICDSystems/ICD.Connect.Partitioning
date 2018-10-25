@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
@@ -223,11 +224,16 @@ namespace ICD.Connect.Partitioning.Devices
 			if (portId == null)
 				return null;
 
-			IIoPort port = factory.GetPortById((int)portId) as IIoPort;
-			if (port == null)
-				Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", portId);
+			try
+			{
+				return factory.GetPortById((int)portId) as IIoPort;
+			}
+			catch (KeyNotFoundException)
+			{
+				Log(eSeverity.Error, "No Serial Port with id {0}", portId);
+			}
 
-			return port;
+			return null;
 		}
 
 		#endregion
