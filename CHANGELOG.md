@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Fail gracefully when a referenced port/device is not present in the configuration
 
+### Removed
+ - Removed DestinationGroups
+
 ## [8.0.0] - 2018-10-18
 ### Added
  - Added RoomLayout features for aligning rooms to a grid
