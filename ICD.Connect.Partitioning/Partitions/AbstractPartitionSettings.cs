@@ -87,22 +87,6 @@ namespace ICD.Connect.Partitioning.Partitions
 		}
 
 		/// <summary>
-		/// Returns true if the settings depend on a device with the given ID.
-		/// For example, to instantiate an IR Port from settings, the device the physical port
-		/// belongs to will need to be instantiated first.
-		/// </summary>
-		/// <returns></returns>
-		public override bool HasDeviceDependency(int id)
-		{
-			return m_Controls.Select(c => c.DeviceId).Contains(id);
-		}
-
-		/// <summary>
-		/// Returns the count from the collection of ids that the settings depends on.
-		/// </summary>
-		public override int DependencyCount { get { return m_Controls.Select(c => c.DeviceId).Distinct().Count(); } }
-
-		/// <summary>
 		/// Writes property elements to xml.
 		/// </summary>
 		/// <param name="writer"></param>
