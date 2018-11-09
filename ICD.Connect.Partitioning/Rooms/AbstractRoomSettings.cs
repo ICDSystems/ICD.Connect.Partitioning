@@ -167,7 +167,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			string attribute =
 				XmlUtils.HasAttribute(xml, COMBINE_ATTRIBUTE)
-					? XmlUtils.GetAttribute(xml, COMBINE_ATTRIBUTE).Value
+					? XmlUtils.GetAttribute(xml, COMBINE_ATTRIBUTE)
 					: null;
 
 			eCombineMode combine =
