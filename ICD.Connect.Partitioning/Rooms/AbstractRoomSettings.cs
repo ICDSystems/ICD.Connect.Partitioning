@@ -158,12 +158,12 @@ namespace ICD.Connect.Partitioning.Rooms
 			writer.WriteEndElement();
 		}
 
-		private IEnumerable<KeyValuePair<int, eCombineMode>> ReadListFromXml(string xml, string listElement, string childElement)
+		private static IEnumerable<KeyValuePair<int, eCombineMode>> ReadListFromXml(string xml, string listElement, string childElement)
 		{
 			return XmlUtils.ReadListFromXml<KeyValuePair<int, eCombineMode>>(xml, listElement, childElement, ReadChildFromXml);
 		}
 
-		private KeyValuePair<int, eCombineMode> ReadChildFromXml(string xml)
+		private static KeyValuePair<int, eCombineMode> ReadChildFromXml(string xml)
 		{
 			string attribute =
 				XmlUtils.HasAttribute(xml, COMBINE_ATTRIBUTE)
