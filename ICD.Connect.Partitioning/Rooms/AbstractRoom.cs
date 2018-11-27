@@ -9,11 +9,10 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels;
+using ICD.Connect.Panels.Devices;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
-using ICD.Connect.Routing.Endpoints.Groups;
 using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Cores;
@@ -33,11 +32,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly RoomOriginatorIdCollection m_AudioDestinations;
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
+		private ICore m_CachedCore;
+
 		private bool m_CombineState;
 
 		#region Properties
 
-		public ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
+		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Returns true if the room is currently behaving as part of a combined room.
@@ -52,7 +53,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_CombineState = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} combine state changed to {1}", this, m_CombineState);
+				Log(eSeverity.Informational, "Combine state changed to {0}", m_CombineState);
 
 				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
 			}
@@ -131,7 +132,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Panels.Clear();
 			settings.Sources.Clear();
 			settings.Destinations.Clear();
-			settings.DestinationGroups.Clear();
 			settings.Partitions.Clear();
 			settings.VolumePoints.Clear();
 
@@ -141,7 +141,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Sources.AddRange(GetChildren<ISource>());
 			settings.Destinations.AddRange(GetChildren<IDestination>());
 			settings.AudioDestinations.AddRange(GetChildren<IDestination>().Where(kvp => m_AudioDestinations.Contains(kvp.Key)));
-			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
 			settings.Partitions.AddRange(GetChildren<IPartition>());
 			settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
 		}
@@ -176,7 +175,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<ISource>(settings.Sources, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.AudioDestinations, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
-			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
 			AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
 
@@ -185,7 +183,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return m_OriginatorIds.GetInstances<TInstance>()
 			                      .Select(p => new KeyValuePair<int, eCombineMode>(p.Id, m_OriginatorIds.GetCombineMode(p.Id)));
@@ -208,7 +206,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				}
 				catch (Exception e)
 				{
-					Logger.AddEntry(eSeverity.Error, "{0} failed to add {1} with id {2} - {3}", this, typeof(T).Name, kvp.Key, e.Message);
+					Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, kvp.Key, e.Message);
 					continue;
 				}
 
@@ -228,7 +226,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Combine Priority", CombinePriority);
+			RoomConsole.BuildConsoleStatus(this, addRow);
 		}
 
 		/// <summary>
@@ -240,9 +238,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
 				yield return node;
 
-			yield return ConsoleNodeGroup.KeyNodeMap("Panels", Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(), p => (uint)((IPanelDevice)p).Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("Devices", Originators.GetInstances<IDevice>().OfType<IConsoleNode>(), p => (uint)((IDevice)p).Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("Ports", Originators.GetInstances<IPort>().OfType<IConsoleNode>(), p => (uint)((IPort)p).Id);
+			foreach (IConsoleNodeBase node in RoomConsole.GetConsoleNodes(this))
+				yield return node;
 		}
 
 		/// <summary>
@@ -263,8 +260,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return
-				new GenericConsoleCommand<int>("SetCombinePriority", "SetCombinePriority <PRIORITY>", i => CombinePriority = i);
+			foreach (IConsoleCommand command in RoomConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>

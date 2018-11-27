@@ -26,6 +26,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public override event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
 
 		private readonly PartitionsCollection m_Partitions;
+		private readonly RoomLayout m_RoomLayout;
 		private readonly IcdHashSet<IPartitionDeviceControl> m_SubscribedPartitions;
 
 		#region Properties
@@ -33,6 +34,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		private static ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
 
 		public override IPartitionsCollection Partitions { get { return m_Partitions; } }
+
+		/// <summary>
+		/// Gets the layout of rooms in the system.
+		/// </summary>
+		public override IRoomLayout RoomLayout { get { return m_RoomLayout; } }
 
 		#endregion
 
@@ -42,6 +48,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public PartitionManager()
 		{
 			m_Partitions = new PartitionsCollection(this);
+			m_RoomLayout = new RoomLayout(this);
 			m_SubscribedPartitions = new IcdHashSet<IPartitionDeviceControl>();
 
 			ServiceProvider.AddService<IPartitionManager>(this);
@@ -426,7 +433,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (room == null)
 				throw new ArgumentNullException("room");
 
-			Logger.AddEntry(eSeverity.Informational, "{0} destroying combined room {1}", this, room);
+			Log(eSeverity.Informational, "Destroying combined room {0}", room);
 
 			// Remove the partitions from the room.
 			IPartition[] partitions = room.Originators.GetInstances<IPartition>().ToArray();
@@ -475,7 +482,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			// Add to the core
 			Core.Originators.AddChild(room);
 
-			Logger.AddEntry(eSeverity.Informational, "{0} created new combine room {1}", this, room);
+			Log(eSeverity.Informational, "Created new combine room {0}", room);
 		}
 
 		/// <summary>
@@ -690,7 +697,18 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			base.ClearSettingsFinal();
 
+			UnsubscribePartitions();
+
 			Partitions.Clear();
+			RoomLayout.Clear();
+		}
+
+		protected override void CopySettingsFinal(PartitionManagerSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.PartitionSettings.SetRange(Partitions.Where(c => c.Serialize).Select(r => r.CopySettings()));
+			settings.RoomLayoutSettings.SetRooms(RoomLayout.GetRooms());
 		}
 
 		protected override void ApplySettingsFinal(PartitionManagerSettings settings, IDeviceFactory factory)
@@ -701,6 +719,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			IEnumerable<IPartition> partitions = GetPartitions(settings, factory);
 			Partitions.SetChildren(partitions);
+
+			RoomLayout.SetRooms(settings.RoomLayoutSettings.GetRooms());
 
 			SubscribePartitions();
 
@@ -732,13 +752,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 				yield return output;
 			}
-		}
-
-		protected override void CopySettingsFinal(PartitionManagerSettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.PartitionSettings.SetRange(Partitions.Where(c => c.Serialize).Select(r => r.CopySettings()));
 		}
 
 		#endregion

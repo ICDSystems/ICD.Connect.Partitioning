@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings.Originators;
 
@@ -12,8 +13,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler OnChildrenChanged;
 
-		private readonly List<int> m_OrderedIds;
-		private readonly Dictionary<int, eCombineMode> m_Ids;
+		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
 		private readonly SafeCriticalSection m_Section;
 		private readonly IRoom m_Room;
 
@@ -29,8 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public RoomOriginatorIdCollection(IRoom room)
 		{
-			m_OrderedIds = new List<int>();
-			m_Ids = new Dictionary<int, eCombineMode>();
+			m_Ids = new IcdOrderedDictionary<int, eCombineMode>();
 			m_Section = new SafeCriticalSection();
 			m_Room = room;
 		}
@@ -57,9 +56,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				return m_OrderedIds.Count == 0
+				return m_Ids.Count == 0
 					       ? Enumerable.Empty<int>()
-					       : m_OrderedIds.ToArray(m_OrderedIds.Count);
+					       : m_Ids.Keys.ToArray(m_Ids.Count);
 			}
 			finally
 			{
@@ -84,10 +83,8 @@ namespace ICD.Connect.Partitioning.Rooms
 					return;
 
 				m_Ids.Clear();
-				m_OrderedIds.Clear();
 
 				m_Ids.AddRange(newIds);
-				m_OrderedIds.AddRange(m_Ids.Keys.Order());
 			}
 			finally
 			{
@@ -118,13 +115,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="ids"></param>
 		public void AddRange(IEnumerable<KeyValuePair<int, eCombineMode>> ids)
 		{
-			bool output;
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
+			bool output = false;
 			
 			m_Section.Enter();
 
 			try
 			{
-				output = ids.Aggregate(false, (current, kvp) => current | AddInternal(kvp.Key, kvp.Value));
+			    foreach (KeyValuePair<int, eCombineMode> kvp in ids)
+			        output |= AddInternal(kvp.Key, kvp.Value);
 			}
 			finally
 			{
@@ -150,15 +151,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.ContainsKey(id))
-				{
-					if (combine == m_Ids[id])
-						return false;
-				}
-				else
-				{
-					m_OrderedIds.AddSorted(id);
-				}
+				eCombineMode existing;
+				if (m_Ids.TryGetValue(id, out existing) && combine == existing)
+					return false;
 
 				m_Ids[id] = combine;
 			}
@@ -183,8 +178,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				if (!m_Ids.Remove(id))
 					return false;
-
-				m_OrderedIds.Remove(id);
 			}
 			finally
 			{
@@ -243,8 +236,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.ContainsKey(id))
-					return m_Ids[id];
+				eCombineMode mode;
+				if (m_Ids.TryGetValue(id, out mode))
+					return mode;
 
 				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
 				throw new KeyNotFoundException(message);
@@ -260,37 +254,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Instances
 
 		/// <summary>
-		/// Gets the originator instance with the given id.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
-		[NotNull]
-		public IOriginator GetInstance(int id)
-		{
-			m_Section.Enter();
-
-			try
-			{
-				if (m_Ids.ContainsKey(id))
-					return Originators.GetChild<IOriginator>(id);
-
-				string message = string.Format("{0} does not contain a {1} with id {2}", GetType().Name, typeof(IOriginator).Name, id);
-				throw new KeyNotFoundException(message);
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
-		}
-
-		/// <summary>
 		/// Gets the first originator instance with the given type.
 		/// </summary>
 		/// <typeparam name="TInstance"></typeparam>
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -305,7 +275,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstance<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -321,7 +291,8 @@ namespace ICD.Connect.Partitioning.Rooms
 					return default(TInstance);
 
 				IEnumerable<int> ids =
-					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
+					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+					     .Select(kvp => kvp.Key);
 
 				return Originators.GetChild(ids, selector);
 			}
@@ -338,7 +309,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstance<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstance<TInstance>(i => true);
 		}
@@ -348,7 +319,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstances<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstances<TInstance>(i => true);
 		}
@@ -358,7 +329,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstances<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -371,7 +342,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstances<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -384,8 +355,10 @@ namespace ICD.Connect.Partitioning.Rooms
 					return Enumerable.Empty<TInstance>();
 
 				IEnumerable<int> ids =
-					m_OrderedIds.Where(id => EnumUtils.GetFlagsIntersection(m_Ids[id], mask) != eCombineMode.None);
-				return Originators.GetChildren(ids, selector);
+					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
+					     .Select(kvp => kvp.Key);
+
+                return Originators.GetChildren(ids, selector);
 			}
 			finally
 			{
@@ -399,9 +372,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="TInstance"></typeparam>
 		/// <returns></returns>
 		public bool HasInstances<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
-			return m_Section.Execute(() => Originators.HasChildren<TInstance>(m_OrderedIds));
+			return m_Section.Execute(() => Originators.ContainsChildAny<TInstance>(m_Ids.Keys));
 		}
 
 		#endregion
@@ -453,7 +426,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstanceRecursive<TInstance>(eCombineMode.Always);
 		}
@@ -464,7 +437,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>(eCombineMode mask)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstanceRecursive<TInstance>(mask, i => true);
 		}
@@ -475,7 +448,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -489,7 +462,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		public TInstance GetInstanceRecursive<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -499,7 +472,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			// Combine room
 			TInstance instance = GetInstance(mask, selector);
-// ReSharper disable once CompareNonConstrainedGenericWithNull
 			if (instance != null)
 				return instance;
 
@@ -523,15 +495,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets all instances recursively as defined by partitions.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<IOriginator> GetInstancesRecursive()
-		{
-			return GetInstancesRecursive(eCombineMode.Always);
-		}
-
-		/// <summary>
-		/// Gets all instances recursively as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
 		public IEnumerable<IOriginator> GetInstancesRecursive(eCombineMode mask)
 		{
 			return GetInstancesRecursive<IOriginator>(mask);
@@ -542,7 +505,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>()
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstancesRecursive<TInstance>(eCombineMode.Always);
 		}
@@ -552,7 +515,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(eCombineMode mask)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			return GetInstancesRecursive<TInstance>(mask, i => true);
 		}
@@ -562,7 +525,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
@@ -575,11 +538,21 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable<TInstance> GetInstancesRecursive<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
-			where TInstance : IOriginator
+			where TInstance : class, IOriginator
 		{
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
+			return GetInstancesRecursiveIterator(mask, selector);
+		}
+
+		/// <summary>
+		/// Gets all instances of the given type recursively as defined by partitions.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<TInstance> GetInstancesRecursiveIterator<TInstance>(eCombineMode mask, Func<TInstance, bool> selector)
+			where TInstance : class, IOriginator
+		{
 			if (mask == eCombineMode.None)
 				yield break;
 

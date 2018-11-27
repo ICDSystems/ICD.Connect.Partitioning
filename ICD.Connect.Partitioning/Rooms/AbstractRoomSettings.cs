@@ -28,8 +28,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string AUDIO_DESTINATION_ELEMENT = "AudioDestination";
 		private const string DESTINATIONS_ELEMENT = "Destinations";
 		private const string DESTINATION_ELEMENT = "Destination";
-		private const string DESTINATION_GROUPS_ELEMENT = "DestinationGroups";
-		private const string DESTINATION_GROUP_ELEMENT = "DestinationGroup";
 		private const string PARTITION_ELEMENT = "Partition";
 		private const string PARTITIONS_ELEMENT = "Partitions";
 		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
@@ -43,7 +41,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly Dictionary<int, eCombineMode> m_Sources;
 		private readonly Dictionary<int, eCombineMode> m_AudioDestinations; 
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
-		private readonly Dictionary<int, eCombineMode> m_DestinationGroups;
 		private readonly Dictionary<int, eCombineMode> m_Partitions;
 		private readonly Dictionary<int, eCombineMode> m_VolumePoints;
 
@@ -59,7 +56,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> Sources { get { return m_Sources; } }
 		public Dictionary<int, eCombineMode> AudioDestinations { get { return m_AudioDestinations; } } 
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
-		public Dictionary<int, eCombineMode> DestinationGroups { get { return m_DestinationGroups; } }
 		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
 		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
 
@@ -76,7 +72,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_Sources = new Dictionary<int, eCombineMode>();
 			m_AudioDestinations = new Dictionary<int, eCombineMode>();
 			m_Destinations = new Dictionary<int, eCombineMode>();
-			m_DestinationGroups = new Dictionary<int, eCombineMode>();
 			m_Partitions = new Dictionary<int, eCombineMode>();
 			m_VolumePoints = new Dictionary<int, eCombineMode>();
 		}
@@ -99,7 +94,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
 			WriteChildrenToXml(writer, m_AudioDestinations, AUDIO_DESTINATIONS_ELEMENT, AUDIO_DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
-			WriteChildrenToXml(writer, m_DestinationGroups, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			WriteChildrenToXml(writer, m_Partitions, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			WriteChildrenToXml(writer, m_VolumePoints, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
         }
@@ -127,7 +121,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> sources = ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> audioDestinations = ReadListFromXml(xml, AUDIO_DESTINATIONS_ELEMENT, AUDIO_DESTINATION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
-			IEnumerable<KeyValuePair<int, eCombineMode>> destinationGroups = ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> partitions = ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
 
@@ -137,7 +130,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			Sources.Clear();
 			AudioDestinations.Clear();
 			Destinations.Clear();
-			DestinationGroups.Clear();
 			Partitions.Clear();
 			VolumePoints.Clear();
 
@@ -147,7 +139,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			Sources.Update(sources);
 			AudioDestinations.Update(audioDestinations);
 			Destinations.Update(destinations);
-			DestinationGroups.Update(destinationGroups);
 			Partitions.Update(partitions);
 			VolumePoints.Update(volumePoints);
 		}
@@ -167,16 +158,16 @@ namespace ICD.Connect.Partitioning.Rooms
 			writer.WriteEndElement();
 		}
 
-		private IEnumerable<KeyValuePair<int, eCombineMode>> ReadListFromXml(string xml, string listElement, string childElement)
+		private static IEnumerable<KeyValuePair<int, eCombineMode>> ReadListFromXml(string xml, string listElement, string childElement)
 		{
 			return XmlUtils.ReadListFromXml<KeyValuePair<int, eCombineMode>>(xml, listElement, childElement, ReadChildFromXml);
 		}
 
-		private KeyValuePair<int, eCombineMode> ReadChildFromXml(string xml)
+		private static KeyValuePair<int, eCombineMode> ReadChildFromXml(string xml)
 		{
 			string attribute =
 				XmlUtils.HasAttribute(xml, COMBINE_ATTRIBUTE)
-					? XmlUtils.GetAttribute(xml, COMBINE_ATTRIBUTE).Value
+					? XmlUtils.GetAttribute(xml, COMBINE_ATTRIBUTE)
 					: null;
 
 			eCombineMode combine =

@@ -6,6 +6,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [9.0.0] - 2018-11-08
+### Changed
+ - Fail gracefully when a referenced port/device is not present in the configuration
+
+### Removed
+ - Removed DestinationGroups
+
+## [8.0.0] - 2018-10-18
+### Added
+ - Added RoomLayout features for aligning rooms to a grid
+ 
+### Changed
+ - Small optimizations to room originator collection
+ - Logging improvements
+
+## [7.0.0] - 2018-09-14
+### Changed
+ - General performance improvements
+ - Originator and control types constrained to class types
+
+## [6.0.1] - 2018-07-02
+### Changed
+ - Fixed bug where not all items would be added to the room originator collection in a batch
+
+## [6.0.0] - 2018-05-24
+### Removed
+ - Element name removed from settings classes
+
 ## [5.0.0] - 2018-05-03
 ### Removed
  - Volume points moved into Audio project

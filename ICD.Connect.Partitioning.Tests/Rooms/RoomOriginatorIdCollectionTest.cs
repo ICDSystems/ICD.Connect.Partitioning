@@ -170,26 +170,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		#region Instances
 
 		[Test]
-		public void GetInstanceIdTest()
-		{
-			ICore core = new Core();
-
-			TestRoom roomA = new TestRoom {Id = 1, Core = core};
-			TestRoom roomB = new TestRoom {Id = 2, Core = core};
-
-			core.Originators.AddChild(roomA);
-			core.Originators.AddChild(roomB);
-
-			roomA.Originators = new RoomOriginatorIdCollection(roomA);
-
-			Assert.Throws<KeyNotFoundException>(() => roomA.Originators.GetInstance(roomB.Id));
-
-			roomA.Originators.Add(roomB.Id, eCombineMode.Always);
-
-			Assert.AreEqual(roomB, roomA.Originators.GetInstance(roomB.Id));
-		}
-
-		[Test]
 		public void GetInstanceSelectorTest()
 		{
 			ICore core = new Core();
@@ -438,9 +418,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			roomC.Originators.Add(roomC6.Id, eCombineMode.Always);
 
 			// Get recursive
-			IOriginator[] roomAContents = roomA.Originators.GetInstancesRecursive().ToArray();
-			IOriginator[] roomBContents = roomB.Originators.GetInstancesRecursive().ToArray();
-			IOriginator[] roomCContents = roomC.Originators.GetInstancesRecursive().ToArray();
+			IOriginator[] roomAContents = roomA.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
+			IOriginator[] roomBContents = roomB.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
+			IOriginator[] roomCContents = roomC.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
 
 			// Room A Contents
 			Assert.IsFalse(roomAContents.Contains(roomA1));

@@ -2,8 +2,9 @@
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings.Originators;
+using ICD.Connect.Partitioning.Partitions;
 
-namespace ICD.Connect.Partitioning.Partitions
+namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public interface IPartitionsCollection : IOriginatorCollection<IPartition>
 	{
