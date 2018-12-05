@@ -113,8 +113,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				int rowIndex = XmlUtils.GetAttributeAsInt(roomXml, ROW_ATTRIBUTE);
 				int roomId = XmlUtils.ReadElementContentAsInt(roomXml);
 
-				RoomLayoutInfo info = new RoomLayoutInfo(columnIndex, rowIndex, roomId);
-				m_Layout.Add(info.Position, info.RoomId);
+				RoomPositionInfo info = new RoomPositionInfo(columnIndex, rowIndex);
+				m_Layout.Add(info, roomId);
 			}
 		}
 
