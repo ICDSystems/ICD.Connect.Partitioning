@@ -88,9 +88,9 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			DialingPlan.WriteToXml(writer, DIALINGPLAN_ELEMENT);
 
-			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Panels, PANELS_ELEMENT, PANEL_ELEMENT);
 			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
+			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
 			WriteChildrenToXml(writer, m_AudioDestinations, AUDIO_DESTINATIONS_ELEMENT, AUDIO_DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
