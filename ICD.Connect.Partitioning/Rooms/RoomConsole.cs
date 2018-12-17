@@ -12,6 +12,8 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
+using ICD.Connect.Routing.Endpoints.Destinations;
+using ICD.Connect.Routing.Endpoints.Sources;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -36,6 +38,14 @@ namespace ICD.Connect.Partitioning.Rooms
 			yield return
 				ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstances<IPort>().OfType<IConsoleNode>(),
 				                            p => (uint)((IPort)p).Id);
+
+			yield return
+				ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstances<ISource>().OfType<IConsoleNode>(),
+				                            p => (uint)((ISource)p).Id);
+
+			yield return
+				ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstances<IDestination>().OfType<IConsoleNode>(),
+				                            p => (uint)((IDestination)p).Id);
 		}
 
 		/// <summary>
