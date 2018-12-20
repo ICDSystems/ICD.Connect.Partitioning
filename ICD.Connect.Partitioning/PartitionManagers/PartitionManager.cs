@@ -573,16 +573,28 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (rooms == null)
 				throw new ArgumentNullException("rooms");
 
-			foreach (IRoom room in rooms)
-			{
-				bool isCombineRoom = room.IsCombineRoom();
-				if (isCombineRoom == room.CombineState)
-					continue;
+			List<IRoom> roomsList = rooms.ToList();
 
-				if (isCombineRoom)
-					room.LeaveCombineState();
-				else
+			IcdHashSet<IRoom> roomsInCombineState = new IcdHashSet<IRoom>();
+
+			// Figure out which rooms are master/slave rooms
+			foreach (IRoom room in roomsList)
+			{
+				if (room.IsCombineRoom())
+					roomsInCombineState.AddRange(room.GetMasterAndSlaveRooms());
+			}
+
+			foreach (IRoom room in roomsList)
+			{
+				bool isCombineState = roomsInCombineState.Contains(room);
+
+				if (room.CombineState == isCombineState)
+					continue;
+	
+				if (isCombineState)
 					room.EnterCombineState();
+				else
+					room.LeaveCombineState();
 			}
 		}
 
