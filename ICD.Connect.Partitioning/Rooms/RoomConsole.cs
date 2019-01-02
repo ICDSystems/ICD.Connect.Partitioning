@@ -59,6 +59,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("instance");
 
 			addRow("Combine Priority", instance.CombinePriority);
+			addRow("CombineState", instance.CombineState);
+			addRow("IsCombineRoom", instance.IsCombineRoom());
+
 		}
 
 		/// <summary>
