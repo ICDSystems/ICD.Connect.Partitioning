@@ -33,11 +33,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		Dictionary<int, eCombineMode> Sources { get; }
 
 		/// <summary>
-		/// Gets the audio destination settings.
-		/// </summary>
-		Dictionary<int, eCombineMode> AudioDestinations { get; }
-
-		/// <summary>
 		/// Gets the destination settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> Destinations { get; }

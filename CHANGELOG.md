@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.0.0] - 2019-01-02
+### Added
+ - Added Source and Destination items to the Room console
+
+### Changed
+ - Re-ordered Devices/Ports/Panels in Room configuration for consistency
+ - Better combine state tracking of rooms
+ 
+### Removed
+ - Removed AudioDestinations collection on the Room
+
 ## [9.0.0] - 2018-11-08
 ### Changed
  - Fail gracefully when a referenced port/device is not present in the configuration

@@ -363,7 +363,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			// Update the partitions and the rooms
 			// TODO - Extremely lazy, should only update anything we touched
-			UpdateRoomCombineState(GetRooms());
+			UpdateRoomCombineState();
 			UpdatePartitions(Partitions);
 		}
 
@@ -407,7 +407,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			// Update the partitions and the rooms
 			// TODO - Extremely lazy, should only update anything we touched
-			UpdateRoomCombineState(GetRooms());
+			UpdateRoomCombineState();
 			UpdatePartitions(Partitions);
 		}
 
@@ -567,23 +567,29 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
-		/// Sets the combined state for the given rooms based on the partitions.
+		/// Sets the combined state for all of the rooms based on the partitions.
 		/// </summary>
-		private void UpdateRoomCombineState(IEnumerable<IRoom> rooms)
+		private static void UpdateRoomCombineState()
 		{
-			if (rooms == null)
-				throw new ArgumentNullException("rooms");
+			IRoom[] rooms = GetRooms().ToArray();
 
+			// Build a set of all of the rooms that are children to combine spaces
+			IcdHashSet<IRoom> roomsInCombineState =
+				rooms.SelectMany(r => r.GetMasterAndSlaveRooms())
+				     .ToIcdHashSet();
+
+			// Update each room's combine state
 			foreach (IRoom room in rooms)
 			{
-				bool isCombineRoom = room.IsCombineRoom();
-				if (isCombineRoom == room.CombineState)
+				bool isCombineState = roomsInCombineState.Contains(room);
+
+				if (room.CombineState == isCombineState)
 					continue;
 
-				if (isCombineRoom)
-					room.LeaveCombineState();
-				else
+				if (isCombineState)
 					room.EnterCombineState();
+				else
+					room.LeaveCombineState();
 			}
 		}
 
