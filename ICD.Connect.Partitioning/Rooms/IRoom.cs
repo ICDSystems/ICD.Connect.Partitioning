@@ -43,6 +43,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		int CombinePriority { get; set; }
 
+		/// <summary>
+		/// Gets the originators that are contained within this room.
+		/// </summary>
 		RoomOriginatorIdCollection Originators { get; }
 
 		RoomOriginatorIdCollection AudioDestinations { get; }
