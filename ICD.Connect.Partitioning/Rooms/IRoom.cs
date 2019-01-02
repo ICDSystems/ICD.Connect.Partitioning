@@ -48,8 +48,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		RoomOriginatorIdCollection Originators { get; }
 
-		RoomOriginatorIdCollection AudioDestinations { get; }
-
 		#endregion
 
 		#region Methods

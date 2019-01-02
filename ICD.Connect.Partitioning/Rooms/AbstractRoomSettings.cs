@@ -24,8 +24,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string DEVICE_ELEMENT = "Device";
 		private const string SOURCES_ELEMENT = "Sources";
 		private const string SOURCE_ELEMENT = "Source";
-		private const string AUDIO_DESTINATIONS_ELEMENT = "AudioDestinations";
-		private const string AUDIO_DESTINATION_ELEMENT = "AudioDestination";
 		private const string DESTINATIONS_ELEMENT = "Destinations";
 		private const string DESTINATION_ELEMENT = "Destination";
 		private const string PARTITION_ELEMENT = "Partition";
@@ -39,7 +37,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly Dictionary<int, eCombineMode> m_Ports;
 		private readonly Dictionary<int, eCombineMode> m_Panels;
 		private readonly Dictionary<int, eCombineMode> m_Sources;
-		private readonly Dictionary<int, eCombineMode> m_AudioDestinations; 
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
 		private readonly Dictionary<int, eCombineMode> m_Partitions;
 		private readonly Dictionary<int, eCombineMode> m_VolumePoints;
@@ -54,7 +51,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> Ports { get { return m_Ports; } }
 		public Dictionary<int, eCombineMode> Panels { get { return m_Panels; } }
 		public Dictionary<int, eCombineMode> Sources { get { return m_Sources; } }
-		public Dictionary<int, eCombineMode> AudioDestinations { get { return m_AudioDestinations; } } 
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
 		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
 		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
@@ -70,7 +66,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_Ports = new Dictionary<int, eCombineMode>();
 			m_Panels = new Dictionary<int, eCombineMode>();
 			m_Sources = new Dictionary<int, eCombineMode>();
-			m_AudioDestinations = new Dictionary<int, eCombineMode>();
 			m_Destinations = new Dictionary<int, eCombineMode>();
 			m_Partitions = new Dictionary<int, eCombineMode>();
 			m_VolumePoints = new Dictionary<int, eCombineMode>();
@@ -92,7 +87,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
 			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
-			WriteChildrenToXml(writer, m_AudioDestinations, AUDIO_DESTINATIONS_ELEMENT, AUDIO_DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_Partitions, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			WriteChildrenToXml(writer, m_VolumePoints, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
@@ -119,7 +113,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> ports = ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> devices = ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> sources = ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
-			IEnumerable<KeyValuePair<int, eCombineMode>> audioDestinations = ReadListFromXml(xml, AUDIO_DESTINATIONS_ELEMENT, AUDIO_DESTINATION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> partitions = ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
@@ -128,7 +121,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			Ports.Clear();
 			Devices.Clear();
 			Sources.Clear();
-			AudioDestinations.Clear();
 			Destinations.Clear();
 			Partitions.Clear();
 			VolumePoints.Clear();
@@ -137,7 +129,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			Ports.Update(ports);
 			Devices.Update(devices);
 			Sources.Update(sources);
-			AudioDestinations.Update(audioDestinations);
 			Destinations.Update(destinations);
 			Partitions.Update(partitions);
 			VolumePoints.Update(volumePoints);
