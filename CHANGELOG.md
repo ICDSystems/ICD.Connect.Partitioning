@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - Re-ordered Devices/Ports/Panels in Room configuration for consistency
+ - Better combine state tracking of rooms
 
 ## [9.0.0] - 2018-11-08
 ### Changed
