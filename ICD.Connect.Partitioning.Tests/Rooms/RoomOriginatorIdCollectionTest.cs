@@ -3,8 +3,8 @@ using System.Linq;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
-using ICD.Connect.Settings;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings.Cores;
+using ICD.Connect.Settings.Originators;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms

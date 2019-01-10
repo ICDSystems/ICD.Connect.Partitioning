@@ -4,8 +4,8 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Core;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Partitions
 {

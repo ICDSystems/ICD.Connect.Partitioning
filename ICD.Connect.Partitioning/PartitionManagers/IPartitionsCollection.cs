@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
+using ICD.Connect.Settings.Originators;
 using ICD.Connect.Partitioning.Partitions;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
 {
