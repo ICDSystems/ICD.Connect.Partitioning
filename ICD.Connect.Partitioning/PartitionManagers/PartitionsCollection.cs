@@ -186,7 +186,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 					foreach (IPartition partition in adjacent)
 					{
 						m_PartitionAdjacentPartitions[child].Add(partition);
-						m_PartitionAdjacentPartitions[partition].Add(child);
+						
+						IcdHashSet<IPartition> adjacentPartitionValue;
+						if (!m_PartitionAdjacentPartitions.TryGetValue(partition, out adjacentPartitionValue))
+						{
+							adjacentPartitionValue = new IcdHashSet<IPartition>();
+							m_PartitionAdjacentPartitions.Add(partition, adjacentPartitionValue);
+						}
+						adjacentPartitionValue.Add(child);
 					}
 				}
 			}
