@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed issue with >1 partition
+
 ## [10.0.0] - 2019-01-02
 ### Added
  - Added Source and Destination items to the Room console
