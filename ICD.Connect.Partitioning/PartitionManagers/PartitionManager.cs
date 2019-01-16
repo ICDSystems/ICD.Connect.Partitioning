@@ -201,9 +201,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				throw new ArgumentNullException("constructor");
 
 			IcdHashSet<IPartition> open =
-				Partitions.Where(p => p.GetPartitionControls()
-				                       .Select(c => Core.GetControl<IPartitionDeviceControl>(c))
-				                       .Any(c => c.IsOpen))
+				Partitions.Where(p => GetControls(p).Any(c => c.IsOpen))
 				          .ToIcdHashSet();
 
 			IcdHashSet<IPartition> closed =
