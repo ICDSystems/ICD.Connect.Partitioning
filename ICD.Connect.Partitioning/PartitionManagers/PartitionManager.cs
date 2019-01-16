@@ -8,6 +8,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
@@ -78,7 +79,22 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			return Core.GetControls<IPartitionDeviceControl>(partition.GetPartitionControls());
+			foreach (DeviceControlInfo info in partition.GetPartitionControls())
+			{
+				IPartitionDeviceControl control;
+
+				try
+				{
+					control = Core.GetControl<IPartitionDeviceControl>(info);
+				}
+				catch (Exception e)
+				{
+					Log(eSeverity.Error, "Unable to get partition control for {0} - {1}", info, e.Message);
+					continue;
+				}
+
+				yield return control;
+			}
 		}
 
 		#endregion
