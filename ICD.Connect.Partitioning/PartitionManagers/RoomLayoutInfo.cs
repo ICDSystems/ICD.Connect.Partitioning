@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
 {
@@ -55,6 +56,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns>true if the current object is equal to the <paramref name="other">other</paramref> parameter; otherwise, false.</returns>
+		[Pure]
 		public bool Equals(RoomPositionInfo other)
 		{
 			return m_Column == other.m_Column &&
@@ -75,6 +77,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// Returns the hash code for this instance.
 		/// </summary>
 		/// <returns>A 32-bit signed integer that is the hash code for this instance.</returns>
+		[Pure]
 		public override int GetHashCode()
 		{
 			unchecked
@@ -85,6 +88,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			}
 		}
 
+		[Pure]
 		public int CompareTo(RoomPositionInfo other)
 		{
 			int columnComparison = m_Column.CompareTo(other.m_Column);
