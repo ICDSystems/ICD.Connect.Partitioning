@@ -100,6 +100,7 @@
     <Compile Include="PartitionManagers\IPartitionManager.cs" />
     <Compile Include="Partitions\IPartitionSettings.cs" />
     <Compile Include="Rooms\DialingPlanInfo.cs" />
+    <Compile Include="Rooms\eAddRemoveType.cs" />
     <Compile Include="Rooms\IRoom.cs" />
     <Compile Include="PartitionManagers\IRoomLayout.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Partitions\PartitionSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rooms\AbstractRoom.cs" />
+    <Compile Include="Rooms\OriginatorsChangedEventArgs.cs" />
     <Compile Include="Rooms\RoomConsole.cs" />
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />

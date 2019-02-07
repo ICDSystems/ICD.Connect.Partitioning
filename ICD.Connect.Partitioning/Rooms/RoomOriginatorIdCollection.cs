@@ -11,7 +11,7 @@ namespace ICD.Connect.Partitioning.Rooms
 {
 	public sealed class RoomOriginatorIdCollection
 	{
-		public event EventHandler OnChildrenChanged;
+		public event EventHandler<OriginatorsChangedEventArgs> OnChildrenChanged;
 
 		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
 		private readonly SafeCriticalSection m_Section;
@@ -82,16 +82,22 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (newIds.DictionaryEqual(m_Ids))
 					return;
 
-				m_Ids.Clear();
+				foreach (var id in m_Ids)
+				{
+					m_Ids.Remove(id.Key);
+					OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id.Key, eAddRemoveType.Removed));
+				}
 
-				m_Ids.AddRange(newIds);
+				foreach (var id in newIds)
+				{
+					m_Ids.Add(id.Key, id.Value);
+					OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id.Key, eAddRemoveType.Added));
+				}
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
-
-			OnChildrenChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -103,8 +109,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool Add(int id, eCombineMode combine)
 		{
 			bool output = AddInternal(id, combine);
-			if (output)
-				OnChildrenChanged.Raise(this);
 
 			return output;
 		}
@@ -131,9 +135,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				m_Section.Leave();
 			}
-			
-			if (output)
-				OnChildrenChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -161,7 +162,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				m_Section.Leave();
 			}
-
+			
+			OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id, eAddRemoveType.Added)); ;
+			
 			return true;
 		}
 
@@ -184,7 +187,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				m_Section.Leave();
 			}
 
-			OnChildrenChanged.Raise(this);
+			OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id, eAddRemoveType.Removed));
 			return true;
 		}
 

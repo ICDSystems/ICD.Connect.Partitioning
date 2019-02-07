@@ -85,6 +85,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected AbstractRoom()
 		{
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
+			m_OriginatorIds.OnChildrenChanged += OriginatorsOnChildrenChanged;
 		}
 
 		#endregion
@@ -117,6 +118,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		protected virtual void HandleCombineState()
 		{
+		}
+
+		protected virtual void OriginatorsOnChildrenChanged(object sender, OriginatorsChangedEventArgs eventArgs)
+		{
+
 		}
 
 		#endregion
