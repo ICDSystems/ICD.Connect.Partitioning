@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -26,10 +27,12 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string SOURCE_ELEMENT = "Source";
 		private const string DESTINATIONS_ELEMENT = "Destinations";
 		private const string DESTINATION_ELEMENT = "Destination";
-		private const string PARTITION_ELEMENT = "Partition";
 		private const string PARTITIONS_ELEMENT = "Partitions";
-		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
+		private const string PARTITION_ELEMENT = "Partition";
 		private const string VOLUME_POINTS_ELEMENT = "VolumePoints";
+		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
+		private const string CONFERENCE_POINTS_ELEMENT = "ConferencePoints";
+		private const string CONFERENCE_POINT_ELEMENT = "ConferencePoint";
 
 		private const string COMBINE_ATTRIBUTE = "combine";
 
@@ -40,12 +43,14 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
 		private readonly Dictionary<int, eCombineMode> m_Partitions;
 		private readonly Dictionary<int, eCombineMode> m_VolumePoints;
+		private readonly Dictionary<int, eCombineMode> m_ConferencePoints;
 
 		#region Properties
 
 		public int CombinePriority { get; set; }
 
-		public DialingPlanInfo DialingPlan { get; set; }
+		[PathSettingsProperty("DialingPlans", ".xml")]
+		public string DialingPlan { get; set; }
 
 		public Dictionary<int, eCombineMode> Devices { get { return m_Devices; } }
 		public Dictionary<int, eCombineMode> Ports { get { return m_Ports; } }
@@ -54,6 +59,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
 		public Dictionary<int, eCombineMode> Partitions { get { return m_Partitions; } }
 		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
+		public Dictionary<int, eCombineMode> ConferencePoints { get { return m_ConferencePoints; } }
 
 		#endregion
 
@@ -69,6 +75,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_Destinations = new Dictionary<int, eCombineMode>();
 			m_Partitions = new Dictionary<int, eCombineMode>();
 			m_VolumePoints = new Dictionary<int, eCombineMode>();
+			m_ConferencePoints = new Dictionary<int, eCombineMode>();
 		}
 
 		/// <summary>
@@ -81,7 +88,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			writer.WriteElementString(COMBINE_PRIORITY_ELEMENT, IcdXmlConvert.ToString(CombinePriority));
 
-			DialingPlan.WriteToXml(writer, DIALINGPLAN_ELEMENT);
+			writer.WriteElementString(DIALINGPLAN_ELEMENT, DialingPlan);
 
 			WriteChildrenToXml(writer, m_Panels, PANELS_ELEMENT, PANEL_ELEMENT);
 			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
@@ -90,6 +97,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			WriteChildrenToXml(writer, m_Partitions, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			WriteChildrenToXml(writer, m_VolumePoints, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
+			WriteChildrenToXml(writer, m_ConferencePoints, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
         }
 
 		/// <summary>
@@ -102,12 +110,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
 
-			string dialingPlan;
-			XmlUtils.TryGetChildElementAsString(xml, DIALINGPLAN_ELEMENT, out dialingPlan);
-
-			DialingPlan = string.IsNullOrEmpty(dialingPlan)
-							  ? new DialingPlanInfo()
-							  : DialingPlanInfo.FromXml(dialingPlan);
+			DialingPlan = XmlUtils.TryReadChildElementContentAsString(xml, DIALINGPLAN_ELEMENT);
 
 			IEnumerable<KeyValuePair<int, eCombineMode>> panels = ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> ports = ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);
@@ -116,6 +119,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> partitions = ReadListFromXml(xml, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> conferencePoints = ReadListFromXml(xml, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
 
 			Panels.Clear();
 			Ports.Clear();
@@ -124,6 +128,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			Destinations.Clear();
 			Partitions.Clear();
 			VolumePoints.Clear();
+			ConferencePoints.Clear();
 
 			Panels.Update(panels);
 			Ports.Update(ports);
@@ -132,6 +137,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			Destinations.Update(destinations);
 			Partitions.Update(partitions);
 			VolumePoints.Update(volumePoints);
+			ConferencePoints.Update(conferencePoints);
 		}
 
 		private void WriteChildrenToXml(IcdXmlTextWriter writer, Dictionary<int, eCombineMode> children, string listElement, string childElement)

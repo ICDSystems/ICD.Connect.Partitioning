@@ -8,6 +8,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
+using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Partitioning.Partitions;
@@ -136,6 +137,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Destinations.Clear();
 			settings.Partitions.Clear();
 			settings.VolumePoints.Clear();
+			settings.ConferencePoints.Clear();
 
 			settings.Ports.AddRange(GetChildren<IPort>());
 			settings.Devices.AddRange(GetChildren<IDevice>());
@@ -144,6 +146,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Destinations.AddRange(GetChildren<IDestination>());
 			settings.Partitions.AddRange(GetChildren<IPartition>());
 			settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
+			settings.ConferencePoints.AddRange(GetChildren<IConferencePoint>());
 		}
 
 		/// <summary>
@@ -176,6 +179,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<IPartition>(settings.Partitions, factory);
 			AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
+			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 		}
 
 		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()

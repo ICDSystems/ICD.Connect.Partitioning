@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+ - Added ConferencePoint ids under Room in configuration
+
+### Changed
+ - DialingPlan configuration is now a single path
  - Added VolumePoints and Partitions to the room console
 
 ## [10.0.1] - 2019-01-16

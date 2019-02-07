@@ -10,7 +10,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Gets the dialing plan.
 		/// </summary>
-		DialingPlanInfo DialingPlan { get; set; }
+		string DialingPlan { get; set; }
 
 		/// <summary>
 		/// Gets the device settings.
@@ -46,5 +46,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the volume point settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> VolumePoints { get; }
+
+		/// <summary>
+		/// Gets the conference point settings.
+		/// </summary>
+		Dictionary<int, eCombineMode> ConferencePoints { get; }
 	}
 }
