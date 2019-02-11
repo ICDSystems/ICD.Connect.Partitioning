@@ -7,7 +7,6 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Partitioning.Cells;
@@ -31,9 +30,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		private readonly PartitionsCollection m_Partitions;
 		private readonly IcdHashSet<IPartitionDeviceControl> m_SubscribedPartitions;
 
+		private ICore m_CachedCore;
+
 		#region Properties
 
-		private static ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
+		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Gets the cells in the system.
@@ -509,7 +510,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		/// <param name="partition"></param>
 		/// <returns></returns>
-		private static IEnumerable<IRoom> GetAdjacentCombineRooms(IPartition partition)
+		private IEnumerable<IRoom> GetAdjacentCombineRooms(IPartition partition)
 		{
 			if (partition == null)
 				throw new ArgumentNullException("partition");
@@ -547,7 +548,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// Gets the rooms available to the core.
 		/// </summary>
 		/// <returns></returns>
-		private static IEnumerable<IRoom> GetRooms()
+		private IEnumerable<IRoom> GetRooms()
 		{
 			return Core.Originators.GetChildren<IRoom>();
 		}
@@ -588,7 +589,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <summary>
 		/// Sets the combined state for all of the rooms based on the partitions.
 		/// </summary>
-		private static void UpdateRoomCombineState()
+		private void UpdateRoomCombineState()
 		{
 			IRoom[] rooms = GetRooms().ToArray();
 
@@ -783,42 +784,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 				yield return output;
 			}
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms());
-		}
-
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
-		private string PrintRooms()
-		{
-			TableBuilder builder = new TableBuilder("Id", "Room", "Children", "Combine Pritority", "Combine State");
-
-			foreach (IRoom room in GetRooms().OrderBy(r => r.Id))
-			{
-				int id = room.Id;
-				string children = StringUtils.ArrayFormat(room.GetRooms().Select(r => r.Id).Order());
-
-				builder.AddRow(id, room, children, room.CombinePriority, room.CombineState);
-			}
-
-			return builder.ToString();
 		}
 
 		#endregion

@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
+using ICD.Connect.Partitioning.Partitions;
+using ICD.Connect.Partitioning.Rooms;
+using ICD.Connect.Settings.Cores;
+
+namespace ICD.Connect.Partitioning.PartitionManagers
+{
+	public static class PartitionManagerConsole
+	{
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <returns></returns>
+		public static IEnumerable<IConsoleNodeBase> GetConsoleNodes(IPartitionManager instance)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			yield break;
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="addRow"></param>
+		public static void BuildConsoleStatus(IPartitionManager instance, AddStatusRowDelegate addRow)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <returns></returns>
+		public static IEnumerable<IConsoleCommand> GetConsoleCommands(IPartitionManager instance)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			yield return new ConsoleCommand("PrintPartitions", "Prints the list of all partitions.", () => PrintPartitions(instance));
+			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms());
+		}
+
+		private static string PrintRooms()
+		{
+			TableBuilder builder = new TableBuilder("Id", "Room", "Children", "Combine Pritority", "Combine State");
+
+			IEnumerable<IRoom> rooms =
+				ServiceProvider.GetService<ICore>()
+				               .Originators
+				               .GetChildren<IRoom>();
+
+			foreach (IRoom room in rooms.OrderBy(r => r.Id))
+			{
+				int id = room.Id;
+				string children = StringUtils.ArrayFormat(room.GetRooms().Select(r => r.Id).Order());
+
+				builder.AddRow(id, room, children, room.CombinePriority, room.CombineState);
+			}
+
+			return builder.ToString();
+		}
+
+		private static string PrintPartitions(IPartitionManager instance)
+		{
+			TableBuilder builder = new TableBuilder("Id", "Partition", "Controls", "Rooms");
+
+			foreach (IPartition partition in instance.Partitions.OrderBy(c => c.Id))
+			{
+				int id = partition.Id;
+				string controls = StringUtils.ArrayFormat(partition.GetPartitionControls().Order());
+				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
+
+				builder.AddRow(id, partition, controls, rooms);
+			}
+
+			return builder.ToString();
+		}
+	}
+}
