@@ -6,6 +6,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
@@ -48,8 +49,35 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
+			yield return new ConsoleCommand("PrintCells", "Prints the list of all cells.", () => PrintCells(instance));
 			yield return new ConsoleCommand("PrintPartitions", "Prints the list of all partitions.", () => PrintPartitions(instance));
 			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms());
+		}
+
+		private static string PrintCells(IPartitionManager instance)
+		{
+			TableBuilder builder = new TableBuilder("Id", "Cell", "Column", "Row", "Room");
+
+			foreach (ICell cell in instance.Cells.OrderBy(c => c.Id))
+				builder.AddRow(cell.Id, cell, cell.Column, cell.Row, cell.Room);
+
+			return builder.ToString();
+		}
+
+		private static string PrintPartitions(IPartitionManager instance)
+		{
+			TableBuilder builder = new TableBuilder("Id", "Partition", "Controls", "Rooms");
+
+			foreach (IPartition partition in instance.Partitions.OrderBy(c => c.Id))
+			{
+				int id = partition.Id;
+				string controls = StringUtils.ArrayFormat(partition.GetPartitionControls().Order());
+				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
+
+				builder.AddRow(id, partition, controls, rooms);
+			}
+
+			return builder.ToString();
 		}
 
 		private static string PrintRooms()
@@ -67,22 +95,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				string children = StringUtils.ArrayFormat(room.GetRooms().Select(r => r.Id).Order());
 
 				builder.AddRow(id, room, children, room.CombinePriority, room.CombineState);
-			}
-
-			return builder.ToString();
-		}
-
-		private static string PrintPartitions(IPartitionManager instance)
-		{
-			TableBuilder builder = new TableBuilder("Id", "Partition", "Controls", "Rooms");
-
-			foreach (IPartition partition in instance.Partitions.OrderBy(c => c.Id))
-			{
-				int id = partition.Id;
-				string controls = StringUtils.ArrayFormat(partition.GetPartitionControls().Order());
-				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
-
-				builder.AddRow(id, partition, controls, rooms);
 			}
 
 			return builder.ToString();
