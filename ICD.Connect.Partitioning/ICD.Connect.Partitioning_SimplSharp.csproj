@@ -79,13 +79,12 @@
     <Compile Include="PartitionManagers\AbstractPartitionManager.cs" />
     <Compile Include="PartitionManagers\AbstractPartitionManagerSettings.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
+    <Compile Include="PartitionManagers\CellsCollection.cs" />
+    <Compile Include="PartitionManagers\ICellsCollection.cs" />
     <Compile Include="PartitionManagers\IPartitionManagerSettings.cs" />
     <Compile Include="PartitionManagers\PartitionManager.cs" />
     <Compile Include="PartitionManagers\PartitionManagerSettings.cs" />
     <Compile Include="PartitionManagers\PartitionsCollection.cs" />
-    <Compile Include="PartitionManagers\RoomLayout.cs" />
-    <Compile Include="PartitionManagers\RoomLayoutInfo.cs" />
-    <Compile Include="PartitionManagers\RoomLayoutSettings.cs" />
     <Compile Include="Partitions\AbstractPartition.cs" />
     <Compile Include="Partitions\AbstractPartitionSettings.cs" />
     <Compile Include="PartitionManagers\IPartitionsCollection.cs" />
@@ -106,7 +105,6 @@
     <Compile Include="PartitionManagers\IPartitionManager.cs" />
     <Compile Include="Partitions\IPartitionSettings.cs" />
     <Compile Include="Rooms\IRoom.cs" />
-    <Compile Include="PartitionManagers\IRoomLayout.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />

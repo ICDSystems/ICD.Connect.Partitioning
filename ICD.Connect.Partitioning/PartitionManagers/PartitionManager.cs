@@ -10,6 +10,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
@@ -26,20 +27,23 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		public override event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
 
+		private readonly CellsCollection m_Cells;
 		private readonly PartitionsCollection m_Partitions;
-		private readonly RoomLayout m_RoomLayout;
 		private readonly IcdHashSet<IPartitionDeviceControl> m_SubscribedPartitions;
 
 		#region Properties
 
 		private static ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
 
-		public override IPartitionsCollection Partitions { get { return m_Partitions; } }
+		/// <summary>
+		/// Gets the cells in the system.
+		/// </summary>
+		public override ICellsCollection Cells { get { return m_Cells; } }
 
 		/// <summary>
-		/// Gets the layout of rooms in the system.
+		/// Gets the partitions in the system.
 		/// </summary>
-		public override IRoomLayout RoomLayout { get { return m_RoomLayout; } }
+		public override IPartitionsCollection Partitions { get { return m_Partitions; } }
 
 		#endregion
 
@@ -48,8 +52,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		public PartitionManager()
 		{
+			m_Cells = new CellsCollection(this);
 			m_Partitions = new PartitionsCollection(this);
-			m_RoomLayout = new RoomLayout(this);
+			
 			m_SubscribedPartitions = new IcdHashSet<IPartitionDeviceControl>();
 
 			ServiceProvider.AddService<IPartitionManager>(this);
@@ -720,15 +725,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			UnsubscribePartitions();
 
 			Partitions.Clear();
-			RoomLayout.Clear();
+			Cells.Clear();
 		}
 
 		protected override void CopySettingsFinal(PartitionManagerSettings settings)
 		{
 			base.CopySettingsFinal(settings);
 
+			settings.CellSettings.SetRange(Cells.Where(c => c.Serialize).Select(r => r.CopySettings()));
 			settings.PartitionSettings.SetRange(Partitions.Where(c => c.Serialize).Select(r => r.CopySettings()));
-			settings.RoomLayoutSettings.SetRooms(RoomLayout.GetRooms());
 		}
 
 		protected override void ApplySettingsFinal(PartitionManagerSettings settings, IDeviceFactory factory)
@@ -740,11 +745,17 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			IEnumerable<IPartition> partitions = GetPartitions(settings, factory);
 			Partitions.SetChildren(partitions);
 
-			RoomLayout.SetRooms(settings.RoomLayoutSettings.GetRooms());
+			IEnumerable<ICell> cells = GetCells(settings, factory);
+			Cells.SetChildren(cells);
 
 			SubscribePartitions();
 
 			m_Partitions.OnChildrenChanged += PartitionsOnChildrenChanged;
+		}
+
+		private IEnumerable<ICell> GetCells(PartitionManagerSettings settings, IDeviceFactory factory)
+		{
+			return GetOriginatorsSkipExceptions<ICell>(settings.CellSettings, factory);
 		}
 
 		private IEnumerable<IPartition> GetPartitions(PartitionManagerSettings settings, IDeviceFactory factory)
@@ -766,7 +777,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				}
 				catch (Exception e)
 				{
-					Logger.AddEntry(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
+					Log(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
 					continue;
 				}
 

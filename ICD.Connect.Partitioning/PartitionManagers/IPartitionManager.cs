@@ -23,9 +23,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		IPartitionsCollection Partitions { get; }
 
 		/// <summary>
-		/// Gets the layout of rooms in the system.
+		/// Gets the cells in the system.
 		/// </summary>
-		IRoomLayout RoomLayout { get; }
+		ICellsCollection Cells { get; }
 
 		/// <summary>
 		/// Gets the control for the given partition.
