@@ -4,7 +4,6 @@ using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
-using ICD.Connect.Settings.Originators;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms
@@ -284,6 +283,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 
@@ -291,6 +293,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 			
 			Assert.Inconclusive();
+			*/
 		}
 
 		[Test]
@@ -342,6 +345,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(roomB);
 			core.Originators.AddChild(roomC);
 
+			Assert.Fail();
+
+			/*
 			// Add the partition
 			Partition partition = new Partition { Id = 4 };
 			partition.AddRoom(roomB.Id);
@@ -459,6 +465,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsTrue(roomCContents.Contains(roomC4));
 			Assert.IsTrue(roomCContents.Contains(roomC5));
 			Assert.IsTrue(roomCContents.Contains(roomC6));
+			*/
 		}
 
 		[Test]

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using ICD.Common.Utils.Services;
+﻿using ICD.Common.Utils.Services;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
@@ -137,6 +136,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 
@@ -145,6 +147,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsFalse(a.IsCombineRoom());
 			Assert.IsFalse(b.IsCombineRoom());
 			Assert.IsTrue(c.IsCombineRoom());
+			*/
 		}
 
 		[Test]
@@ -189,6 +192,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 			partition.AddRoom(c.Id);
@@ -199,6 +205,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsNull(b.GetMasterRoom());
 			Assert.IsNull(c.GetMasterRoom());
 			Assert.AreEqual(b, parent.GetMasterRoom());
+			*/
 		}
 
 		[Test]
@@ -243,6 +250,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 			partition.AddRoom(c.Id);
@@ -258,6 +268,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.AreEqual(2, slaves.Length);
 			Assert.IsTrue(slaves.Contains(a));
 			Assert.IsTrue(slaves.Contains(c));
+			*/
 		}
 
 		[Test]
@@ -302,6 +313,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 			partition.AddRoom(c.Id);
@@ -318,6 +332,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.AreEqual(b, masterAndSlaves[0]);
 			Assert.IsTrue(masterAndSlaves.Contains(a));
 			Assert.IsTrue(masterAndSlaves.Contains(c));
+			*/
 		}
 
 		[Test]
@@ -353,6 +368,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 
@@ -368,6 +386,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 			Assert.IsTrue(cRooms.Contains(a));
 			Assert.IsTrue(cRooms.Contains(b));
+			*/
 		}
 
 		[Test]
@@ -403,6 +422,9 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			core.Originators.AddChild(c);
 			core.Originators.AddChild(partition);
 
+			Assert.Fail();
+
+			/*
 			partition.AddRoom(a.Id);
 			partition.AddRoom(b.Id);
 
@@ -423,6 +445,7 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsTrue(cRooms.Contains(a));
 			Assert.IsTrue(cRooms.Contains(b));
 			Assert.IsTrue(cRooms.Contains(c));
+			*/
 		}
 
 		#endregion
