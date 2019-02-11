@@ -1,11 +1,25 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Settings;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
 	public interface IPartitionSettings : ISettings
 	{
+		/// <summary>
+		/// Gets/sets the id for the first cell adjacent to this partition.
+		/// </summary>
+		[OriginatorIdSettingsProperty(typeof(ICell))]
+		int? CellAId { get; set; }
+
+		/// <summary>
+		/// Gets/sets the id for the second cell adjacent to this partition.
+		/// </summary>
+		[OriginatorIdSettingsProperty(typeof(ICell))]
+		int? CellBId { get; set; }
+
 		/// <summary>
 		/// Sets the controls associated with this partition.
 		/// </summary>
@@ -17,17 +31,5 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		/// <returns></returns>
 		IEnumerable<DeviceControlInfo> GetPartitionControls();
-
-		/// <summary>
-		/// Sets the rooms that are adjacent to the partition.
-		/// </summary>
-		/// <param name="roomIds"></param>
-		void SetRooms(IEnumerable<int> roomIds);
-
-		/// <summary>
-		/// Returns the rooms that are added as adjacent to the partition.
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<int> GetRooms();
 	}
 }
