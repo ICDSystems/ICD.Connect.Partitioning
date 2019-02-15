@@ -83,6 +83,10 @@
     <Compile Include="Partitions\AbstractPartition.cs" />
     <Compile Include="Partitions\AbstractPartitionSettings.cs" />
     <Compile Include="PartitionManagers\IPartitionsCollection.cs" />
+    <Compile Include="RoomGroups\AbstractRoomGroup.cs" />
+    <Compile Include="RoomGroups\AbstractRoomGroupSettings.cs" />
+    <Compile Include="RoomGroups\IRoomGroup.cs" />
+    <Compile Include="RoomGroups\IRoomGroupSettings.cs" />
     <Compile Include="Rooms\AbstractRoomSettings.cs" />
     <Compile Include="Controls\AbstractPartitionDeviceControl.cs" />
     <Compile Include="Controls\IPartitionDeviceControl.cs" />
