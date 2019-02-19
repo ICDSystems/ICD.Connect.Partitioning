@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Moved partition control open state and event handling into abstraction
+
 ## [11.0.0] - 2019-02-11
 ### Added
  - Added ConferencePoint ids under Room in configuration

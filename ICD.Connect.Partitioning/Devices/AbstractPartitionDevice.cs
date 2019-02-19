@@ -49,7 +49,7 @@ namespace ICD.Connect.Partitioning.Devices
 
 				m_IsOpen = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} open status changed to {1}", this, m_IsOpen);
+				Log(eSeverity.Informational, "Open status changed to {0}", m_IsOpen);
 
 				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
 			}

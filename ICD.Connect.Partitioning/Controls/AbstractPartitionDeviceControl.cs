@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -14,12 +15,49 @@ namespace ICD.Connect.Partitioning.Controls
 		/// <summary>
 		/// Raised when the partition is detected as open or closed.
 		/// </summary>
-		public abstract event EventHandler<BoolEventArgs> OnOpenStatusChanged;
+		public event EventHandler<BoolEventArgs> OnOpenStatusChanged;
+
+		private bool m_IsOpen;
 
 		/// <summary>
 		/// Returns the current open state of the partition.
 		/// </summary>
-		public abstract bool IsOpen { get; }
+		public bool IsOpen
+		{
+			get { return m_IsOpen; }
+			protected set
+			{
+				if (value == m_IsOpen)
+					return;
+
+				m_IsOpen = value;
+
+				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
+			}
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <param name="id"></param>
+		protected AbstractPartitionDeviceControl(TParent parent, int id)
+			: base(parent, id)
+		{
+		}
+
+		/// <summary>
+		/// Override to release resources.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnOpenStatusChanged = null;
+
+			base.DisposeFinal(disposing);
+		}
+
+		#region Methods
 
 		/// <summary>
 		/// Opens the partition.
@@ -42,15 +80,7 @@ namespace ICD.Connect.Partitioning.Controls
 				Open();
 		}
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="parent"></param>
-		/// <param name="id"></param>
-		protected AbstractPartitionDeviceControl(TParent parent, int id)
-			: base(parent, id)
-		{
-		}
+		#endregion
 
 		#region Console
 

@@ -1,6 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.EventArguments;
-using ICD.Common.Utils.Extensions;
+﻿using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Partitioning.Devices;
 
 namespace ICD.Connect.Partitioning.Controls
@@ -11,16 +9,6 @@ namespace ICD.Connect.Partitioning.Controls
 	public sealed class PartitionDeviceControl : AbstractPartitionDeviceControl<IPartitionDevice>
 	{
 		/// <summary>
-		/// Raised when the partition is detected as open or closed.
-		/// </summary>
-		public override event EventHandler<BoolEventArgs> OnOpenStatusChanged;
-
-		/// <summary>
-		/// Returns the current open state of the partition.
-		/// </summary>
-		public override bool IsOpen { get { return Parent.IsOpen; } }
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="parent"></param>
@@ -29,6 +17,8 @@ namespace ICD.Connect.Partitioning.Controls
 			: base(parent, id)
 		{
 			parent.OnOpenStatusChanged += ParentOnOpenStatusChanged;
+
+			IsOpen = parent.IsOpen;
 		}
 
 		/// <summary>
@@ -36,8 +26,6 @@ namespace ICD.Connect.Partitioning.Controls
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnOpenStatusChanged = null;
-
 			Parent.OnOpenStatusChanged -= ParentOnOpenStatusChanged;
 
 			base.DisposeFinal(disposing);
@@ -66,7 +54,7 @@ namespace ICD.Connect.Partitioning.Controls
 		/// <param name="args"></param>
 		private void ParentOnOpenStatusChanged(object sender, BoolEventArgs args)
 		{
-			OnOpenStatusChanged.Raise(this, new BoolEventArgs(args.Data));
+			IsOpen = Parent.IsOpen;
 		}
 	}
 }
