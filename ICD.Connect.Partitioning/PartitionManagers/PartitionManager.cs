@@ -744,10 +744,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			base.ApplySettingsFinal(settings, factory);
 
 			IEnumerable<IPartition> partitions = GetPartitions(settings, factory);
-			Partitions.SetChildren(partitions);
+			m_Partitions.SetChildren(partitions);
 
 			IEnumerable<ICell> cells = GetCells(settings, factory);
-			Cells.SetChildren(cells);
+			m_Cells.SetChildren(cells);
+			m_Cells.RebuildCache();
 
 			SubscribePartitions();
 

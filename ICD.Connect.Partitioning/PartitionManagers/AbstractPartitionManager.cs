@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;

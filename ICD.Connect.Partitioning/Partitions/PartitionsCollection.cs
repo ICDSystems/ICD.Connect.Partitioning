@@ -6,11 +6,11 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
-using ICD.Connect.Partitioning.Partitions;
+using ICD.Connect.Partitioning.PartitionManagers;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Originators;
 
-namespace ICD.Connect.Partitioning.PartitionManagers
+namespace ICD.Connect.Partitioning.Partitions
 {
 	public sealed class PartitionsCollection : AbstractOriginatorCollection<IPartition>, IPartitionsCollection
 	{

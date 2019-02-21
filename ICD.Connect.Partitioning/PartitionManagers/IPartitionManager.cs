@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
