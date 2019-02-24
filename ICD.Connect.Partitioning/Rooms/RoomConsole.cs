@@ -28,7 +28,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			yield return ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstances<IPanelDevice>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstances<IPort>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstances<IDevice>(), p => (uint)p.Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstances<ISource>(), p => (uint)p.Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstances<ISourceBase>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstances<IDestination>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Partitions", instance.Originators.GetInstances<IPartition>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("VolumePoints", instance.Originators.GetInstances<IVolumePoint>(), p => (uint)p.Id);
