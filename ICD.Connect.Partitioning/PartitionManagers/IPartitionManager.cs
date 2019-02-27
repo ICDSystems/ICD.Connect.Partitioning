@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
@@ -140,5 +141,31 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partitionControl"></param>
 		/// <param name="constructor"></param>
 		void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor) where TRoom : IRoom;
+	}
+
+	public static class PartitionManagerExtensions
+	{
+		/// <summary>
+		/// Gets the partition for the given cell coordinates and direction.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="column"></param>
+		/// <param name="row"></param>
+		/// <param name="direction"></param>
+		/// <returns></returns>
+		public static IPartition GetPartition(this IPartitionManager extends, int column, int row, eCellDirection direction)
+		{
+			// get original cell if it exists
+			var cell = extends.Cells.GetCell(column, row);
+			if (cell == null)
+				return null;
+
+			var neighborCell = extends.Cells.GetNeighboringCell(column, row, direction);
+			if (neighborCell == null)
+				return null;
+
+			// find partition that's in between both cells
+			return extends.Partitions.FirstOrDefault(p => p.CellA == cell && p.CellB == neighborCell || p.CellA == neighborCell && p.CellB == cell);
+		}
 	}
 }

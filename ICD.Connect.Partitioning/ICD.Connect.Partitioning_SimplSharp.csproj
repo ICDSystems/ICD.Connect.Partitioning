@@ -73,6 +73,7 @@
     <Compile Include="Cells\AbstractCellSettings.cs" />
     <Compile Include="Cells\Cell.cs" />
     <Compile Include="Cells\CellColumnRowInfo.cs" />
+    <Compile Include="Cells\CellDirectionEventArgs.cs" />
     <Compile Include="Cells\CellSettings.cs" />
     <Compile Include="Cells\ICell.cs" />
     <Compile Include="Cells\ICellSettings.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="PartitionManagers\PartitionManager.cs" />
     <Compile Include="PartitionManagers\PartitionManagerConsole.cs" />
     <Compile Include="PartitionManagers\PartitionManagerSettings.cs" />
-    <Compile Include="Partitions\PartitionDirectionEventArgs.cs" />
     <Compile Include="Partitions\PartitionsCollection.cs" />
     <Compile Include="Partitions\AbstractPartition.cs" />
     <Compile Include="Partitions\AbstractPartitionSettings.cs" />
