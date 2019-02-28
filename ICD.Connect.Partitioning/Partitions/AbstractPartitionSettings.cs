@@ -18,7 +18,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		private const string ELEMENT_PARTITION_CONTROLS = "PartitionControls";
 		private const string ELEMENT_PARTITION_CONTROL = "PartitionControl";
 
-		private readonly IcdHashSet<PartitionDeviceControlInfo> m_Controls;
+		private readonly IcdHashSet<PartitionControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		protected AbstractPartitionSettings()
 		{
-			m_Controls = new IcdHashSet<PartitionDeviceControlInfo>();
+			m_Controls = new IcdHashSet<PartitionControlInfo>();
 			m_Section = new SafeCriticalSection();
 		}
 
@@ -46,7 +46,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		public void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls)
+		public void SetPartitionControls(IEnumerable<PartitionControlInfo> partitionControls)
 		{
 			m_Section.Enter();
 
@@ -65,7 +65,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Returns the controls that are associated with thr
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<PartitionDeviceControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionControlInfo> GetPartitionControls()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray());
 		}
@@ -96,9 +96,9 @@ namespace ICD.Connect.Partitioning.Partitions
 			CellAId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_A);
 			CellBId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_B);
 
-			IEnumerable<PartitionDeviceControlInfo> partitionControls =
+			IEnumerable<PartitionControlInfo> partitionControls =
 				XmlUtils.ReadListFromXml(xml, ELEMENT_PARTITION_CONTROLS, ELEMENT_PARTITION_CONTROL,
-										 e => PartitionDeviceControlInfo.ReadFromXml(e));
+										 e => PartitionControlInfo.ReadFromXml(e));
 
 			SetPartitionControls(partitionControls);
 		}

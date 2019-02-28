@@ -27,7 +27,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<PartitionDeviceControlInfo> GetPartitionControls();
+		IEnumerable<PartitionControlInfo> GetPartitionControls();
 	}
 
 	public static class PartitionExtensions

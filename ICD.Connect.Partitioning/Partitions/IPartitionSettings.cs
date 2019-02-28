@@ -25,12 +25,12 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls);
+		void SetPartitionControls(IEnumerable<PartitionControlInfo> partitionControls);
 
 		/// <summary>
 		/// Returns the controls that are associated with thr
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<PartitionDeviceControlInfo> GetPartitionControls();
+		IEnumerable<PartitionControlInfo> GetPartitionControls();
 	}
 }

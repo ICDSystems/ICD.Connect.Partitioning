@@ -6,7 +6,7 @@ using ICD.Connect.Devices.Controls;
 
 namespace ICD.Connect.Partitioning.Controls
 {
-	public struct PartitionDeviceControlInfo : IEquatable<PartitionDeviceControlInfo>, IComparable<PartitionDeviceControlInfo>
+	public struct PartitionControlInfo : IEquatable<PartitionControlInfo>, IComparable<PartitionControlInfo>
 	{
 		private const string MODE_ELEMENT = "Mode";
 
@@ -29,7 +29,7 @@ namespace ICD.Connect.Partitioning.Controls
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <param name="control"></param>
-		public PartitionDeviceControlInfo(ePartitionFeedback mode, DeviceControlInfo control)
+		public PartitionControlInfo(ePartitionFeedback mode, DeviceControlInfo control)
 		{
 			m_Mode = mode;
 			m_Control = control;
@@ -67,7 +67,7 @@ namespace ICD.Connect.Partitioning.Controls
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		public static PartitionDeviceControlInfo ReadFromXml(string xml)
+		public static PartitionControlInfo ReadFromXml(string xml)
 		{
 			ePartitionFeedback mode =
 				XmlUtils.TryReadChildElementContentAsEnum<ePartitionFeedback>(xml, MODE_ELEMENT, true) ?? ePartitionFeedback.None;
@@ -75,7 +75,7 @@ namespace ICD.Connect.Partitioning.Controls
 			// Hack - we have the same elements as a DeviceControlInfo
 			DeviceControlInfo control = DeviceControlInfo.ReadFromXml(xml);
 
-			return new PartitionDeviceControlInfo(mode, control);
+			return new PartitionControlInfo(mode, control);
 		}
 
 		#region Equality
@@ -86,7 +86,7 @@ namespace ICD.Connect.Partitioning.Controls
 		/// <param name="a1"></param>
 		/// <param name="a2"></param>
 		/// <returns></returns>
-		public static bool operator ==(PartitionDeviceControlInfo a1, PartitionDeviceControlInfo a2)
+		public static bool operator ==(PartitionControlInfo a1, PartitionControlInfo a2)
 		{
 			return a1.Equals(a2);
 		}
@@ -97,12 +97,12 @@ namespace ICD.Connect.Partitioning.Controls
 		/// <param name="a1"></param>
 		/// <param name="a2"></param>
 		/// <returns></returns>
-		public static bool operator !=(PartitionDeviceControlInfo a1, PartitionDeviceControlInfo a2)
+		public static bool operator !=(PartitionControlInfo a1, PartitionControlInfo a2)
 		{
 			return !a1.Equals(a2);
 		}
 
-		public int CompareTo(PartitionDeviceControlInfo other)
+		public int CompareTo(PartitionControlInfo other)
 		{
 			int result = m_Control.CompareTo(other.m_Control);
 			if (result != 0)
@@ -113,7 +113,7 @@ namespace ICD.Connect.Partitioning.Controls
 // ReSharper restore ImpureMethodCallOnReadonlyValueField
 		}
 
-		public bool Equals(PartitionDeviceControlInfo other)
+		public bool Equals(PartitionControlInfo other)
 		{
 			return m_Mode == other.m_Mode &&
 				   m_Control == other.m_Control;
@@ -126,7 +126,7 @@ namespace ICD.Connect.Partitioning.Controls
 		/// <returns></returns>
 		public override bool Equals(object other)
 		{
-			return other is PartitionDeviceControlInfo && Equals((PartitionDeviceControlInfo)other);
+			return other is PartitionControlInfo && Equals((PartitionControlInfo)other);
 		}
 
 		/// <summary>

@@ -13,7 +13,7 @@ namespace ICD.Connect.Partitioning.Partitions
 	public abstract class AbstractPartition<TSettings> : AbstractOriginator<TSettings>, IPartition
 		where TSettings : IPartitionSettings, new()
 	{
-		private readonly IcdHashSet<PartitionDeviceControlInfo> m_Controls;
+		private readonly IcdHashSet<PartitionControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
 
 		#region Properties
@@ -35,7 +35,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		protected AbstractPartition()
 		{
-			m_Controls = new IcdHashSet<PartitionDeviceControlInfo>();
+			m_Controls = new IcdHashSet<PartitionControlInfo>();
 			m_Section = new SafeCriticalSection();
 		}
 
@@ -45,7 +45,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<PartitionDeviceControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionControlInfo> GetPartitionControls()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray(m_Controls.Count));
 		}
@@ -54,7 +54,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls that are associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		public void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls)
+		public void SetPartitionControls(IEnumerable<PartitionControlInfo> partitionControls)
 		{
 			m_Section.Enter();
 
@@ -83,7 +83,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			CellA = null;
 			CellB = null;
 
-			SetPartitionControls(Enumerable.Empty<PartitionDeviceControlInfo>());
+			SetPartitionControls(Enumerable.Empty<PartitionControlInfo>());
 		}
 
 		/// <summary>
