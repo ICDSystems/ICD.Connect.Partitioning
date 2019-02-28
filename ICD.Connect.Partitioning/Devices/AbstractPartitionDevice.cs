@@ -32,11 +32,6 @@ namespace ICD.Connect.Partitioning.Devices
 		public PartitionDeviceControl PartitionControl { get { return m_PartitionControl; } }
 
 		/// <summary>
-		/// Gets the partition control for this device.
-		/// </summary>
-		IPartitionDeviceControl IPartitionDevice.PartitionControl { get { return PartitionControl; } }
-
-		/// <summary>
 		/// Returns the current open state of the partition.
 		/// </summary>
 		public bool IsOpen
@@ -85,6 +80,17 @@ namespace ICD.Connect.Partitioning.Devices
 		/// Closes the partition.
 		/// </summary>
 		public abstract void Close();
+
+		/// <summary>
+		/// Toggles the open state of the partition.
+		/// </summary>
+		public virtual void Toggle()
+		{
+			if (IsOpen)
+				Close();
+			else
+				Open();
+		}
 
 		#region Console
 
