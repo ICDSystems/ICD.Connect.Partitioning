@@ -79,6 +79,7 @@
     <Compile Include="Cells\ICellSettings.cs" />
     <Compile Include="Controls\ePartitionFeedback.cs" />
     <Compile Include="Controls\IPartitionControlBase.cs" />
+    <Compile Include="Controls\PartitionDeviceControlInfo.cs" />
     <Compile Include="eCombineMode.cs" />
     <Compile Include="PartitionManagers\AbstractPartitionManager.cs" />
     <Compile Include="PartitionManagers\AbstractPartitionManagerSettings.cs" />

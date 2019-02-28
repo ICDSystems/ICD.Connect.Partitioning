@@ -2,8 +2,8 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Cells;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings.Originators;
@@ -13,7 +13,7 @@ namespace ICD.Connect.Partitioning.Partitions
 	public abstract class AbstractPartition<TSettings> : AbstractOriginator<TSettings>, IPartition
 		where TSettings : IPartitionSettings, new()
 	{
-		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
+		private readonly IcdHashSet<PartitionDeviceControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
 
 		#region Properties
@@ -35,7 +35,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		protected AbstractPartition()
 		{
-			m_Controls = new IcdHashSet<DeviceControlInfo>();
+			m_Controls = new IcdHashSet<PartitionDeviceControlInfo>();
 			m_Section = new SafeCriticalSection();
 		}
 
@@ -45,7 +45,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<DeviceControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionDeviceControlInfo> GetPartitionControls()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray(m_Controls.Count));
 		}
@@ -54,7 +54,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls that are associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		public void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls)
+		public void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls)
 		{
 			m_Section.Enter();
 
@@ -83,7 +83,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			CellA = null;
 			CellB = null;
 
-			SetPartitionControls(Enumerable.Empty<DeviceControlInfo>());
+			SetPartitionControls(Enumerable.Empty<PartitionDeviceControlInfo>());
 		}
 
 		/// <summary>
@@ -108,7 +108,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
 		{
 			// Load the partition controls
-			factory.LoadOriginators(settings.GetPartitionControls().Select(c => c.DeviceId));
+			factory.LoadOriginators(settings.GetPartitionControls().Select(c => c.Control.DeviceId));
 
 			base.ApplySettingsFinal(settings, factory);
 

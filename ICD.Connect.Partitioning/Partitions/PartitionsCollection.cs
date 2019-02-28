@@ -164,7 +164,7 @@ namespace ICD.Connect.Partitioning.Partitions
 					}
 
 					// Build control to partition lookup
-					foreach (DeviceControlInfo partitionControl in child.GetPartitionControls())
+					foreach (DeviceControlInfo partitionControl in child.GetPartitionControls().Select(p => p.Control))
 					{
 						if (!m_ControlPartitions.ContainsKey(partitionControl))
 							m_ControlPartitions.Add(partitionControl, new IcdHashSet<IPartition>());

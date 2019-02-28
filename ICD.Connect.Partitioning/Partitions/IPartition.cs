@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Cells;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Originators;
 
@@ -27,7 +27,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<DeviceControlInfo> GetPartitionControls();
+		IEnumerable<PartitionDeviceControlInfo> GetPartitionControls();
 	}
 
 	public static class PartitionExtensions

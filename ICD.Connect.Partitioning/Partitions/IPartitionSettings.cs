@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Cells;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
@@ -24,12 +25,12 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls);
+		void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls);
 
 		/// <summary>
 		/// Returns the controls that are associated with thr
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<DeviceControlInfo> GetPartitionControls();
+		IEnumerable<PartitionDeviceControlInfo> GetPartitionControls();
 	}
 }

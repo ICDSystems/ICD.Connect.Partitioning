@@ -2,10 +2,9 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Cells;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
@@ -19,7 +18,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		private const string ELEMENT_PARTITION_CONTROLS = "PartitionControls";
 		private const string ELEMENT_PARTITION_CONTROL = "PartitionControl";
 
-		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
+		private readonly IcdHashSet<PartitionDeviceControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
 
 		/// <summary>
@@ -39,7 +38,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		protected AbstractPartitionSettings()
 		{
-			m_Controls = new IcdHashSet<DeviceControlInfo>();
+			m_Controls = new IcdHashSet<PartitionDeviceControlInfo>();
 			m_Section = new SafeCriticalSection();
 		}
 
@@ -47,7 +46,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Sets the controls associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		public void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls)
+		public void SetPartitionControls(IEnumerable<PartitionDeviceControlInfo> partitionControls)
 		{
 			m_Section.Enter();
 
@@ -66,7 +65,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Returns the controls that are associated with thr
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<DeviceControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionDeviceControlInfo> GetPartitionControls()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray());
 		}
@@ -97,19 +96,9 @@ namespace ICD.Connect.Partitioning.Partitions
 			CellAId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_A);
 			CellBId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_B);
 
-			IEnumerable<DeviceControlInfo> partitionControls =
+			IEnumerable<PartitionDeviceControlInfo> partitionControls =
 				XmlUtils.ReadListFromXml(xml, ELEMENT_PARTITION_CONTROLS, ELEMENT_PARTITION_CONTROL,
-										 e => DeviceControlInfo.ReadFromXml(e));
-
-			// Migration
-			int? deviceId = XmlUtils.TryReadChildElementContentAsInt(xml, "Device");
-			int? controlId = XmlUtils.TryReadChildElementContentAsInt(xml, "Control");
-
-			if (deviceId.HasValue || controlId.HasValue)
-			{
-				DeviceControlInfo deviceControl = new DeviceControlInfo(deviceId ?? 0, controlId ?? 0);
-				partitionControls = partitionControls.Append(deviceControl);
-			}
+										 e => PartitionDeviceControlInfo.ReadFromXml(e));
 
 			SetPartitionControls(partitionControls);
 		}
