@@ -95,7 +95,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			base.CopySettingsFinal(settings);
 
 			settings.CellAId = CellA == null ? (int?)null : CellA.Id;
-			settings.CellAId = CellB == null ? (int?)null : CellB.Id;
+			settings.CellBId = CellB == null ? (int?)null : CellB.Id;
 
 			settings.SetPartitionControls(GetPartitionControls());
 		}
@@ -113,12 +113,9 @@ namespace ICD.Connect.Partitioning.Partitions
 			base.ApplySettingsFinal(settings, factory);
 
 			SetPartitionControls(settings.GetPartitionControls());
-
 			
-
-
-
-
+			CellA = settings.CellAId == null ? null : factory.GetOriginatorById<ICell>(settings.CellAId.Value);
+			CellB = settings.CellBId == null ? null : factory.GetOriginatorById<ICell>(settings.CellBId.Value);
 		}
 
 		#endregion
