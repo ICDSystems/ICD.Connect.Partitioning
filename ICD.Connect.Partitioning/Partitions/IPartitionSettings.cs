@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings;

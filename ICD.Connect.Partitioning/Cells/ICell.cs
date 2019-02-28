@@ -1,5 +1,4 @@
-﻿using ICD.Connect.Partitioning.Partitions;
-using ICD.Connect.Partitioning.Rooms;
+﻿using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Cells
