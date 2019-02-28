@@ -9,6 +9,13 @@ namespace ICD.Connect.Partitioning.Controls
 	public sealed class PartitionDeviceControl : AbstractPartitionDeviceControl<IPartitionDevice>
 	{
 		/// <summary>
+		/// Returns the mask for the type of feedback that is supported,
+		/// I.e. if we can set the open state of the partition, and if the partition
+		/// gives us feedback for the current open state.
+		/// </summary>
+		public override ePartitionFeedback SupportsFeedback { get { return Parent.SupportsFeedback; } }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="parent"></param>
@@ -31,6 +38,8 @@ namespace ICD.Connect.Partitioning.Controls
 			base.DisposeFinal(disposing);
 		}
 
+		#region Methods
+
 		/// <summary>
 		/// Opens the partition.
 		/// </summary>
@@ -46,6 +55,16 @@ namespace ICD.Connect.Partitioning.Controls
 		{
 			Parent.Close();
 		}
+
+		/// <summary>
+		/// Toggles the open state of the partition.
+		/// </summary>
+		public override void Toggle()
+		{
+			Parent.Toggle();
+		}
+
+		#endregion
 
 		/// <summary>
 		/// Called when the parent IsOpen status changes.
