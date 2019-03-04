@@ -167,5 +167,20 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			// find partition that's in between both cells
 			return extends.Partitions.FirstOrDefault(p => p.CellA == cell && p.CellB == neighborCell || p.CellA == neighborCell && p.CellB == cell);
 		}
+
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open) where TRoom : IRoom, new()
+		{
+			if (open)
+				extends.CombineRooms<TRoom>(partition, () => new TRoom());
+			else
+				extends.UncombineRooms<TRoom>(partition, () => new TRoom());
+		}
+
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open) where TRoom : IRoom, new()
+		{
+			var partitions = extends.Partitions.GetPartitions(partitionControl);
+			foreach (var partition in partitions)
+				extends.SetPartition<TRoom>(partition, open);
+		}
 	}
 }
