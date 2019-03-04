@@ -79,13 +79,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// Gets the controls for the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		public override IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition)
+		public override IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition, ePartitionFeedback mask)
 		{
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (PartitionControlInfo info in partition.GetPartitionControls())
+			foreach (PartitionControlInfo info in partition.GetPartitionControls(mask))
 			{
 				IPartitionDeviceControl control;
 
@@ -207,7 +208,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				throw new ArgumentNullException("constructor");
 
 			IcdHashSet<IPartition> open =
-				Partitions.Where(p => GetControls(p).Any(c => c.IsOpen))
+				Partitions.Where(p => GetControls(p, ePartitionFeedback.Get).Any(c => c.IsOpen))
 				          .ToIcdHashSet();
 
 			IcdHashSet<IPartition> closed =
@@ -621,7 +622,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => c.IsOpen))
+			foreach (IPartitionDeviceControl control in GetControls(partition, ePartitionFeedback.Set))
 				control.Close();
 		}
 
@@ -634,7 +635,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => !c.IsOpen))
+			foreach (IPartitionDeviceControl control in GetControls(partition, ePartitionFeedback.Set))
 				control.Open();
 		}
 
@@ -659,7 +660,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			UnsubscribePartitions();
 
-			m_SubscribedPartitions.AddRange(Partitions.SelectMany(p => GetControls(p)));
+			m_SubscribedPartitions.AddRange(Partitions.SelectMany(p => GetControls(p, ePartitionFeedback.Get)));
 
 			foreach (IPartitionDeviceControl partition in m_SubscribedPartitions)
 				Subscribe(partition);
