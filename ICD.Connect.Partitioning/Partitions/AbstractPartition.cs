@@ -51,6 +51,15 @@ namespace ICD.Connect.Partitioning.Partitions
 		}
 
 		/// <summary>
+		/// Gets the controls that are associated with this partition.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<PartitionControlInfo> GetPartitionControls(ePartitionFeedback mask)
+		{
+			return m_Section.Execute(() => m_Controls.Where(c => c.Mode.HasFlags(mask)).ToArray());
+		}
+
+		/// <summary>
 		/// Sets the controls that are associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>

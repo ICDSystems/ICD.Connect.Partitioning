@@ -30,12 +30,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		ICellsCollection Cells { get; }
 
 		/// <summary>
-		/// Gets the control for the given partition.
-		/// Returns null if the partition has no control specified.
+		/// Gets the controls for the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition);
+		IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition, ePartitionFeedback mask);
 
 		/// <summary>
 		/// Returns true if the given partition is currently part of a combine room.
