@@ -95,6 +95,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract void InitializeCombineRooms<TRoom>(Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
+		/// Combines/uncombines rooms in a single pass by opening/closing the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="open"></param>
+		/// <param name="close"></param>
+		/// <param name="constructor"></param>
+		public abstract void CombineRooms<TRoom>(IEnumerable<IPartition> open, IEnumerable<IPartition> close, Func<TRoom> constructor) where TRoom : IRoom;
+
+		/// <summary>
 		/// Creates a new room instance to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
@@ -104,30 +113,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance to contain the given partition controls.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="controls"></param>
-		/// <param name="constructor"></param>
-		public abstract void CombineRooms<TRoom>(IEnumerable<IPartitionDeviceControl> controls, Func<TRoom> constructor)
-			where TRoom : IRoom;
-
-		/// <summary>
 		/// Creates a new room instance to contain the given partition.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
 		/// <param name="constructor"></param>
 		public abstract void CombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
-
-		/// <summary>
-		/// Creates a new room instance to contain the partitions tied to the control.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public abstract void CombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-			where TRoom : IRoom;
 
 		/// <summary>
 		/// Removes the partitions from existing rooms.
@@ -143,15 +134,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partition"></param>
 		/// <param name="constructor"></param>
 		public abstract void UncombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
-
-		/// <summary>
-		/// Removes the partitions tied to the given control from existing rooms.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public abstract void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-			where TRoom : IRoom;
 
 		#endregion
 
