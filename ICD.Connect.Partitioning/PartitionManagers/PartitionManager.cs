@@ -200,16 +200,37 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			IcdHashSet<IPartition> open =
-				Partitions.Where(p => GetControls(p).Any(c => c.IsOpen))
-				          .ToIcdHashSet();
-
-			IcdHashSet<IPartition> closed =
-				Partitions.Where(p => !open.Contains(p))
-				          .ToIcdHashSet();
+			IcdHashSet<IPartition> open = Partitions.Where(InitializeOpen).ToIcdHashSet();
+			IcdHashSet<IPartition> closed = Partitions.Except(open).ToIcdHashSet();
 
 			UncombineRooms(closed, constructor);
 			CombineRooms(open, constructor);
+		}
+
+		/// <summary>
+		/// Returns true if the given partition should be considered open for the InitializeCombineRooms pass.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		private bool InitializeOpen(IPartition partition)
+		{
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
+			IcdHashSet<IPartitionDeviceControl> controls = GetControls(partition).ToIcdHashSet();
+			if (controls.Count == 0)
+				return false;
+
+			// Simple case
+			bool result;
+			if (controls.Select(c => c.IsOpen).Unanimous(out result))
+				return result;
+
+			// During uncombining when a partition has more than 1 control we hit the following situation:
+			//	- Control A is closed, Control B is still open
+			//	- Event is fired, external consumer tells partition manager to initialize combine rooms
+			//	- We need to determine that the partition should be closed even though one control is still open
+			return CombinesRoom(partition);
 		}
 
 		/// <summary>
