@@ -6,10 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.1.0] - 2019-04-05
+### Added
+ - Added features for determining if a given room is a master
+
+### Changed
+ - Fixed feedback issue when opening/closing partitions with multiple controls
+
 ## [10.0.1] - 2019-01-16
 ### Changed
  - Fixed issue with >1 partition
- - Failing more gracefully when trying to load paritions with missing controls
+ - Failing more gracefully when trying to load partitions with missing controls
 
 ## [10.0.0] - 2019-01-02
 ### Added
