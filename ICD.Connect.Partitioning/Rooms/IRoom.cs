@@ -55,12 +55,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Informs the room it is part of a combined room.
 		/// </summary>
-		void EnterCombineState();
-
-		/// <summary>
-		/// Informs the room it is no longer part of a combined room.
-		/// </summary>
-		void LeaveCombineState();
+		/// <param name="combine"></param>
+		void EnterCombineState(bool combine);
 
 		#endregion
 	}

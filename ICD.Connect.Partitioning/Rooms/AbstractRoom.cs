@@ -26,6 +26,9 @@ namespace ICD.Connect.Partitioning.Rooms
 	public abstract class AbstractRoom<TSettings> : AbstractOriginator<TSettings>, IRoom
 		where TSettings : IRoomSettings, new()
 	{
+		/// <summary>
+		/// Raised when the room combine state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
@@ -101,17 +104,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Informs the room it is part of a combined room.
 		/// </summary>
-		public void EnterCombineState()
+		/// <param name="combine"></param>
+		public void EnterCombineState(bool combine)
 		{
-			CombineState = true;
-		}
-
-		/// <summary>
-		/// Informs the room it is no longer part of a combined room.
-		/// </summary>
-		public void LeaveCombineState()
-		{
-			CombineState = false;
+			CombineState = combine;
 		}
 
 		#endregion

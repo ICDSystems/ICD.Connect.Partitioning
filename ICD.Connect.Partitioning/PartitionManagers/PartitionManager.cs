@@ -616,14 +616,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			foreach (IRoom room in rooms)
 			{
 				bool isCombineState = roomsInCombineState.Contains(room);
-
-				if (room.CombineState == isCombineState)
-					continue;
-
-				if (isCombineState)
-					room.EnterCombineState();
-				else
-					room.LeaveCombineState();
+				room.EnterCombineState(isCombineState);
 			}
 		}
 
