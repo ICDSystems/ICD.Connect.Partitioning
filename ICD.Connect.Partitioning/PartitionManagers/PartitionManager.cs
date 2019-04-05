@@ -125,6 +125,19 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public override IRoom GetCombineRoom(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return GetRooms().FirstOrDefault(r => r.ContainsRoom(room));
+		}
+
+		/// <summary>
 		/// Gets the combine room containing the given partition.
 		/// </summary>
 		/// <param name="partition"></param>

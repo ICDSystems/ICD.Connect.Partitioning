@@ -60,6 +60,13 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract bool CombinesRoom(int partitionId);
 
 		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public abstract IRoom GetCombineRoom(IRoom room);
+
+		/// <summary>
 		/// Gets the combine room containing the given partition.
 		/// </summary>
 		/// <param name="partition"></param>

@@ -59,6 +59,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				Log(eSeverity.Informational, "Combine state changed to {0}", m_CombineState);
 
+				HandleCombineState();
+
 				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
 			}
 		}
@@ -108,6 +110,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		public void EnterCombineState(bool combine)
 		{
 			CombineState = combine;
+		}
+
+		/// <summary>
+		/// Called when the room combine state changes.
+		/// </summary>
+		protected virtual void HandleCombineState()
+		{
 		}
 
 		#endregion

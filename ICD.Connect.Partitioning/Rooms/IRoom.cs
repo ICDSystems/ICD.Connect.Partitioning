@@ -8,6 +8,8 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
+using ICD.Connect.Partitioning.Extensions;
+using ICD.Connect.Partitioning.PartitionManagers;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Endpoints.Destinations;
@@ -330,6 +332,25 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Rooms
 
 		/// <summary>
+		/// Returns true if this room contains the given room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public static bool ContainsRoom(this IRoom extends, IRoom other)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			return extends.Originators
+			              .GetInstancesRecursive<IPartition>()
+			              .Any(p => p.ContainsRoom(other.Id));
+		}
+
+		/// <summary>
 		/// Returns true if the room is made up of child rooms.
 		/// </summary>
 		/// <param name="extends"></param>
@@ -340,6 +361,27 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("extends");
 
 			return extends.Originators.HasInstances<IPartition>();
+		}
+
+		/// <summary>
+		/// returns true if the room is a child to a combine space and is the master room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static bool IsMasterRoom(this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			IPartitionManager manager;
+			if (!extends.Core.TryGetPartitionManager(out manager))
+				return false;
+
+			IRoom parent = manager.GetCombineRoom(extends);
+			if (parent == null)
+				return false;
+
+			return extends == parent.GetMasterRoom();
 		}
 
 		/// <summary>
