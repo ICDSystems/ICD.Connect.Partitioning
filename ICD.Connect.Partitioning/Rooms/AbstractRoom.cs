@@ -85,7 +85,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected AbstractRoom()
 		{
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
-			m_OriginatorIds.OnChildrenChanged += OriginatorsOnChildrenChanged;
+			m_OriginatorIds.OnChildAdded += OriginatorsOnChildAdded;
+			m_OriginatorIds.OnChildRemoved += OriginatorsOnChildRemoved;
 		}
 
 		#endregion
@@ -120,9 +121,12 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 		}
 
-		protected virtual void OriginatorsOnChildrenChanged(object sender, OriginatorsChangedEventArgs eventArgs)
+		protected virtual void OriginatorsOnChildAdded(object sender, ChildChangedEventArgs eventArgs)
 		{
+		}
 
+		protected virtual void OriginatorsOnChildRemoved(object sender, ChildChangedEventArgs eventArgs)
+		{
 		}
 
 		#endregion

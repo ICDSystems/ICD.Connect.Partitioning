@@ -4,6 +4,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings;
 
@@ -11,7 +12,8 @@ namespace ICD.Connect.Partitioning.Rooms
 {
 	public sealed class RoomOriginatorIdCollection
 	{
-		public event EventHandler<OriginatorsChangedEventArgs> OnChildrenChanged;
+		public event EventHandler<ChildChangedEventArgs> OnChildAdded;
+		public event EventHandler<ChildChangedEventArgs> OnChildRemoved;
 
 		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
 		private readonly SafeCriticalSection m_Section;
@@ -74,6 +76,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (ids == null)
 				throw new ArgumentNullException("ids");
 
+			Dictionary<int, eCombineMode> added = new Dictionary<int, eCombineMode>();
+			Dictionary<int, eCombineMode> removed = new Dictionary<int, eCombineMode>();
+
 			m_Section.Enter();
 
 			try
@@ -82,22 +87,30 @@ namespace ICD.Connect.Partitioning.Rooms
 				if (newIds.DictionaryEqual(m_Ids))
 					return;
 
-				foreach (var id in m_Ids)
-				{
-					m_Ids.Remove(id.Key);
-					OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id.Key, eAddRemoveType.Removed));
-				}
+				removed.AddRange(m_Ids);
+				m_Ids.Clear();
 
-				foreach (var id in newIds)
+				foreach (KeyValuePair<int, eCombineMode> kvp in newIds)
 				{
-					m_Ids.Add(id.Key, id.Value);
-					OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id.Key, eAddRemoveType.Added));
+					m_Ids.Add(kvp.Key, kvp.Value);
+
+					eCombineMode mode;
+					if (removed.TryGetValue(kvp.Key, out mode) && kvp.Value == mode)
+						removed.Remove(kvp.Key);
+					else
+						added.Add(kvp.Key, kvp.Value);
 				}
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
+
+			foreach (KeyValuePair<int, eCombineMode> kvp in removed)
+				OnChildRemoved.Raise(this, new ChildChangedEventArgs(kvp.Key, kvp.Value));
+
+			foreach (KeyValuePair<int, eCombineMode> kvp in added)
+				OnChildAdded.Raise(this, new ChildChangedEventArgs(kvp.Key, kvp.Value));
 		}
 
 		/// <summary>
@@ -108,9 +121,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns>False if the collection already contains the given id and it has the given combine mode.</returns>
 		public bool Add(int id, eCombineMode combine)
 		{
-			bool output = AddInternal(id, combine);
-
-			return output;
+			return AddInternal(id, combine);
 		}
 
 		/// <summary>
@@ -119,22 +130,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="ids"></param>
 		public void AddRange(IEnumerable<KeyValuePair<int, eCombineMode>> ids)
 		{
-            if (ids == null)
-                throw new ArgumentNullException("ids");
+			if (ids == null)
+				throw new ArgumentNullException("ids");
 
-			bool output = false;
-			
-			m_Section.Enter();
-
-			try
-			{
-			    foreach (KeyValuePair<int, eCombineMode> kvp in ids)
-			        output |= AddInternal(kvp.Key, kvp.Value);
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
+			foreach (KeyValuePair<int, eCombineMode> kvp in ids)
+				AddInternal(kvp.Key, kvp.Value);
 		}
 
 		/// <summary>
@@ -163,7 +163,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				m_Section.Leave();
 			}
 			
-			OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id, eAddRemoveType.Added)); ;
+			OnChildAdded.Raise(this, new ChildChangedEventArgs(id, combine)); ;
 			
 			return true;
 		}
@@ -175,19 +175,23 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns>False if the collection doesn't contain the given id.</returns>
 		public bool Remove(int id)
 		{
+			eCombineMode combine;
+
 			m_Section.Enter();
 
 			try
 			{
-				if (!m_Ids.Remove(id))
+				if (!m_Ids.TryGetValue(id, out combine))
 					return false;
+
+				m_Ids.Remove(id);
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
 
-			OnChildrenChanged.Raise(this, new OriginatorsChangedEventArgs(id, eAddRemoveType.Removed));
+			OnChildRemoved.Raise(this, new ChildChangedEventArgs(id, combine));
 			return true;
 		}
 
