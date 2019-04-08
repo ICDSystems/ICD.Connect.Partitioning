@@ -52,6 +52,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		bool CombinesRoom(int partitionId);
 
 		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		IRoom GetCombineRoom(IRoom room);
+
+		/// <summary>
 		/// Gets the combine room containing the given partition.
 		/// </summary>
 		/// <param name="partition"></param>

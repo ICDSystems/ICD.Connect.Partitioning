@@ -18,17 +18,16 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 		public RoomOriginatorIdCollection Originators { get; set; }
 
+		/// <summary>
+		/// Informs the room it is part of a combined room.
+		/// </summary>
+		/// <param name="combine"></param>
+		public void EnterCombineState(bool combine)
+		{
+			throw new NotImplementedException();
+		}
+
 		public RoomOriginatorIdCollection AudioDestinations { get; set; }
-
-		public void EnterCombineState()
-		{
-			throw new NotImplementedException();
-		}
-
-		public void LeaveCombineState()
-		{
-			throw new NotImplementedException();
-		}
 	}
 
 	public sealed class TestRoomSettings: AbstractTestSettings

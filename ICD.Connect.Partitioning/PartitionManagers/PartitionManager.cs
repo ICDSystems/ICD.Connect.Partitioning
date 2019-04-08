@@ -132,6 +132,19 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public override IRoom GetCombineRoom(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return GetRooms().FirstOrDefault(r => r.ContainsRoom(room));
+		}
+
+		/// <summary>
 		/// Gets the combine room containing the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
@@ -207,19 +220,40 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			IcdHashSet<IPartition> open =
-				Partitions.Where(p => GetControls(p, ePartitionFeedback.Get).Any(c => c.IsOpen))
-				          .ToIcdHashSet();
-
-			IcdHashSet<IPartition> closed =
-				Partitions.Where(p => !open.Contains(p))
-				          .ToIcdHashSet();
+			IcdHashSet<IPartition> open = Partitions.Where(InitializeOpen).ToIcdHashSet();
+			IcdHashSet<IPartition> closed = Partitions.Except(open).ToIcdHashSet();
 
 			CombineRooms(open, closed, constructor);
 		}
 
 		/// <summary>
-		/// Combines/uncombines rooms in a single pass by opening/closing the given partitions.
+		/// Returns true if the given partition should be considered open for the InitializeCombineRooms pass.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		private bool InitializeOpen(IPartition partition)
+		{
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
+			IcdHashSet<IPartitionDeviceControl> controls = GetControls(partition, ePartitionFeedback.Get).ToIcdHashSet();
+			if (controls.Count == 0)
+				return false;
+
+			// Simple case
+			bool result;
+			if (controls.Select(c => c.IsOpen).Unanimous(out result))
+				return result;
+
+			// During uncombining when a partition has more than 1 control we hit the following situation:
+			//	- Control A is closed, Control B is still open
+			//	- Event is fired, external consumer tells partition manager to initialize combine rooms
+			//	- We need to determine that the partition should be closed even though one control is still open
+			return CombinesRoom(partition);
+		}
+
+		/// <summary>
+		/// Creates a new room instance to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="open"></param>
@@ -552,14 +586,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			foreach (IRoom room in rooms)
 			{
 				bool isCombineState = roomsInCombineState.Contains(room);
-
-				if (room.CombineState == isCombineState)
-					continue;
-
-				if (isCombineState)
-					room.EnterCombineState();
-				else
-					room.LeaveCombineState();
+				room.EnterCombineState(isCombineState);
 			}
 		}
 
