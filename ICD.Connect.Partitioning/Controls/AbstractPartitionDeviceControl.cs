@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -31,6 +32,8 @@ namespace ICD.Connect.Partitioning.Controls
 					return;
 
 				m_IsOpen = value;
+
+				Log(eSeverity.Informational, "IsOpen set to {0}", m_IsOpen);
 
 				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
 			}
