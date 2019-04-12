@@ -164,9 +164,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open) where TRoom : IRoom, new()
 		{
 			if (open)
-				extends.CombineRooms<TRoom>(partition, () => new TRoom());
+				extends.CombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
 			else
-				extends.UncombineRooms<TRoom>(partition, () => new TRoom());
+				extends.UncombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
 		}
 
 		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open) where TRoom : IRoom, new()
