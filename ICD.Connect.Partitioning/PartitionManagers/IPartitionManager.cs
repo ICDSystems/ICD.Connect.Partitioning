@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
@@ -148,31 +149,48 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <returns></returns>
 		public static IPartition GetPartition(this IPartitionManager extends, int column, int row, eCellDirection direction)
 		{
-			// get original cell if it exists
-			var cell = extends.Cells.GetCell(column, row);
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			// Get original cell if it exists
+			ICell cell = extends.Cells.GetCell(column, row);
 			if (cell == null)
 				return null;
 
-			var neighborCell = extends.Cells.GetNeighboringCell(column, row, direction);
+			ICell neighborCell = extends.Cells.GetNeighboringCell(column, row, direction);
 			if (neighborCell == null)
 				return null;
 
-			// find partition that's in between both cells
+			// Find partition that's in between both cells
 			return extends.Partitions.FirstOrDefault(p => p.CellA == cell && p.CellB == neighborCell || p.CellA == neighborCell && p.CellB == cell);
 		}
 
-		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open) where TRoom : IRoom, new()
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open)
+			where TRoom : IRoom, new()
 		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
 			if (open)
 				extends.CombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
 			else
 				extends.UncombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
 		}
 
-		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open) where TRoom : IRoom, new()
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open)
+			where TRoom : IRoom, new()
 		{
-			var partitions = extends.Partitions.GetPartitions(partitionControl);
-			foreach (var partition in partitions)
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (partitionControl == null)
+				throw new ArgumentNullException("partitionControl");
+
+			IEnumerable<IPartition> partitions = extends.Partitions.GetPartitions(partitionControl);
+			foreach (IPartition partition in partitions)
 				extends.SetPartition<TRoom>(partition, open);
 		}
 	}
