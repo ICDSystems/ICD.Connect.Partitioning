@@ -388,7 +388,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			DestroyCombineRooms(combineRooms);
 
 			// Find the sequence of contiguous partitions in the open set and (re)build combine rooms
-			List<List<IPartition>> groups = GetContiguous(openPartitionsUpdateSet).Select(g => g.ToList()).ToList();
+			IEnumerable<IEnumerable<IPartition>> groups = GetContiguous(openPartitionsUpdateSet).Select(g => g.ToArray()).ToArray();
 			CreateCombineRooms(groups, constructor);
 
 			if (!update)
