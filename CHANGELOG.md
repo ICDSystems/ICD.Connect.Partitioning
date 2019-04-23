@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - PartitionControls expose a mask for supporting get/set state operations
+ - Partitions can be configured with a mask for get/set state operations
+
+### Changed
+ - Significant performance improvements when opening/closing multiple partitions
+ - Partitions and rooms are aligned to a grid for visual representation
+
 ## [11.1.0] - 2019-04-23
 ### Changed
  - Moved partition control open state and event handling into abstraction
