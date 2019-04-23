@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.1.0] - 2019-04-23
 ### Changed
  - Moved partition control open state and event handling into abstraction
+ - Logging partition state changes
 
 ## [11.0.0] - 2019-02-11
 ### Added
