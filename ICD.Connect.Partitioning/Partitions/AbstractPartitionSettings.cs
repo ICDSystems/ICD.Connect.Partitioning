@@ -2,58 +2,51 @@
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Devices.Controls;
+using ICD.Connect.Partitioning.Cells;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Settings;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.Partitions
 {
 	public abstract class AbstractPartitionSettings : AbstractSettings, IPartitionSettings
 	{
-		private const string PARTITION_CONTROLS_ELEMENT = "PartitionControls";
-		private const string PARTITION_CONTROL_ELEMENT = "PartitionControl";
-		private const string ROOMS_ELEMENT = "Rooms";
-		private const string ROOM_ELEMENT = "Room";
+		private const string ELEMENT_CELL_A = "CellA";
+		private const string ELEMENT_CELL_B = "CellB";
 
-		private readonly IcdHashSet<int> m_Rooms;
-		private readonly IcdHashSet<DeviceControlInfo> m_Controls;
+		private const string ELEMENT_PARTITION_CONTROLS = "PartitionControls";
+		private const string ELEMENT_PARTITION_CONTROL = "PartitionControl";
+
+		private readonly IcdHashSet<PartitionControlInfo> m_Controls;
 		private readonly SafeCriticalSection m_Section;
+
+		/// <summary>
+		/// Gets/sets the id for the first cell adjacent to this partition.
+		/// </summary>
+		[OriginatorIdSettingsProperty(typeof(ICell))]
+		public int? CellAId { get; set; }
+
+		/// <summary>
+		/// Gets/sets the id for the second cell adjacent to this partition.
+		/// </summary>
+		[OriginatorIdSettingsProperty(typeof(ICell))]
+		public int? CellBId { get; set; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractPartitionSettings()
 		{
-			m_Rooms = new IcdHashSet<int>();
-			m_Controls = new IcdHashSet<DeviceControlInfo>();
+			m_Controls = new IcdHashSet<PartitionControlInfo>();
 			m_Section = new SafeCriticalSection();
-		}
-
-		/// <summary>
-		/// Sets the rooms that are adjacent to the partition.
-		/// </summary>
-		/// <param name="roomIds"></param>
-		public void SetRooms(IEnumerable<int> roomIds)
-		{
-			m_Section.Enter();
-
-			try
-			{
-				m_Rooms.Clear();
-				m_Rooms.AddRange(roomIds);
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
 		}
 
 		/// <summary>
 		/// Sets the controls associated with this partition.
 		/// </summary>
 		/// <param name="partitionControls"></param>
-		public void SetPartitionControls(IEnumerable<DeviceControlInfo> partitionControls)
+		public void SetPartitionControls(IEnumerable<PartitionControlInfo> partitionControls)
 		{
 			m_Section.Enter();
 
@@ -69,19 +62,10 @@ namespace ICD.Connect.Partitioning.Partitions
 		}
 
 		/// <summary>
-		/// Returns the rooms that are added as adjacent to the partition.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<int> GetRooms()
-		{
-			return m_Section.Execute(() => m_Rooms.ToArray());
-		}
-
-		/// <summary>
 		/// Returns the controls that are associated with thr
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<DeviceControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionControlInfo> GetPartitionControls()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray());
 		}
@@ -94,9 +78,11 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.WriteElements(writer);
 
-			XmlUtils.WriteListToXml(writer, GetPartitionControls(), PARTITION_CONTROLS_ELEMENT,
-			                        (w, d) => d.WriteToXml(w, PARTITION_CONTROL_ELEMENT));
-			XmlUtils.WriteListToXml(writer, GetRooms(), ROOMS_ELEMENT, ROOM_ELEMENT);
+			writer.WriteElementString(ELEMENT_CELL_A, IcdXmlConvert.ToString(CellAId));
+			writer.WriteElementString(ELEMENT_CELL_B, IcdXmlConvert.ToString(CellBId));
+
+			XmlUtils.WriteListToXml(writer, GetPartitionControls(), ELEMENT_PARTITION_CONTROLS,
+			                        (w, d) => d.WriteToXml(w, ELEMENT_PARTITION_CONTROL));
 		}
 
 		/// <summary>
@@ -107,24 +93,14 @@ namespace ICD.Connect.Partitioning.Partitions
 		{
 			base.ParseXml(xml);
 
-			IEnumerable<int> roomIds = XmlUtils.ReadListFromXml(xml, ROOMS_ELEMENT, ROOM_ELEMENT,
-																x => XmlUtils.ReadElementContentAsInt(x));
-			IEnumerable<DeviceControlInfo> partitionControls =
-				XmlUtils.ReadListFromXml(xml, PARTITION_CONTROLS_ELEMENT, PARTITION_CONTROL_ELEMENT,
-										 e => DeviceControlInfo.ReadFromXml(e));
+			CellAId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_A);
+			CellBId = XmlUtils.TryReadChildElementContentAsInt(xml, ELEMENT_CELL_B);
 
-			// Migration
-			int? deviceId = XmlUtils.TryReadChildElementContentAsInt(xml, "Device");
-			int? controlId = XmlUtils.TryReadChildElementContentAsInt(xml, "Control");
-
-			if (deviceId.HasValue || controlId.HasValue)
-			{
-				DeviceControlInfo deviceControl = new DeviceControlInfo(deviceId ?? 0, controlId ?? 0);
-				partitionControls = partitionControls.Append(deviceControl);
-			}
+			IEnumerable<PartitionControlInfo> partitionControls =
+				XmlUtils.ReadListFromXml(xml, ELEMENT_PARTITION_CONTROLS, ELEMENT_PARTITION_CONTROL,
+										 e => PartitionControlInfo.ReadFromXml(e));
 
 			SetPartitionControls(partitionControls);
-			SetRooms(roomIds);
 		}
 	}
 }

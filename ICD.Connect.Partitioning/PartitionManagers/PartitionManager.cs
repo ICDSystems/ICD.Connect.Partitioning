@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
@@ -7,9 +7,8 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
@@ -26,20 +25,25 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		public override event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
 
+		private readonly CellsCollection m_Cells;
 		private readonly PartitionsCollection m_Partitions;
-		private readonly RoomLayout m_RoomLayout;
 		private readonly IcdHashSet<IPartitionDeviceControl> m_SubscribedPartitions;
+
+		private ICore m_CachedCore;
 
 		#region Properties
 
-		private static ICore Core { get { return ServiceProvider.GetService<ICore>(); } }
-
-		public override IPartitionsCollection Partitions { get { return m_Partitions; } }
+		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
-		/// Gets the layout of rooms in the system.
+		/// Gets the cells in the system.
 		/// </summary>
-		public override IRoomLayout RoomLayout { get { return m_RoomLayout; } }
+		public override ICellsCollection Cells { get { return m_Cells; } }
+
+		/// <summary>
+		/// Gets the partitions in the system.
+		/// </summary>
+		public override IPartitionsCollection Partitions { get { return m_Partitions; } }
 
 		#endregion
 
@@ -48,8 +52,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		public PartitionManager()
 		{
+			m_Cells = new CellsCollection(this);
 			m_Partitions = new PartitionsCollection(this);
-			m_RoomLayout = new RoomLayout(this);
+			
 			m_SubscribedPartitions = new IcdHashSet<IPartitionDeviceControl>();
 
 			ServiceProvider.AddService<IPartitionManager>(this);
@@ -74,19 +79,20 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// Gets the controls for the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		public override IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition)
+		public override IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition, ePartitionFeedback mask)
 		{
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (DeviceControlInfo info in partition.GetPartitionControls())
+			foreach (PartitionControlInfo info in partition.GetPartitionControls(mask))
 			{
 				IPartitionDeviceControl control;
 
 				try
 				{
-					control = Core.GetControl<IPartitionDeviceControl>(info);
+					control = Core.GetControl<IPartitionDeviceControl>(info.Control);
 				}
 				catch (Exception e)
 				{
@@ -123,6 +129,19 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public override bool CombinesRoom(int partitionId)
 		{
 			return GetRooms().Any(r => r.Originators.ContainsRecursive(partitionId));
+		}
+
+		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public override IRoom GetCombineRoom(IRoom room)
+		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return GetRooms().FirstOrDefault(r => r.ContainsRoom(room));
 		}
 
 		/// <summary>
@@ -201,16 +220,57 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			IcdHashSet<IPartition> open =
-				Partitions.Where(p => GetControls(p).Any(c => c.IsOpen))
-				          .ToIcdHashSet();
+			IcdHashSet<IPartition> open = Partitions.Where(InitializeOpen).ToIcdHashSet();
+			IcdHashSet<IPartition> closed = Partitions.Except(open).ToIcdHashSet();
 
-			IcdHashSet<IPartition> closed =
-				Partitions.Where(p => !open.Contains(p))
-				          .ToIcdHashSet();
+			CombineRooms(open, closed, constructor);
+		}
 
-			UncombineRooms(closed, constructor);
-			CombineRooms(open, constructor);
+		/// <summary>
+		/// Returns true if the given partition should be considered open for the InitializeCombineRooms pass.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		private bool InitializeOpen(IPartition partition)
+		{
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
+			IcdHashSet<IPartitionDeviceControl> controls = GetControls(partition, ePartitionFeedback.Get).ToIcdHashSet();
+			if (controls.Count == 0)
+				return false;
+
+			// Simple case
+			bool result;
+			if (controls.Select(c => c.IsOpen).Unanimous(out result))
+				return result;
+
+			// During uncombining when a partition has more than 1 control we hit the following situation:
+			//	- Control A is closed, Control B is still open
+			//	- Event is fired, external consumer tells partition manager to initialize combine rooms
+			//	- We need to determine that the partition should be closed even though one control is still open
+			return CombinesRoom(partition);
+		}
+
+		/// <summary>
+		/// Creates a new room instance to contain the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="open"></param>
+		/// <param name="close"></param>
+		/// <param name="constructor"></param>
+		public override void CombineRooms<TRoom>(IEnumerable<IPartition> open, IEnumerable<IPartition> close, Func<TRoom> constructor)
+		{
+			if (open == null)
+				throw new ArgumentNullException("open");
+
+			if (close == null)
+				throw new ArgumentNullException("close");
+
+			if (constructor == null)
+				throw new ArgumentNullException("constructor");
+
+			CombineRooms(open, close, constructor, true);
 		}
 
 		/// <summary>
@@ -227,25 +287,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			CombineRooms(partitions, constructor, true);
-		}
-
-		/// <summary>
-		/// Creates a new room instance to contain the given partition controls.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="controls"></param>
-		/// <param name="constructor"></param>
-		public override void CombineRooms<TRoom>(IEnumerable<IPartitionDeviceControl> controls, Func<TRoom> constructor)
-		{
-			if (controls == null)
-				throw new ArgumentNullException("controls");
-
-			if (constructor == null)
-				throw new ArgumentNullException("constructor");
-
-			IEnumerable<IPartition> partitions = Partitions.GetPartitions(controls);
-			CombineRooms(partitions, constructor);
+			CombineRooms(partitions, Enumerable.Empty<IPartition>(), constructor);
 		}
 
 		/// <summary>
@@ -262,25 +304,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			CombineRooms(new[] {partition}, constructor);
-		}
-
-		/// <summary>
-		/// Creates a new room instance to contain the partitions tied to the control.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public override void CombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-		{
-			if (partitionControl == null)
-				throw new ArgumentNullException("partitionControl");
-
-			if (constructor == null)
-				throw new ArgumentNullException("constructor");
-
-			IEnumerable<IPartition> partitions = Partitions.GetPartitions(partitionControl);
-			CombineRooms(partitions, constructor);
+			CombineRooms(partition.Yield(), constructor);
 		}
 
 		/// <summary>
@@ -296,7 +320,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			UncombineRooms(partitions, constructor, true);
+			CombineRooms(Enumerable.Empty<IPartition>(), partitions, constructor);
 		}
 
 		/// <summary>
@@ -312,25 +336,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			UncombineRooms(new[] {partition}, constructor);
-		}
-
-		/// <summary>
-		/// Removes the partitions tied to the given control from existing rooms.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public override void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-		{
-			if (partitionControl == null)
-				throw new ArgumentNullException("partitionControl");
-
-			if (constructor == null)
-				throw new ArgumentNullException("constructor");
-
-			IEnumerable<IPartition> partitions = Partitions.GetPartitions(partitionControl);
-			UncombineRooms(partitions, constructor);
+			UncombineRooms(partition.Yield(), constructor);
 		}
 
 		#endregion
@@ -338,38 +344,51 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		#region Private Methods
 
 		/// <summary>
-		/// Creates a new room instance to contain the given partitions.
+		/// Combines/uncombines rooms to match the given set of partitions that are open/closed.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitions"></param>
+		/// <param name="openPartitions"></param>
+		/// <param name="closedPartitions"></param>
 		/// <param name="constructor"></param>
 		/// <param name="update"></param>
-		private void CombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor, bool update)
+		private void CombineRooms<TRoom>(IEnumerable<IPartition> openPartitions, IEnumerable<IPartition> closedPartitions, Func<TRoom> constructor, bool update)
 			where TRoom : IRoom
 		{
-			if (partitions == null)
-				throw new ArgumentNullException("partitions");
+			if (openPartitions == null)
+				throw new ArgumentNullException("openPartitions");
+
+			if (closedPartitions == null)
+				throw new ArgumentNullException("closedPartitions");
 
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			// Take the partitions that are not already combining rooms
-			IcdHashSet<IPartition> partitionsSet = partitions.Where(p => !CombinesRoom(p)).ToIcdHashSet();
-			if (partitionsSet.Count == 0)
+			// Remove the partitions that are not changing
+			IcdHashSet<IPartition> openPartitionsUpdateSet = openPartitions.Where(p => !CombinesRoom(p)).ToIcdHashSet();
+			IcdHashSet<IPartition> closedPartitionsUpdateSet = closedPartitions.Where(CombinesRoom).ToIcdHashSet();
+
+			// if no changes necessary, exit early
+			if (!openPartitionsUpdateSet.Any() && !closedPartitionsUpdateSet.Any())
 				return;
 
-			// Add the partitions from any adjacent combine spaces
-			foreach (IPartition partition in partitionsSet.ToArray())
+			// Add the partitions from any adjacent combine spaces that will be combined by an opening partition
+			foreach (IPartition partition in openPartitionsUpdateSet.ToArray())
 			{
 				foreach (IRoom room in GetAdjacentCombineRooms(partition))
-					partitionsSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>());
+					openPartitionsUpdateSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>().Except(closedPartitionsUpdateSet));
 			}
+			// Add the partitions from any existing combine rooms that have a partition closing
+			foreach (IRoom room in GetCombineRooms(closedPartitionsUpdateSet))
+			{
+					openPartitionsUpdateSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>().Except(closedPartitionsUpdateSet));
+			}
+			
+			// Destroy all current combine rooms that exist with the accumulated sets of partitions
+			IEnumerable<IRoom> combineRooms = GetCombineRooms(closedPartitionsUpdateSet.Concat(openPartitionsUpdateSet));
+			DestroyCombineRooms(combineRooms);
 
-			// Clear out any existing combine spaces
-			UncombineRooms(partitionsSet, constructor, false);
-
-			// Build a sequence of continguous partitions
-			IEnumerable<IEnumerable<IPartition>> groups = GetContiguous(partitionsSet);
+			// Find the sequence of contiguous partitions in the open set and (re)build combine rooms
+			IEnumerable<IEnumerable<IPartition>> groups = GetContiguous(openPartitionsUpdateSet).Select(g => g.ToArray()).ToArray();
 			CreateCombineRooms(groups, constructor);
 
 			if (!update)
@@ -395,34 +414,27 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
+			
+			CombineRooms(Enumerable.Empty<IPartition>(), partitions, constructor, update);
+		}
 
-			// We only need to close partitions that are currently combining rooms
-			IcdHashSet<IPartition> closePartitions = partitions.Where(CombinesRoom).ToIcdHashSet();
-			if (closePartitions.Count == 0)
-				return;
+		/// <summary>
+		/// Creates a new room instance to contain the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="partitions"></param>
+		/// <param name="constructor"></param>
+		/// <param name="update"></param>
+		private void CombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor, bool update)
+			where TRoom : IRoom
+		{
+			if (partitions == null)
+				throw new ArgumentNullException("partitions");
 
-			// Get the partitions that need to be re-opened after the close
-			IcdHashSet<IPartition> openPartitions =
-				GetCombineRooms(closePartitions).SelectMany(r => r.Originators
-				                                                  .GetInstances<IPartition>())
-				                                .Except(closePartitions)
-				                                .ToIcdHashSet();
+			if (constructor == null)
+				throw new ArgumentNullException("constructor");
 
-			// Destroy the combine rooms
-			IEnumerable<IRoom> combineRooms = GetCombineRooms(closePartitions);
-			DestroyCombineRooms(combineRooms);
-
-			// Rebuild combine rooms around the open partitions
-			if (openPartitions.Count > 0)
-				CombineRooms(openPartitions, constructor, false);
-
-			if (!update)
-				return;
-
-			// Update the partitions and the rooms
-			// TODO - Extremely lazy, should only update anything we touched
-			UpdateRoomCombineState();
-			UpdatePartitions(Partitions);
+			CombineRooms(partitions, Enumerable.Empty<IPartition>(), constructor, update);
 		}
 
 		/// <summary>
@@ -434,31 +446,23 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (rooms == null)
 				throw new ArgumentNullException("rooms");
 
-			foreach (IRoom room in rooms)
-				DestroyCombineRoom(room);
-		}
+			IList<IRoom> roomsList = rooms as IList<IRoom> ?? rooms.ToArray();
 
-		/// <summary>
-		/// Removes the room from the core and disposes it.
-		/// </summary>
-		/// <param name="room"></param>
-		private void DestroyCombineRoom(IRoom room)
-		{
-			if (room == null)
-				throw new ArgumentNullException("room");
+			// Remove the partitions from the rooms.
+			foreach (IRoom room in roomsList)
+			{
+				Log(eSeverity.Informational, "Destroying combined room {0}", room);
 
-			Log(eSeverity.Informational, "Destroying combined room {0}", room);
-
-			// Remove the partitions from the room.
-			IPartition[] partitions = room.Originators.GetInstances<IPartition>().ToArray();
-			foreach (IPartition partition in partitions)
-				room.Originators.Remove(partition.Id);
+				int[] partitionIds = room.Originators.GetInstances<IPartition>().Select(p => p.Id).ToArray();
+				room.Originators.RemoveRange(partitionIds);
+			}
 
 			// Remove the room from the core
-			Core.Originators.RemoveChild(room);
-			IDisposable disposable = room as IDisposable;
-			if (disposable != null)
-				disposable.Dispose();
+			Core.Originators.RemoveChildren(roomsList);
+
+			// Dispose the rooms
+			foreach (IDisposable room in roomsList.OfType<IDisposable>())
+				room.Dispose();
 		}
 
 		private void CreateCombineRooms<TRoom>(IEnumerable<IEnumerable<IPartition>> groups, Func<TRoom> constructor)
@@ -467,36 +471,26 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (groups == null)
 				throw new ArgumentNullException("groups");
 
-			foreach (IEnumerable<IPartition> group in groups)
-				CreateCombineRoom(group, constructor);
-		}
-
-		/// <summary>
-		/// Creates a new room of the given type containing the given partitions.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitions"></param>
-		/// <param name="constructor"></param>
-		private void CreateCombineRoom<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor)
-			where TRoom : IRoom
-		{
-			if (partitions == null)
-				throw new ArgumentNullException("partitions");
-
 			if (constructor == null)
 				throw new ArgumentNullException("constructor");
 
-			IcdHashSet<IPartition> partitionsSet = partitions.ToIcdHashSet();
+			List<IRoom> rooms = new List<IRoom>();
 
-			// Build the room.
-			TRoom room = constructor();
-			room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id));
-			room.Originators.AddRange(partitionsSet.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
+			foreach (IEnumerable<IPartition> group in groups)
+			{
+				// Build the room.
+				TRoom room = constructor();
+				room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id).Concat(rooms.Select(r => r.Id)));
+				room.Originators
+				    .AddRange(group.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
+
+				Log(eSeverity.Informational, "Created new combine room {0}", room);
+
+				rooms.Add(room);
+			}
 
 			// Add to the core
-			Core.Originators.AddChild(room);
-
-			Log(eSeverity.Informational, "Created new combine room {0}", room);
+			Core.Originators.AddChildren(rooms);
 		}
 
 		/// <summary>
@@ -504,7 +498,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		/// <param name="partition"></param>
 		/// <returns></returns>
-		private static IEnumerable<IRoom> GetAdjacentCombineRooms(IPartition partition)
+		private IEnumerable<IRoom> GetAdjacentCombineRooms(IPartition partition)
 		{
 			if (partition == null)
 				throw new ArgumentNullException("partition");
@@ -542,7 +536,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// Gets the rooms available to the core.
 		/// </summary>
 		/// <returns></returns>
-		private static IEnumerable<IRoom> GetRooms()
+		private IEnumerable<IRoom> GetRooms()
 		{
 			return Core.Originators.GetChildren<IRoom>();
 		}
@@ -583,7 +577,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <summary>
 		/// Sets the combined state for all of the rooms based on the partitions.
 		/// </summary>
-		private static void UpdateRoomCombineState()
+		private void UpdateRoomCombineState()
 		{
 			IRoom[] rooms = GetRooms().ToArray();
 
@@ -596,14 +590,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			foreach (IRoom room in rooms)
 			{
 				bool isCombineState = roomsInCombineState.Contains(room);
-
-				if (room.CombineState == isCombineState)
-					continue;
-
-				if (isCombineState)
-					room.EnterCombineState();
-				else
-					room.LeaveCombineState();
+				room.EnterCombineState(isCombineState);
 			}
 		}
 
@@ -616,7 +603,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => c.IsOpen))
+			foreach (IPartitionDeviceControl control in GetControls(partition, ePartitionFeedback.Set))
 				control.Close();
 		}
 
@@ -629,7 +616,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (IPartitionDeviceControl control in GetControls(partition).Where(c => !c.IsOpen))
+			foreach (IPartitionDeviceControl control in GetControls(partition, ePartitionFeedback.Set))
 				control.Open();
 		}
 
@@ -654,7 +641,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			UnsubscribePartitions();
 
-			m_SubscribedPartitions.AddRange(Partitions.SelectMany(p => GetControls(p)));
+			m_SubscribedPartitions.AddRange(Partitions.SelectMany(p => GetControls(p, ePartitionFeedback.Get)));
 
 			foreach (IPartitionDeviceControl partition in m_SubscribedPartitions)
 				Subscribe(partition);
@@ -720,15 +707,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			UnsubscribePartitions();
 
 			Partitions.Clear();
-			RoomLayout.Clear();
+			Cells.Clear();
 		}
 
 		protected override void CopySettingsFinal(PartitionManagerSettings settings)
 		{
 			base.CopySettingsFinal(settings);
 
+			settings.CellSettings.SetRange(Cells.Where(c => c.Serialize).Select(r => r.CopySettings()));
 			settings.PartitionSettings.SetRange(Partitions.Where(c => c.Serialize).Select(r => r.CopySettings()));
-			settings.RoomLayoutSettings.SetRooms(RoomLayout.GetRooms());
 		}
 
 		protected override void ApplySettingsFinal(PartitionManagerSettings settings, IDeviceFactory factory)
@@ -738,13 +725,20 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			base.ApplySettingsFinal(settings, factory);
 
 			IEnumerable<IPartition> partitions = GetPartitions(settings, factory);
-			Partitions.SetChildren(partitions);
+			m_Partitions.SetChildren(partitions);
 
-			RoomLayout.SetRooms(settings.RoomLayoutSettings.GetRooms());
+			IEnumerable<ICell> cells = GetCells(settings, factory);
+			m_Cells.SetChildren(cells);
+			m_Cells.RebuildCache();
 
 			SubscribePartitions();
 
 			m_Partitions.OnChildrenChanged += PartitionsOnChildrenChanged;
+		}
+
+		private IEnumerable<ICell> GetCells(PartitionManagerSettings settings, IDeviceFactory factory)
+		{
+			return GetOriginatorsSkipExceptions<ICell>(settings.CellSettings, factory);
 		}
 
 		private IEnumerable<IPartition> GetPartitions(PartitionManagerSettings settings, IDeviceFactory factory)
@@ -766,48 +760,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				}
 				catch (Exception e)
 				{
-					Logger.AddEntry(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
+					Log(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
 					continue;
 				}
 
 				yield return output;
 			}
-		}
-
-		#endregion
-
-		#region Console
-
-		/// <summary>
-		/// Gets the child console commands.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (IConsoleCommand command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms());
-		}
-
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
-		private string PrintRooms()
-		{
-			TableBuilder builder = new TableBuilder("Id", "Room", "Children", "Combine Pritority", "Combine State");
-
-			foreach (IRoom room in GetRooms().OrderBy(r => r.Id))
-			{
-				int id = room.Id;
-				string children = StringUtils.ArrayFormat(room.GetRooms().Select(r => r.Id).Order());
-
-				builder.AddRow(id, room, children, room.CombinePriority, room.CombineState);
-			}
-
-			return builder.ToString();
 		}
 
 		#endregion

@@ -172,20 +172,39 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns>False if the collection doesn't contain the given id.</returns>
 		public bool Remove(int id)
 		{
+			bool output = RemoveInternal(id);
+			if (output)
+				OnChildrenChanged.Raise(this);
+
+			return output;
+		}
+
+		public void RemoveRange(IEnumerable<int> ids)
+		{
+			if (ids == null)
+				throw new ArgumentNullException("ids");
+
+			bool output = false;
+
 			m_Section.Enter();
 
 			try
 			{
-				if (!m_Ids.Remove(id))
-					return false;
+				foreach (int id in ids)
+					output |= RemoveInternal(id);
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
 
-			OnChildrenChanged.Raise(this);
-			return true;
+			if (output)
+				OnChildrenChanged.Raise(this);
+		}
+
+		private bool RemoveInternal(int id)
+		{
+			return m_Section.Execute(() => m_Ids.Remove(id));
 		}
 
 		/// <summary>

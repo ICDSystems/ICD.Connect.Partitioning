@@ -6,8 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - PartitionControls expose a mask for supporting get/set state operations
+ - Partitions can be configured with a mask for get/set state operations
+
+### Changed
+ - Significant performance improvements when opening/closing multiple partitions
+ - Partitions and rooms are aligned to a grid for visual representation
+
+## [11.1.0] - 2019-04-23
 ### Changed
  - Moved partition control open state and event handling into abstraction
+ - Logging partition state changes
 
 ## [11.0.0] - 2019-02-11
 ### Added
@@ -17,10 +27,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - DialingPlan configuration is now a single path
  - Added VolumePoints and Partitions to the room console
 
+## [10.1.0] - 2019-04-05
+### Added
+ - Added features for determining if a given room is a master
+
+### Changed
+ - Fixed feedback issue when opening/closing partitions with multiple controls
+
 ## [10.0.1] - 2019-01-16
 ### Changed
  - Fixed issue with >1 partition
- - Failing more gracefully when trying to load paritions with missing controls
+ - Failing more gracefully when trying to load partitions with missing controls
 
 ## [10.0.0] - 2019-01-02
 ### Added

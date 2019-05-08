@@ -5,6 +5,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.EventArguments;
+using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.DigitalInput;
 using ICD.Connect.Protocol.Ports.IoPort;
@@ -16,6 +17,8 @@ namespace ICD.Connect.Partitioning.Devices
 	{
 		private IDigitalInputPort m_Port;
 		private bool m_InvertInput;
+
+		#region Properties
 
 		/// <summary>
 		/// By default we detect a "true" signal from the port as the partition being open.
@@ -36,6 +39,15 @@ namespace ICD.Connect.Partitioning.Devices
 		}
 
 		/// <summary>
+		/// Returns the mask for the type of feedback that is supported,
+		/// I.e. if we can set the open state of the partition, and if the partition
+		/// gives us feedback for the current open state.
+		/// </summary>
+		public override ePartitionFeedback SupportsFeedback { get { return ePartitionFeedback.Get; } }
+
+		#endregion
+
+		/// <summary>
 		/// Release resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
@@ -43,24 +55,6 @@ namespace ICD.Connect.Partitioning.Devices
 			base.DisposeFinal(disposing);
 
 			SetPort(null);
-		}
-
-		/// <summary>
-		/// Opens the partition.
-		/// </summary>
-		public override void Open()
-		{
-			// Currently not supporting opening/closing partitions
-			Logger.AddEntry(eSeverity.Error, "{0} does not support opening/closing", GetType().Name);
-		}
-
-		/// <summary>
-		/// Closes the partition.
-		/// </summary>
-		public override void Close()
-		{
-			// Currently not supporting opening/closing partitions
-			Logger.AddEntry(eSeverity.Error, "{0} does not support opening/closing", GetType().Name);
 		}
 
 		#region Methods
@@ -81,6 +75,20 @@ namespace ICD.Connect.Partitioning.Devices
 
 			UpdatePortConfiguration();
 			UpdateIsOpen();
+		}
+
+		/// <summary>
+		/// Opens the partition.
+		/// </summary>
+		public override void Open()
+		{
+		}
+
+		/// <summary>
+		/// Closes the partition.
+		/// </summary>
+		public override void Close()
+		{
 		}
 
 		#endregion

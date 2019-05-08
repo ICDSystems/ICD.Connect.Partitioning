@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -19,22 +18,16 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnOpenStatusChanged;
 
-		private readonly PartitionDeviceControl m_PartitionControl;
-
 		private bool m_IsOpen;
 
 		#region Properties
 
 		/// <summary>
-		/// Gets the partition control for this device.
+		/// Returns the mask for the type of feedback that is supported,
+		/// I.e. if we can set the open state of the partition, and if the partition
+		/// gives us feedback for the current open state.
 		/// </summary>
-		[PublicAPI]
-		public PartitionDeviceControl PartitionControl { get { return m_PartitionControl; } }
-
-		/// <summary>
-		/// Gets the partition control for this device.
-		/// </summary>
-		IPartitionDeviceControl IPartitionDevice.PartitionControl { get { return PartitionControl; } }
+		public abstract ePartitionFeedback SupportsFeedback { get; }
 
 		/// <summary>
 		/// Returns the current open state of the partition.
@@ -62,8 +55,7 @@ namespace ICD.Connect.Partitioning.Devices
 		/// </summary>
 		protected AbstractPartitionDevice()
 		{
-			m_PartitionControl = new PartitionDeviceControl(this, 0);
-			Controls.Add(m_PartitionControl);
+			Controls.Add(new PartitionDeviceControl(this, 0));
 		}
 
 		/// <summary>
@@ -76,6 +68,8 @@ namespace ICD.Connect.Partitioning.Devices
 			base.DisposeFinal(disposing);
 		}
 
+		#region Methods
+
 		/// <summary>
 		/// Opens the partition.
 		/// </summary>
@@ -85,6 +79,19 @@ namespace ICD.Connect.Partitioning.Devices
 		/// Closes the partition.
 		/// </summary>
 		public abstract void Close();
+
+		/// <summary>
+		/// Toggles the open state of the partition.
+		/// </summary>
+		public virtual void Toggle()
+		{
+			if (IsOpen)
+				Close();
+			else
+				Open();
+		}
+
+		#endregion
 
 		#region Console
 
@@ -96,6 +103,7 @@ namespace ICD.Connect.Partitioning.Devices
 		{
 			base.BuildConsoleStatus(addRow);
 
+			addRow("Supports Feedback", SupportsFeedback);
 			addRow("IsOpen", IsOpen);
 		}
 

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
@@ -24,9 +23,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract IPartitionsCollection Partitions { get; }
 
 		/// <summary>
-		/// Gets the layout of rooms in the system.
+		/// Gets the cells in the system.
 		/// </summary>
-		public abstract IRoomLayout RoomLayout { get; }
+		public abstract ICellsCollection Cells { get; }
 
 		/// <summary>
 		/// Gets the help information for the node.
@@ -38,12 +37,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		#region Methods
 
 		/// <summary>
-		/// Gets the control for the given partition.
-		/// Returns null if the partition has no control specified.
+		/// Gets the controls for the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		public abstract IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition);
+		public abstract IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition, ePartitionFeedback mask);
 
 		/// <summary>
 		/// Returns true if the given partition is currently part of a combine room.
@@ -58,6 +57,13 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partitionId"></param>
 		/// <returns></returns>
 		public abstract bool CombinesRoom(int partitionId);
+
+		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public abstract IRoom GetCombineRoom(IRoom room);
 
 		/// <summary>
 		/// Gets the combine room containing the given partition.
@@ -96,6 +102,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		public abstract void InitializeCombineRooms<TRoom>(Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
+		/// Combines/uncombines rooms in a single pass by opening/closing the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="open"></param>
+		/// <param name="close"></param>
+		/// <param name="constructor"></param>
+		public abstract void CombineRooms<TRoom>(IEnumerable<IPartition> open, IEnumerable<IPartition> close, Func<TRoom> constructor) where TRoom : IRoom;
+
+		/// <summary>
 		/// Creates a new room instance to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
@@ -105,30 +120,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance to contain the given partition controls.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="controls"></param>
-		/// <param name="constructor"></param>
-		public abstract void CombineRooms<TRoom>(IEnumerable<IPartitionDeviceControl> controls, Func<TRoom> constructor)
-			where TRoom : IRoom;
-
-		/// <summary>
 		/// Creates a new room instance to contain the given partition.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
 		/// <param name="constructor"></param>
 		public abstract void CombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
-
-		/// <summary>
-		/// Creates a new room instance to contain the partitions tied to the control.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public abstract void CombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-			where TRoom : IRoom;
 
 		/// <summary>
 		/// Removes the partitions from existing rooms.
@@ -145,18 +142,42 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="constructor"></param>
 		public abstract void UncombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
 
-		/// <summary>
-		/// Removes the partitions tied to the given control from existing rooms.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		public abstract void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor)
-			where TRoom : IRoom;
-
 		#endregion
 
 		#region Console
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in PartitionManagerConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
+		/// Wrokaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			PartitionManagerConsole.BuildConsoleStatus(this, addRow);
+		}
 
 		/// <summary>
 		/// Gets the child console commands.
@@ -167,7 +188,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("PrintPartitions", "Prints the list of all partitions.", () => PrintPartitions());
+			foreach (IConsoleCommand command in PartitionManagerConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>
@@ -177,22 +199,6 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
-		}
-
-		private string PrintPartitions()
-		{
-			TableBuilder builder = new TableBuilder("Id", "Partition", "Controls", "Rooms");
-
-			foreach (IPartition partition in Partitions.OrderBy(c => c.Id))
-			{
-				int id = partition.Id;
-				string controls = StringUtils.ArrayFormat(partition.GetPartitionControls().Order());
-				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
-
-				builder.AddRow(id, partition, controls, rooms);
-			}
-
-			return builder.ToString();
 		}
 
 		#endregion

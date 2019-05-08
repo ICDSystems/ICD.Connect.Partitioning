@@ -7,25 +7,26 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 {
 	public abstract class AbstractPartitionManagerSettings : AbstractSettings, IPartitionManagerSettings
 	{
+		private const string CELLS_ELEMENT = "Cells";
+		private const string CELL_ELEMENT = "Cell";
+
 		private const string PARTITIONS_ELEMENT = "Partitions";
 		private const string PARTITION_ELEMENT = "Partition";
 
-		private const string LAYOUT_ELEMENT = "Layout";
-
+		private readonly SettingsCollection m_CellSettings;
 		private readonly SettingsCollection m_PartitionSettings;
-		private readonly RoomLayoutSettings m_RoomLayoutSettings;
 
 		#region Properties
+
+		/// <summary>
+		/// Gets the collection of individual cell settings instances.
+		/// </summary>
+		public SettingsCollection CellSettings { get { return m_CellSettings; } }
 
 		/// <summary>
 		/// Gets the collection of individual partition settings instances.
 		/// </summary>
 		public SettingsCollection PartitionSettings { get { return m_PartitionSettings; } }
-
-		/// <summary>
-		/// Gets the room layout settings.
-		/// </summary>
-		public RoomLayoutSettings RoomLayoutSettings { get { return m_RoomLayoutSettings; } }
 
 		#endregion
 
@@ -34,8 +35,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		protected AbstractPartitionManagerSettings()
 		{
+			m_CellSettings = new SettingsCollection();
 			m_PartitionSettings = new SettingsCollection();
-			m_RoomLayoutSettings = new RoomLayoutSettings();
 		}
 
 		#region Methods
@@ -48,8 +49,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			base.WriteElements(writer);
 
+			m_CellSettings.ToXml(writer, CELLS_ELEMENT, CELL_ELEMENT);
 			m_PartitionSettings.ToXml(writer, PARTITIONS_ELEMENT, PARTITION_ELEMENT);
-			m_RoomLayoutSettings.ToXml(writer, LAYOUT_ELEMENT);
 		}
 
 		/// <summary>
@@ -60,11 +61,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		{
 			base.ParseXml(xml);
 
-			string layoutXml;
-			if (XmlUtils.TryGetChildElementAsString(xml, LAYOUT_ELEMENT, out layoutXml))
-				m_RoomLayoutSettings.ParseXml(layoutXml);
-			else
-				m_RoomLayoutSettings.Clear();
+			IEnumerable<ISettings> cells = PluginFactory.GetSettingsFromXml(xml, CELLS_ELEMENT);
+
+			foreach (ISettings item in cells)
+			{
+				if (CellSettings.Add(item))
+					continue;
+
+				Logger.AddEntry(eSeverity.Error, "{0} failed to add duplicate {1}", GetType().Name, item);
+			}
 
 			IEnumerable<ISettings> partitions = PluginFactory.GetSettingsFromXml(xml, PARTITIONS_ELEMENT);
 

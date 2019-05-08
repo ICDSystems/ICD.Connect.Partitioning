@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
@@ -23,17 +26,17 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		IPartitionsCollection Partitions { get; }
 
 		/// <summary>
-		/// Gets the layout of rooms in the system.
+		/// Gets the cells in the system.
 		/// </summary>
-		IRoomLayout RoomLayout { get; }
+		ICellsCollection Cells { get; }
 
 		/// <summary>
-		/// Gets the control for the given partition.
-		/// Returns null if the partition has no control specified.
+		/// Gets the controls for the given partition.
 		/// </summary>
 		/// <param name="partition"></param>
+		/// <param name="mask"></param>
 		/// <returns></returns>
-		IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition);
+		IEnumerable<IPartitionDeviceControl> GetControls(IPartition partition, ePartitionFeedback mask);
 
 		/// <summary>
 		/// Returns true if the given partition is currently part of a combine room.
@@ -48,6 +51,14 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partitionId"></param>
 		/// <returns></returns>
 		bool CombinesRoom(int partitionId);
+
+		/// <summary>
+		/// Gets the combine room containing the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		IRoom GetCombineRoom(IRoom room);
 
 		/// <summary>
 		/// Gets the combine room containing the given partition.
@@ -87,6 +98,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		void InitializeCombineRooms<TRoom>(Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
+		/// Combines/uncombines rooms in a single pass by opening/closing the given partitions.
+		/// </summary>
+		/// <typeparam name="TRoom"></typeparam>
+		/// <param name="open"></param>
+		/// <param name="close"></param>
+		/// <param name="constructor"></param>
+		void CombineRooms<TRoom>(IEnumerable<IPartition> open, IEnumerable<IPartition> close, Func<TRoom> constructor) where TRoom : IRoom;
+
+		/// <summary>
 		/// Creates a new room instance to contain the given partitions.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
@@ -95,28 +115,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		void CombineRooms<TRoom>(IEnumerable<IPartition> partitions, Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
-		/// Creates a new room instance to contain the given partition controls.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="controls"></param>
-		/// <param name="constructor"></param>
-		void CombineRooms<TRoom>(IEnumerable<IPartitionDeviceControl> controls, Func<TRoom> constructor) where TRoom : IRoom;
-
-		/// <summary>
 		/// Creates a new room instance to contain the given partition.
 		/// </summary>
 		/// <typeparam name="TRoom"></typeparam>
 		/// <param name="partition"></param>
 		/// <param name="constructor"></param>
 		void CombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
-
-		/// <summary>
-		/// Creates a new room instance to contain the partitions tied to the control.
-		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		void CombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor) where TRoom : IRoom;
 
 		/// <summary>
 		/// Removes the partitions from existing rooms.
@@ -131,13 +135,63 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="partition"></param>
 		/// <param name="constructor"></param>
 		void UncombineRooms<TRoom>(IPartition partition, Func<TRoom> constructor) where TRoom : IRoom;
+	}
 
+	public static class PartitionManagerExtensions
+	{
 		/// <summary>
-		/// Removes the partitions tied to the given control from existing rooms.
+		/// Gets the partition for the given cell coordinates and direction.
 		/// </summary>
-		/// <typeparam name="TRoom"></typeparam>
-		/// <param name="partitionControl"></param>
-		/// <param name="constructor"></param>
-		void UncombineRooms<TRoom>(IPartitionDeviceControl partitionControl, Func<TRoom> constructor) where TRoom : IRoom;
+		/// <param name="extends"></param>
+		/// <param name="column"></param>
+		/// <param name="row"></param>
+		/// <param name="direction"></param>
+		/// <returns></returns>
+		public static IPartition GetPartition(this IPartitionManager extends, int column, int row, eCellDirection direction)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			// Get original cell if it exists
+			ICell cell = extends.Cells.GetCell(column, row);
+			if (cell == null)
+				return null;
+
+			ICell neighborCell = extends.Cells.GetNeighboringCell(column, row, direction);
+			if (neighborCell == null)
+				return null;
+
+			// Find partition that's in between both cells
+			return extends.Partitions.FirstOrDefault(p => p.CellA == cell && p.CellB == neighborCell || p.CellA == neighborCell && p.CellB == cell);
+		}
+
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open)
+			where TRoom : IRoom, new()
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
+			if (open)
+				extends.CombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
+			else
+				extends.UncombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
+		}
+
+		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open)
+			where TRoom : IRoom, new()
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (partitionControl == null)
+				throw new ArgumentNullException("partitionControl");
+
+			IEnumerable<IPartition> partitions = extends.Partitions.GetPartitions(partitionControl);
+			foreach (IPartition partition in partitions)
+				extends.SetPartition<TRoom>(partition, open);
+		}
 	}
 }

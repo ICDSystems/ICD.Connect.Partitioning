@@ -28,6 +28,9 @@ namespace ICD.Connect.Partitioning.Rooms
 	public abstract class AbstractRoom<TSettings> : AbstractOriginator<TSettings>, IRoom
 		where TSettings : IRoomSettings, new()
 	{
+		/// <summary>
+		/// Raised when the room combine state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
@@ -57,6 +60,8 @@ namespace ICD.Connect.Partitioning.Rooms
 				m_CombineState = value;
 
 				Log(eSeverity.Informational, "Combine state changed to {0}", m_CombineState);
+
+				HandleCombineState();
 
 				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
 			}
@@ -103,17 +108,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Informs the room it is part of a combined room.
 		/// </summary>
-		public void EnterCombineState()
+		/// <param name="combine"></param>
+		public void EnterCombineState(bool combine)
 		{
-			CombineState = true;
+			CombineState = combine;
 		}
 
 		/// <summary>
-		/// Informs the room it is no longer part of a combined room.
+		/// Called when the room combine state changes.
 		/// </summary>
-		public void LeaveCombineState()
+		protected virtual void HandleCombineState()
 		{
-			CombineState = false;
 		}
 
 		#endregion

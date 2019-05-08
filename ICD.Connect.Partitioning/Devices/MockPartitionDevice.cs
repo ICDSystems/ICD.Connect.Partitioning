@@ -1,9 +1,17 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Partitioning.Controls;
 
 namespace ICD.Connect.Partitioning.Devices
 {
 	public sealed class MockPartitionDevice : AbstractPartitionDevice<MockPartitionDeviceSettings>
 	{
+		/// <summary>
+		/// Returns the mask for the type of feedback that is supported,
+		/// I.e. if we can set the open state of the partition, and if the partition
+		/// gives us feedback for the current open state.
+		/// </summary>
+		public override ePartitionFeedback SupportsFeedback { get { return ePartitionFeedback.GetSet; } }
+
 		#region Methods
 
 		[PublicAPI]

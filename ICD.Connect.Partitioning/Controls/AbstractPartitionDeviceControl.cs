@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -19,6 +20,15 @@ namespace ICD.Connect.Partitioning.Controls
 
 		private bool m_IsOpen;
 
+		#region Properties
+
+		/// <summary>
+		/// Returns the mask for the type of feedback that is supported,
+		/// I.e. if we can set the open state of the partition, and if the partition
+		/// gives us feedback for the current open state.
+		/// </summary>
+		public abstract ePartitionFeedback SupportsFeedback { get; }
+
 		/// <summary>
 		/// Returns the current open state of the partition.
 		/// </summary>
@@ -32,9 +42,13 @@ namespace ICD.Connect.Partitioning.Controls
 
 				m_IsOpen = value;
 
+				Log(eSeverity.Informational, "IsOpen set to {0}", m_IsOpen);
+
 				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
 			}
 		}
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -92,6 +106,7 @@ namespace ICD.Connect.Partitioning.Controls
 		{
 			base.BuildConsoleStatus(addRow);
 
+			addRow("Supports Feedback", SupportsFeedback);
 			addRow("IsOpen", IsOpen);
 		}
 
