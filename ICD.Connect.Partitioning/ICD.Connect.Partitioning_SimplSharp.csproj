@@ -90,6 +90,7 @@
     <Compile Include="PartitionManagers\PartitionManager.cs" />
     <Compile Include="PartitionManagers\PartitionManagerConsole.cs" />
     <Compile Include="PartitionManagers\PartitionManagerSettings.cs" />
+    <Compile Include="Partitions\IPartitionsCollection.cs" />
     <Compile Include="Partitions\PartitionsCollection.cs" />
     <Compile Include="Partitions\AbstractPartition.cs" />
     <Compile Include="Partitions\AbstractPartitionSettings.cs" />
