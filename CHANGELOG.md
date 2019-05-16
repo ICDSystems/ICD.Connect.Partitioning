@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - RoomOriginatorIdCollection specifies which children have been added/removed to/from the collection
+
 ## [10.1.0] - 2019-04-05
 ### Added
  - Added features for determining if a given room is a master
