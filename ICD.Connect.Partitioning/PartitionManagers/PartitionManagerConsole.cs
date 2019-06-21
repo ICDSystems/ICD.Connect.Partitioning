@@ -71,7 +71,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			foreach (IPartition partition in instance.Partitions.OrderBy(c => c.Id))
 			{
 				int id = partition.Id;
-				string controls = StringUtils.ArrayFormat(partition.GetPartitionControls().Order());
+				string controls = StringUtils.ArrayFormat(partition.GetPartitionControlInfos().Order());
 				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
 
 				builder.AddRow(id, partition, controls, rooms);
