@@ -45,7 +45,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<PartitionControlInfo> GetPartitionControls()
+		public IEnumerable<PartitionControlInfo> GetPartitionControlInfos()
 		{
 			return m_Section.Execute(() => m_Controls.ToArray(m_Controls.Count));
 		}
@@ -54,7 +54,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<PartitionControlInfo> GetPartitionControls(ePartitionFeedback mask)
+		public IEnumerable<PartitionControlInfo> GetPartitionControlInfos(ePartitionFeedback mask)
 		{
 			return m_Section.Execute(() => m_Controls.Where(c => c.Mode.HasFlags(mask)).ToArray());
 		}
@@ -106,7 +106,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			settings.CellAId = CellA == null ? (int?)null : CellA.Id;
 			settings.CellBId = CellB == null ? (int?)null : CellB.Id;
 
-			settings.SetPartitionControls(GetPartitionControls());
+			settings.SetPartitionControls(GetPartitionControlInfos());
 		}
 
 		/// <summary>

@@ -27,13 +27,13 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<PartitionControlInfo> GetPartitionControls();
+		IEnumerable<PartitionControlInfo> GetPartitionControlInfos();
 
 		/// <summary>
 		/// Gets the controls that are associated with this partition.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<PartitionControlInfo> GetPartitionControls(ePartitionFeedback mask);
+		IEnumerable<PartitionControlInfo> GetPartitionControlInfos(ePartitionFeedback mask);
 	}
 
 	public static class PartitionExtensions

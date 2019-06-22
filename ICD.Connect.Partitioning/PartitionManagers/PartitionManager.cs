@@ -87,7 +87,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				throw new ArgumentNullException("partition");
 
-			foreach (PartitionControlInfo info in partition.GetPartitionControls(mask))
+			foreach (PartitionControlInfo info in partition.GetPartitionControlInfos(mask))
 			{
 				IPartitionDeviceControl control;
 
