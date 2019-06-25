@@ -38,11 +38,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		Dictionary<int, eCombineMode> Destinations { get; }
 
 		/// <summary>
-		/// Gets the partition settings.
-		/// </summary>
-		Dictionary<int, eCombineMode> Partitions { get; }
-
-		/// <summary>
 		/// Gets the volume point settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> VolumePoints { get; }
