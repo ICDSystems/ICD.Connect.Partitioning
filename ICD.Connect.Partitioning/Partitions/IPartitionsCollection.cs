@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
+using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Partitions
@@ -33,5 +34,11 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <param name="partition"></param>
 		/// <returns></returns>
 		IEnumerable<IPartition> GetAdjacentPartitions(IPartition partition);
+
+		/// <summary>
+		/// Gets the partitions adjacent to the given room.
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<IPartition> GetRoomAdjacentPartitions(IRoom room);
 	}
 }
