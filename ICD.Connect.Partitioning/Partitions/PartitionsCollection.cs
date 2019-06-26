@@ -122,6 +122,33 @@ namespace ICD.Connect.Partitioning.Partitions
 		}
 
 		/// <summary>
+		/// Returns the partitions that divide the same two rooms as the given partition.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		public IEnumerable<IPartition> GetSiblingPartitions(IPartition partition)
+		{
+			if (partition == null)
+				throw new ArgumentNullException("partition");
+
+			m_PartitionsSection.Enter();
+
+			try
+			{
+				// Get the two rooms either side of the partition
+				IcdHashSet<int> adjacentRooms = partition.GetRooms().ToIcdHashSet();
+
+				// Get all of the two rooms partitions that only divide the two rooms
+				return adjacentRooms.SelectMany(r => m_RoomAdjacentPartitions[r])
+				                    .Where(p => p.GetRooms().All(r => adjacentRooms.Contains(r)));
+			}
+			finally
+			{
+				m_PartitionsSection.Leave();
+			}
+		}
+
+		/// <summary>
 		/// Gets the partitions adjacent to the given room.
 		/// </summary>
 		/// <returns></returns>

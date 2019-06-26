@@ -40,5 +40,12 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// </summary>
 		/// <returns></returns>
 		IEnumerable<IPartition> GetRoomAdjacentPartitions(IRoom room);
+
+		/// <summary>
+		/// Returns the partitions that divide the same two rooms as the given partition.
+		/// </summary>
+		/// <param name="partition"></param>
+		/// <returns></returns>
+		IEnumerable<IPartition> GetSiblingPartitions(IPartition partition);
 	}
 }
