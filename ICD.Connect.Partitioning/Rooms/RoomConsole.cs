@@ -80,6 +80,8 @@ namespace ICD.Connect.Partitioning.Rooms
 				                               i => instance.CombinePriority = i);
 
 			yield return new GenericConsoleCommand<int>("ProfileRouting", "ProfileRouting <ITERATIONS>", i => ProfileRouting(instance, i));
+
+			yield return new ConsoleCommand("ListChildRooms", "Lists the child rooms, and whether they are a slave or master room.", ()=> ListChildRooms(instance));
 #endif
 
 			yield break;
@@ -98,6 +100,18 @@ namespace ICD.Connect.Partitioning.Rooms
 				        .ToArray();
 
 			IcdStopwatch.Profile(() => RouteRandom(switchers), iterations, "Profile Routing");
+		}
+
+		private static string ListChildRooms(IRoom instance)
+		{
+			TableBuilder builder = new TableBuilder("Room Id", "Master/Slave", "Combine Priority");
+
+			foreach (IRoom room in instance.GetRoomsRecursive().Except(instance))
+			{
+				builder.AddRow(room.Id, room.IsMasterRoom() ? "Master" : "Slave", room.CombinePriority);
+			}
+
+			return builder.ToString();
 		}
 
 		private static void RouteRandom(IEnumerable<IRouteSwitcherControl> switchers)
