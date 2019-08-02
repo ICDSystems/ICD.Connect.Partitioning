@@ -30,22 +30,23 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("instance");
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstancesRecursive<IPanelDevice>().OfType<IConsoleNode>(),
 				                            p => (uint)((IPanelDevice)p).Id);
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstances<IDevice>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstancesRecursive<IDevice>().OfType<IConsoleNode>(),
 				                            p => (uint)((IDevice)p).Id);
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstances<IPort>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstancesRecursive<IPort>().OfType<IConsoleNode>(),
 				                            p => (uint)((IPort)p).Id);
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstances<ISource>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstancesRecursive<ISource>().OfType<IConsoleNode>(),
 				                            p => (uint)((ISource)p).Id);
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstances<IDestination>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstancesRecursive<IDestination>().OfType<IConsoleNode>(),
 				                            p => (uint)((IDestination)p).Id);
+
 		}
 
 		/// <summary>
