@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -30,22 +32,23 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("instance");
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstances<IPanelDevice>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstancesRecursive<IPanelDevice>().OfType<IConsoleNode>(),
 				                            p => (uint)((IPanelDevice)p).Id);
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstances<IDevice>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstancesRecursive<IDevice>().OfType<IConsoleNode>(),
 				                            p => (uint)((IDevice)p).Id);
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstances<IPort>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstancesRecursive<IPort>().OfType<IConsoleNode>(),
 				                            p => (uint)((IPort)p).Id);
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstances<ISource>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstancesRecursive<ISource>().OfType<IConsoleNode>(),
 				                            p => (uint)((ISource)p).Id);
 
 			yield return
-				ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstances<IDestination>().OfType<IConsoleNode>(),
+				ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstancesRecursive<IDestination>().OfType<IConsoleNode>(),
 				                            p => (uint)((IDestination)p).Id);
+
 		}
 
 		/// <summary>
@@ -79,6 +82,8 @@ namespace ICD.Connect.Partitioning.Rooms
 				                               i => instance.CombinePriority = i);
 
 			yield return new GenericConsoleCommand<int>("ProfileRouting", "ProfileRouting <ITERATIONS>", i => ProfileRouting(instance, i));
+
+			yield return new ConsoleCommand("ListChildRooms", "Lists the child rooms, and whether they are a slave or master room.", ()=> ListChildRooms(instance));
 #endif
 
 			yield break;
@@ -97,6 +102,18 @@ namespace ICD.Connect.Partitioning.Rooms
 				        .ToArray();
 
 			IcdStopwatch.Profile(() => RouteRandom(switchers), iterations, "Profile Routing");
+		}
+
+		private static string ListChildRooms(IRoom instance)
+		{
+			TableBuilder builder = new TableBuilder("Room Id", "Master/Slave", "Combine Priority");
+
+			foreach (IRoom room in instance.GetRoomsRecursive().Except(instance))
+			{
+				builder.AddRow(room.Id, room.IsMasterRoom() ? "Master" : "Slave", room.CombinePriority);
+			}
+
+			return builder.ToString();
 		}
 
 		private static void RouteRandom(IEnumerable<IRouteSwitcherControl> switchers)
