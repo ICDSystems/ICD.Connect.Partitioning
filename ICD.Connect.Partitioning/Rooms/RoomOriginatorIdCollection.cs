@@ -363,7 +363,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				IEnumerable<int> ids =
 					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-					     .Select(kvp => kvp.Key);
+					     .Select(kvp => kvp.Key)
+						 .ToArray();
 
                 return Originators.GetChildren(ids, selector);
 			}
@@ -550,7 +551,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
-			return GetInstancesRecursiveIterator(mask, selector);
+			return GetInstancesRecursiveIterator(mask, selector).Distinct();
 		}
 
 		/// <summary>
@@ -573,7 +574,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				eCombineMode childMask = mask & (master ? eCombineMode.Master : eCombineMode.Slave);
 
-				foreach (TInstance instance in room.Originators.GetInstances(childMask, selector))
+				TInstance[] instances = room.Originators.GetInstances(childMask, selector).ToArray();
+
+				foreach (TInstance instance in instances)
 					yield return instance;
 
 				master = false;
