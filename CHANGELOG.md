@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.3.0] - 2019-08-02
+### Added
+ - Added console command to print child rooms for a given room
+
+### Changed
+ - Fixed a potential bug where a combine space could be made without any child rooms
+ - GetInstancesRecursive only returns distinct items
+ - Room console commands show devices, sources, etc recursively
+
 ## [10.2.0] - 2019-05-16
 ### Changed
  - RoomOriginatorIdCollection specifies which children have been added/removed to/from the collection
