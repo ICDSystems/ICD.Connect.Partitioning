@@ -521,6 +521,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				throw new ArgumentNullException("constructor");
 
 			IcdHashSet<IPartition> partitionsSet = partitions.ToIcdHashSet();
+			if (partitionsSet.Count == 0)
+				return;
 
 			// Build the room.
 			TRoom room = constructor();
