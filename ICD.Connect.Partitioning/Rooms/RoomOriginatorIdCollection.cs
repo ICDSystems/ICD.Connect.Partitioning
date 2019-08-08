@@ -562,7 +562,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (selector == null)
 				throw new ArgumentNullException("selector");
 
-			return GetInstancesRecursiveIterator(mask, selector);
+			return GetInstancesRecursiveIterator(mask, selector).Distinct();
 		}
 
 		/// <summary>

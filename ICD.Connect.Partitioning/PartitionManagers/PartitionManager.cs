@@ -479,11 +479,15 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			foreach (IEnumerable<IPartition> group in groups)
 			{
+				IcdHashSet<IPartition> partitionsSet = group.ToIcdHashSet();
+				if (partitionsSet.Count == 0)
+					continue;
+
 				// Build the room.
 				TRoom room = constructor();
 				room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildren<IRoom>().Select(r => r.Id).Concat(rooms.Select(r => r.Id)));
 				room.Originators
-				    .AddRange(group.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
+				    .AddRange(partitionsSet.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
 				Log(eSeverity.Informational, "Created new combine room {0}", room);
 
