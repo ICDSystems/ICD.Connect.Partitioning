@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.1.0] - 2019-08-15
 ### Added
  - Exposing GetRoomAdjacentPartitions in IPartitionsCollection interface
  - Added method for getting sibling partitions for a given partition
