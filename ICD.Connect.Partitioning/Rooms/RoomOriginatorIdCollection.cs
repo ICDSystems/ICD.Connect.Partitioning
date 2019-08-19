@@ -81,24 +81,33 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (ids == null)
 				throw new ArgumentNullException("ids");
 
+			bool change = false;
+
 			m_Section.Enter();
 
 			try
 			{
-				Dictionary<int, eCombineMode> newIds = ids.ToDictionary();
+				// Don't add/remove if there is no change
+				Dictionary<int, eCombineMode> newIds =
+					ids.Where(kvp => kvp.Value != eCombineMode.None).ToDictionary();
 				if (newIds.DictionaryEqual(m_Ids))
 					return;
 
-				m_Ids.Clear();
+				// Clear the old ids
+				foreach (int oldId in m_Ids.Keys.ToArray())
+					change |= RemoveInternal(oldId);
 
-				m_Ids.AddRange(newIds);
+				// Add the new ids
+				foreach (KeyValuePair<int, eCombineMode> kvp in newIds)
+					change |= AddInternal(kvp.Key, kvp.Value);
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
 
-			OnChildrenChanged.Raise(this);
+			if (change)
+				OnChildrenChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -152,14 +161,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		private bool AddInternal(int id, eCombineMode combine)
 		{
 			if (combine == eCombineMode.None)
-				return false;
+				return RemoveInternal(id);
 
 			m_Section.Enter();
 
 			try
 			{
-				eCombineMode existing;
-				if (m_Ids.TryGetValue(id, out existing) && combine == existing)
+				if (combine == m_Ids.GetDefault(id))
 					return false;
 
 				m_Ids[id] = combine;
