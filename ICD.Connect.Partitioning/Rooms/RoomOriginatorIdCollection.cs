@@ -11,6 +11,9 @@ namespace ICD.Connect.Partitioning.Rooms
 {
 	public sealed class RoomOriginatorIdCollection
 	{
+		/// <summary>
+		/// Raised when items are added/removed to/from the collection.
+		/// </summary>
 		public event EventHandler OnChildrenChanged;
 
 		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
@@ -22,6 +25,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public int Count { get { return m_Section.Execute(() => m_Ids.Count); } }
 
+		/// <summary>
+		/// Gets the core originators collection.
+		/// </summary>
 		private IOriginatorCollection<IOriginator> Originators { get { return m_Room.Core.Originators; } }
 
 		/// <summary>
@@ -31,6 +37,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			m_Ids = new IcdOrderedDictionary<int, eCombineMode>();
 			m_Section = new SafeCriticalSection();
+
 			m_Room = room;
 		}
 
@@ -118,21 +125,21 @@ namespace ICD.Connect.Partitioning.Rooms
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-			bool output = false;
+			bool change = false;
 			
 			m_Section.Enter();
 
 			try
 			{
 			    foreach (KeyValuePair<int, eCombineMode> kvp in ids)
-			        output |= AddInternal(kvp.Key, kvp.Value);
+			        change |= AddInternal(kvp.Key, kvp.Value);
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
 			
-			if (output)
+			if (change)
 				OnChildrenChanged.Raise(this);
 		}
 
@@ -156,13 +163,13 @@ namespace ICD.Connect.Partitioning.Rooms
 					return false;
 
 				m_Ids[id] = combine;
+
+				return true;
 			}
 			finally
 			{
 				m_Section.Leave();
 			}
-
-			return true;
 		}
 
 		/// <summary>
@@ -179,6 +186,10 @@ namespace ICD.Connect.Partitioning.Rooms
 			return output;
 		}
 
+		/// <summary>
+		/// Removes the ids from the collection.
+		/// </summary>
+		/// <param name="ids"></param>
 		public void RemoveRange(IEnumerable<int> ids)
 		{
 			if (ids == null)
@@ -202,6 +213,11 @@ namespace ICD.Connect.Partitioning.Rooms
 				OnChildrenChanged.Raise(this);
 		}
 
+		/// <summary>
+		/// Removes the id from the collection.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>True if the collection contains the given id.</returns>
 		private bool RemoveInternal(int id)
 		{
 			return m_Section.Execute(() => m_Ids.Remove(id));
@@ -278,6 +294,18 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="TInstance"></typeparam>
 		/// <returns></returns>
 		[CanBeNull]
+		public TInstance GetInstance<TInstance>()
+			where TInstance : class, IOriginator
+		{
+			return GetInstance<TInstance>(i => true);
+		}
+
+		/// <summary>
+		/// Gets the first originator instance with the given type.
+		/// </summary>
+		/// <typeparam name="TInstance"></typeparam>
+		/// <returns></returns>
+		[CanBeNull]
 		public TInstance GetInstance<TInstance>(Func<TInstance, bool> selector)
 			where TInstance : class, IOriginator
 		{
@@ -300,14 +328,14 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("selector");
 
 			if (mask == eCombineMode.None)
-				return default(TInstance);
+				return null;
 
 			m_Section.Enter();
 
 			try
 			{
 				if (m_Ids.Count == 0)
-					return default(TInstance);
+					return null;
 
 				IEnumerable<int> ids =
 					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
@@ -319,18 +347,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				m_Section.Leave();
 			}
-		}
-
-		/// <summary>
-		/// Gets the first originator instance with the given type.
-		/// </summary>
-		/// <typeparam name="TInstance"></typeparam>
-		/// <returns></returns>
-		[CanBeNull]
-		public TInstance GetInstance<TInstance>()
-			where TInstance : class, IOriginator
-		{
-			return GetInstance<TInstance>(i => true);
 		}
 
 		/// <summary>
@@ -487,7 +503,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("selector");
 
 			if (mask == eCombineMode.None)
-				return default(TInstance);
+				return null;
 
 			// Combine room
 			TInstance instance = GetInstance(mask, selector);
@@ -507,7 +523,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				master = false;
 			}
 
-			return default(TInstance);
+			return null;
 		}
 
 		/// <summary>
