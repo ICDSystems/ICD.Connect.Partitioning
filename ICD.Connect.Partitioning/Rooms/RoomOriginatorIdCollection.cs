@@ -4,6 +4,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Comparers;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings.Originators;
 
@@ -17,7 +18,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		public event EventHandler OnChildrenChanged;
 
 		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
+		private readonly Dictionary<Type, List<IOriginator>> m_TypeToChildrenCache;
+		private readonly PredicateComparer<IOriginator, int> m_ChildIdComparer;
 		private readonly SafeCriticalSection m_Section;
+
 		private readonly IRoom m_Room;
 
 		/// <summary>
@@ -26,16 +30,14 @@ namespace ICD.Connect.Partitioning.Rooms
 		public int Count { get { return m_Section.Execute(() => m_Ids.Count); } }
 
 		/// <summary>
-		/// Gets the core originators collection.
-		/// </summary>
-		private IOriginatorCollection<IOriginator> Originators { get { return m_Room.Core.Originators; } }
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public RoomOriginatorIdCollection(IRoom room)
 		{
 			m_Ids = new IcdOrderedDictionary<int, eCombineMode>();
+			m_TypeToChildrenCache = new Dictionary<Type, List<IOriginator>>();
+			m_ChildIdComparer = new PredicateComparer<IOriginator, int>(c => c.Id);
+
 			m_Section = new SafeCriticalSection();
 
 			m_Room = room;
@@ -172,6 +174,12 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_Ids[id] = combine;
 
+				// Cache the originator
+				IOriginator originator = m_Room.Core.Originators[id];
+
+				foreach (Type type in originator.GetType().GetAllTypes())
+					m_TypeToChildrenCache.GetOrAddNew(type).AddSorted(originator, m_ChildIdComparer);
+
 				return true;
 			}
 			finally
@@ -228,7 +236,25 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns>True if the collection contains the given id.</returns>
 		private bool RemoveInternal(int id)
 		{
-			return m_Section.Execute(() => m_Ids.Remove(id));
+			m_Section.Enter();
+
+			try
+			{
+				if (!m_Ids.Remove(id))
+					return false;
+
+				// Remove the originator from the cache
+				IOriginator originator = m_Room.Core.Originators[id];
+
+				foreach (Type type in originator.GetType().GetAllTypes())
+					m_TypeToChildrenCache[type].Remove(originator);
+
+				return true;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		/// <summary>
@@ -342,14 +368,12 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.Count == 0)
-					return null;
-
-				IEnumerable<int> ids =
-					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-					     .Select(kvp => kvp.Key);
-
-				return Originators.GetChild(ids, selector);
+				List<IOriginator> children;
+				return m_TypeToChildrenCache.TryGetValue(typeof(TInstance), out children)
+					? children.Cast<TInstance>()
+					          .FirstOrDefault(c => EnumUtils.GetFlagsIntersection(m_Ids[c.Id], mask) != eCombineMode.None
+					                               && selector(c))
+					: null;
 			}
 			finally
 			{
@@ -394,14 +418,13 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			try
 			{
-				if (m_Ids.Count == 0)
-					return Enumerable.Empty<TInstance>();
-
-				IEnumerable<int> ids =
-					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-					     .Select(kvp => kvp.Key);
-
-                return Originators.GetChildren(ids, selector);
+				List<IOriginator> children;
+				return m_TypeToChildrenCache.TryGetValue(typeof(TInstance), out children)
+					? children.Cast<TInstance>()
+					          .Where(c => EnumUtils.GetFlagsIntersection(m_Ids[c.Id], mask) != eCombineMode.None
+					                      && selector(c))
+					          .ToArray()
+					: Enumerable.Empty<TInstance>();
 			}
 			finally
 			{
@@ -417,7 +440,17 @@ namespace ICD.Connect.Partitioning.Rooms
 		public bool HasInstances<TInstance>()
 			where TInstance : class, IOriginator
 		{
-			return m_Section.Execute(() => Originators.ContainsChildAny<TInstance>(m_Ids.Keys));
+			m_Section.Enter();
+
+			try
+			{
+				List<IOriginator> cache;
+				return m_TypeToChildrenCache.TryGetValue(typeof(TInstance), out cache) && cache.Count > 0;
+			}
+			finally
+			{
+				m_Section.Leave();
+			}
 		}
 
 		#endregion
