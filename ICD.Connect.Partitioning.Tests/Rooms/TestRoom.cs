@@ -12,11 +12,20 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 
 		public ICore Core { get; set; }
 
-		public bool CombineState { get { throw new NotImplementedException(); } }
+		public bool CombineState { get; set; }
 
 		public int CombinePriority { get; set; }
 
 		public RoomOriginatorIdCollection Originators { get; set; }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public TestRoom(ICore core)
+		{
+			Core = core;
+			Originators = new RoomOriginatorIdCollection(this);
+		}
 
 		/// <summary>
 		/// Informs the room it is part of a combined room.
@@ -24,13 +33,11 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		/// <param name="combine"></param>
 		public void EnterCombineState(bool combine)
 		{
-			throw new NotImplementedException();
+			CombineState = combine;
 		}
-
-		public RoomOriginatorIdCollection AudioDestinations { get; set; }
 	}
 
-	public sealed class TestRoomSettings: AbstractTestSettings
+	public sealed class TestRoomSettings : AbstractTestSettings
 	{
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Services;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Partitions;
-using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
+using ICD.Connect.Settings.Originators;
 using NUnit.Framework;
 
 namespace ICD.Connect.Partitioning.Tests.Rooms
@@ -26,12 +27,39 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void CountTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			room.Originators.Add(1, eCombineMode.Always);
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
+
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
 			room.Originators.Add(3, eCombineMode.Always);
-			room.Originators.Add(2, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
 
 			Assert.AreEqual(3, room.Originators.Count);
 		}
@@ -41,12 +69,39 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void ClearTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			room.Originators.Add(1, eCombineMode.Always);
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
+
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
 			room.Originators.Add(3, eCombineMode.Always);
-			room.Originators.Add(2, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
 
 			room.Originators.Clear();
 
@@ -58,110 +113,303 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetIdsTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			room.Originators.Add(1, eCombineMode.Always);
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
+
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
 			room.Originators.Add(3, eCombineMode.Always);
-			room.Originators.Add(2, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
 
 			Assert.AreEqual(3, room.Originators.GetIds().Count());
-			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] {1, 2, 3}));
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] {3, 4, 5}));
 		}
 
 		[Test]
 		public void SetIdsTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			room.Originators.Add(1, eCombineMode.Always);
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
+
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
 			room.Originators.Add(3, eCombineMode.Always);
-			room.Originators.Add(2, eCombineMode.Always);
 
 			room.Originators.SetIds(new []
 			{
-				new KeyValuePair<int, eCombineMode>(10, eCombineMode.Always),
-				new KeyValuePair<int, eCombineMode>(12, eCombineMode.Always),
-				new KeyValuePair<int, eCombineMode>(11, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(4, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(5, eCombineMode.Always)
 			});
 
-			Assert.AreEqual(3, room.Originators.GetIds().Count());
-			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 10, 11, 12 }));
+			Assert.AreEqual(2, room.Originators.GetIds().Count());
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 4, 5 }));
 		}
 
 		[Test]
 		public void AddTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			Assert.IsTrue(room.Originators.Add(1, eCombineMode.Always));
-			Assert.IsTrue(room.Originators.Add(1, eCombineMode.Combine));
-			Assert.IsFalse(room.Originators.Add(1, eCombineMode.Combine));
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
 
-			Assert.IsTrue(room.Originators.Contains(1));
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
+			Assert.IsTrue(room.Originators.Add(3, eCombineMode.Always));
+			Assert.IsTrue(room.Originators.Add(3, eCombineMode.Combine));
+			Assert.IsFalse(room.Originators.Add(3, eCombineMode.Combine));
+
+			Assert.IsTrue(room.Originators.Contains(3));
 		}
 
 		[Test]
 		public void AddRangeTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
+
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
+
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
+
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
+			room.Originators.Add(3, eCombineMode.Always);
 
 			room.Originators.AddRange(new[]
 			{
-				new KeyValuePair<int, eCombineMode>(10, eCombineMode.Always),
-				new KeyValuePair<int, eCombineMode>(12, eCombineMode.Always),
-				new KeyValuePair<int, eCombineMode>(11, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(4, eCombineMode.Always),
+				new KeyValuePair<int, eCombineMode>(5, eCombineMode.Always)
 			});
 
 			Assert.AreEqual(3, room.Originators.GetIds().Count());
-			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 10, 11, 12 }));
+			Assert.IsTrue(room.Originators.GetIds().SequenceEqual(new[] { 3, 4, 5 }));
 		}
 
-		[TestCase(1, eCombineMode.Always)]
-		public void RemoveTest(int id, eCombineMode combineMode)
+		[Test]
+		public void RemoveTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			room.Originators.Add(id, combineMode);
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
 
-			Assert.IsTrue(room.Originators.Remove(id));
-			Assert.IsFalse(room.Originators.Remove(id));
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
 
-			Assert.IsFalse(room.Originators.Contains(id));
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
+
+			Assert.IsTrue(room.Originators.Remove(3));
+			Assert.IsFalse(room.Originators.Remove(3));
+
+			Assert.IsFalse(room.Originators.Contains(3));
 		}
 
-		[TestCase(1, eCombineMode.Always)]
-		public void ContainsTest(int id, eCombineMode combineMode)
+		[Test]
+		public void ContainsTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core()
+			{
+				Id = 1
+			};
 
-			Assert.IsFalse(room.Originators.Contains(id));
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
 
-			room.Originators.Add(id, combineMode);
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
 
-			Assert.IsTrue(room.Originators.Contains(id));
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
+			Assert.IsFalse(room.Originators.Contains(3));
+
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
+
+			Assert.IsTrue(room.Originators.Contains(3));
 		}
 
 		#endregion
 
 		#region Combine
 
-		[TestCase(1, eCombineMode.Always)]
-		public void GetCombineModeTest(int id, eCombineMode combineMode)
+		[Test]
+		public void GetCombineModeTest()
 		{
-			TestRoom room = new TestRoom();
-			room.Originators = new RoomOriginatorIdCollection(room);
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			Assert.Throws<KeyNotFoundException>(() => room.Originators.GetCombineMode(id));
+			TestRoom room = new TestRoom(core)
+			{
+				Id = 2
+			};
 
-			room.Originators.Add(id, combineMode);
+			Cell tempA = new Cell
+			{
+				Id = 3
+			};
 
-			Assert.AreEqual(combineMode, room.Originators.GetCombineMode(id));
+			Cell tempB = new Cell
+			{
+				Id = 4
+			};
+
+			Cell tempC = new Cell
+			{
+				Id = 5
+			};
+
+			core.Originators.AddChild(room);
+			core.Originators.AddChild(tempA);
+			core.Originators.AddChild(tempB);
+			core.Originators.AddChild(tempC);
+
+			Assert.Throws<KeyNotFoundException>(() => room.Originators.GetCombineMode(6));
+
+			room.Originators.Add(3, eCombineMode.Always);
+			room.Originators.Add(4, eCombineMode.Always);
+			room.Originators.Add(5, eCombineMode.Always);
+
+			Assert.AreEqual(eCombineMode.Always, room.Originators.GetCombineMode(3));
 		}
 
 		#endregion
@@ -171,17 +419,35 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetInstanceSelectorTest()
 		{
-			ICore core = new Core();
+			ICore core = new Core
+			{
+				Id = 1
+			};
 
-			TestRoom roomA = new TestRoom { Id = 1, Core = core, Name = "A" };
-			TestRoom roomB = new TestRoom { Id = 2, Core = core, Name = "B" };
-			TestRoom roomC = new TestRoom { Id = 3, Core = core, Name = "C" };
+			TestRoom roomA = new TestRoom(core)
+			{
+				Id = 2,
+				Core = core,
+				Name = "A"
+			};
+
+			TestRoom roomB = new TestRoom(core)
+			{
+				Id = 3,
+				Core = core,
+				Name = "B"
+			};
+
+			TestRoom roomC = new TestRoom(core)
+			{
+				Id = 4,
+				Core = core,
+				Name = "C"
+			};
 
 			core.Originators.AddChild(roomA);
 			core.Originators.AddChild(roomB);
 			core.Originators.AddChild(roomC);
-
-			roomA.Originators = new RoomOriginatorIdCollection(roomA);
 
 			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(o => o.Name == "B"));
 
@@ -196,17 +462,35 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetInstanceMaskSelectorTest()
 		{
-			ICore core = new Core();
+			ICore core = new Core
+			{
+				Id = 1
+			};
 
-			TestRoom roomA = new TestRoom { Id = 1, Core = core, Name = "A" };
-			TestRoom roomB = new TestRoom { Id = 2, Core = core, Name = "B" };
-			TestRoom roomC = new TestRoom { Id = 3, Core = core, Name = "C" };
+			TestRoom roomA = new TestRoom(core)
+			{
+				Id = 2,
+				Core = core,
+				Name = "A"
+			};
+
+			TestRoom roomB = new TestRoom(core)
+			{
+				Id = 3,
+				Core = core,
+				Name = "B"
+			};
+
+			TestRoom roomC = new TestRoom(core)
+			{
+				Id = 4,
+				Core = core,
+				Name = "C"
+			};
 
 			core.Originators.AddChild(roomA);
 			core.Originators.AddChild(roomB);
 			core.Originators.AddChild(roomC);
-
-			roomA.Originators = new RoomOriginatorIdCollection(roomA);
 
 			Assert.IsNull(roomA.Originators.GetInstance<TestRoom>(o => o.Name == "B"));
 
@@ -256,44 +540,195 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room parent = new Room
+			TestRoom parent = new TestRoom(core)
 			{
-				Id = 2
+				Core = core,
+				Id = 10
 			};
 
-			Room a = new Room
+			TestRoom roomA = new TestRoom(core)
 			{
-				Id = 3,
-				CombinePriority = 5
-			};
-
-			Room b = new Room
-			{
-				Id = 4,
+				Core = core,
+				Id = 2,
 				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			TestRoom roomB = new TestRoom(core)
 			{
-				Id = 5
+				Core = core,
+				Id = 3,
+				CombinePriority = 2
+			};
+
+			TestRoom roomC = new TestRoom(core)
+			{
+				Core = core,
+				Id = 4,
+				CombinePriority = 2
+			};
+
+			Cell cellA = new Cell
+			{
+				Id = 5,
+				Room = roomA,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = roomB,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = roomC,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
 			};
 
 			core.Originators.AddChild(parent);
-			core.Originators.AddChild(a);
-			core.Originators.AddChild(b);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(roomA);
+			core.Originators.AddChild(roomB);
+			core.Originators.AddChild(roomC);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
+			// Add children to Room A
+			Cell roomA1 = new Cell { Id = 11, Name = "A1" };
+			Cell roomA2 = new Cell { Id = 12, Name = "A2" };
+			Cell roomA3 = new Cell { Id = 13, Name = "A3" };
+			Cell roomA4 = new Cell { Id = 14, Name = "A4" };
+			Cell roomA5 = new Cell { Id = 15, Name = "A5" };
+			Cell roomA6 = new Cell { Id = 16, Name = "A6" };
 
-			parent.Originators.Add(partition.Id, eCombineMode.Always);
+			core.Originators.AddChild(roomA1);
+			core.Originators.AddChild(roomA2);
+			core.Originators.AddChild(roomA3);
+			core.Originators.AddChild(roomA4);
+			core.Originators.AddChild(roomA5);
+			core.Originators.AddChild(roomA6);
 
-			
-			Assert.Inconclusive();
-			*/
+			roomA.Originators.Add(roomA1.Id, eCombineMode.None);
+			roomA.Originators.Add(roomA2.Id, eCombineMode.Single);
+			roomA.Originators.Add(roomA3.Id, eCombineMode.Slave);
+			roomA.Originators.Add(roomA4.Id, eCombineMode.Master);
+			roomA.Originators.Add(roomA5.Id, eCombineMode.Combine);
+			roomA.Originators.Add(roomA6.Id, eCombineMode.Always);
+
+			// Add children to Room B
+			Cell roomB1 = new Cell { Id = 17, Name = "B1" };
+			Cell roomB2 = new Cell { Id = 18, Name = "B2" };
+			Cell roomB3 = new Cell { Id = 19, Name = "B3" };
+			Cell roomB4 = new Cell { Id = 20, Name = "B4" };
+			Cell roomB5 = new Cell { Id = 21, Name = "B5" };
+			Cell roomB6 = new Cell { Id = 22, Name = "B6" };
+
+			core.Originators.AddChild(roomB1);
+			core.Originators.AddChild(roomB2);
+			core.Originators.AddChild(roomB3);
+			core.Originators.AddChild(roomB4);
+			core.Originators.AddChild(roomB5);
+			core.Originators.AddChild(roomB6);
+
+			roomB.Originators.Add(roomB1.Id, eCombineMode.None);
+			roomB.Originators.Add(roomB2.Id, eCombineMode.Single);
+			roomB.Originators.Add(roomB3.Id, eCombineMode.Slave);
+			roomB.Originators.Add(roomB4.Id, eCombineMode.Master);
+			roomB.Originators.Add(roomB5.Id, eCombineMode.Combine);
+			roomB.Originators.Add(roomB6.Id, eCombineMode.Always);
+
+			// Add children to Room C
+			Cell roomC1 = new Cell { Id = 23, Name = "C1" };
+			Cell roomC2 = new Cell { Id = 24, Name = "C2" };
+			Cell roomC3 = new Cell { Id = 25, Name = "C3" };
+			Cell roomC4 = new Cell { Id = 26, Name = "C4" };
+			Cell roomC5 = new Cell { Id = 27, Name = "C5" };
+			Cell roomC6 = new Cell { Id = 28, Name = "C6" };
+
+			core.Originators.AddChild(roomC1);
+			core.Originators.AddChild(roomC2);
+			core.Originators.AddChild(roomC3);
+			core.Originators.AddChild(roomC4);
+			core.Originators.AddChild(roomC5);
+			core.Originators.AddChild(roomC6);
+
+			roomC.Originators.Add(roomC1.Id, eCombineMode.None);
+			roomC.Originators.Add(roomC2.Id, eCombineMode.Single);
+			roomC.Originators.Add(roomC3.Id, eCombineMode.Slave);
+			roomC.Originators.Add(roomC4.Id, eCombineMode.Master);
+			roomC.Originators.Add(roomC5.Id, eCombineMode.Combine);
+			roomC.Originators.Add(roomC6.Id, eCombineMode.Always);
+
+			// Parent Room
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomA1.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomA2.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomA3.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomA4.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomA5.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomA6.Id));
+
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomB1.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomB2.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomB3.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomB4.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomB5.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomB6.Id));
+
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomC1.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomC2.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomC3.Id));
+			Assert.IsFalse(parent.Originators.ContainsRecursive(roomC4.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomC5.Id));
+			Assert.IsTrue(parent.Originators.ContainsRecursive(roomC6.Id));
+
+			// Room A
+			Assert.IsFalse(roomA.Originators.ContainsRecursive(roomA1.Id));
+			Assert.IsTrue(roomA.Originators.ContainsRecursive(roomA2.Id));
+			Assert.IsTrue(roomA.Originators.ContainsRecursive(roomA3.Id));
+			Assert.IsTrue(roomA.Originators.ContainsRecursive(roomA4.Id));
+			Assert.IsTrue(roomA.Originators.ContainsRecursive(roomA5.Id));
+			Assert.IsTrue(roomA.Originators.ContainsRecursive(roomA6.Id));
+
+			// Room B
+			Assert.IsFalse(roomB.Originators.ContainsRecursive(roomB1.Id));
+			Assert.IsTrue(roomB.Originators.ContainsRecursive(roomB2.Id));
+			Assert.IsTrue(roomB.Originators.ContainsRecursive(roomB3.Id));
+			Assert.IsTrue(roomB.Originators.ContainsRecursive(roomB4.Id));
+			Assert.IsTrue(roomB.Originators.ContainsRecursive(roomB5.Id));
+			Assert.IsTrue(roomB.Originators.ContainsRecursive(roomB6.Id));
+
+			// Room C
+			Assert.IsFalse(roomC.Originators.ContainsRecursive(roomC1.Id));
+			Assert.IsTrue(roomC.Originators.ContainsRecursive(roomC2.Id));
+			Assert.IsTrue(roomC.Originators.ContainsRecursive(roomC3.Id));
+			Assert.IsTrue(roomC.Originators.ContainsRecursive(roomC4.Id));
+			Assert.IsTrue(roomC.Originators.ContainsRecursive(roomC5.Id));
+			Assert.IsTrue(roomC.Originators.ContainsRecursive(roomC6.Id));
 		}
 
 		[Test]
@@ -329,41 +764,96 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		[Test]
 		public void GetInstancesRecursiveTest()
 		{
-			ICore core = new Core();
+			Core core = new Core
+			{
+				Id = 1
+			};
 
-			// Add the rooms
-			TestRoom roomA = new TestRoom { Id = 1, Core = core, Name = "A" };
-			roomA.Originators = new RoomOriginatorIdCollection(roomA);
+			TestRoom parent = new TestRoom(core)
+			{
+				Core = core,
+				Id = 10
+			};
 
-			TestRoom roomB = new TestRoom { Id = 2, Core = core, Name = "B" };
-			roomB.Originators = new RoomOriginatorIdCollection(roomB);
+			TestRoom roomA = new TestRoom(core)
+			{
+				Core = core,
+				Id = 2,
+				CombinePriority = 1
+			};
 
-			TestRoom roomC = new TestRoom { Id = 3, Core = core, Name = "C" };
-			roomC.Originators = new RoomOriginatorIdCollection(roomC);
+			TestRoom roomB = new TestRoom(core)
+			{
+				Core = core,
+				Id = 3,
+				CombinePriority = 2
+			};
 
+			TestRoom roomC = new TestRoom(core)
+			{
+				Core = core,
+				Id = 4,
+				CombinePriority = 2
+			};
+
+			Cell cellA = new Cell
+			{
+				Id = 5,
+				Room = roomA,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = roomB,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = roomC,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
+			};
+
+			core.Originators.AddChild(parent);
 			core.Originators.AddChild(roomA);
 			core.Originators.AddChild(roomB);
 			core.Originators.AddChild(roomC);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			// Add the partition
-			Partition partition = new Partition { Id = 4 };
-			partition.AddRoom(roomB.Id);
-			partition.AddRoom(roomC.Id);
-			core.Originators.AddChild(partition);
-
-			// Room A contains B and C
-			roomA.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			// Add children to Room A
-			TestRoom roomA1 = new TestRoom { Id = 5, Core = core, Name = "A1" };
-			TestRoom roomA2 = new TestRoom { Id = 6, Core = core, Name = "A2" };
-			TestRoom roomA3 = new TestRoom { Id = 7, Core = core, Name = "A3" };
-			TestRoom roomA4 = new TestRoom { Id = 8, Core = core, Name = "A4" };
-			TestRoom roomA5 = new TestRoom { Id = 9, Core = core, Name = "A5" };
-			TestRoom roomA6 = new TestRoom { Id = 10, Core = core, Name = "A6" };
+			Cell roomA1 = new Cell { Id = 11, Name = "A1" };
+			Cell roomA2 = new Cell { Id = 12, Name = "A2" };
+			Cell roomA3 = new Cell { Id = 13, Name = "A3" };
+			Cell roomA4 = new Cell { Id = 14, Name = "A4" };
+			Cell roomA5 = new Cell { Id = 15, Name = "A5" };
+			Cell roomA6 = new Cell { Id = 16, Name = "A6" };
 
 			core.Originators.AddChild(roomA1);
 			core.Originators.AddChild(roomA2);
@@ -380,12 +870,12 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			roomA.Originators.Add(roomA6.Id, eCombineMode.Always);
 
 			// Add children to Room B
-			TestRoom roomB1 = new TestRoom { Id = 11, Core = core, Name = "B1" };
-			TestRoom roomB2 = new TestRoom { Id = 12, Core = core, Name = "B2" };
-			TestRoom roomB3 = new TestRoom { Id = 13, Core = core, Name = "B3" };
-			TestRoom roomB4 = new TestRoom { Id = 14, Core = core, Name = "B4" };
-			TestRoom roomB5 = new TestRoom { Id = 15, Core = core, Name = "B5" };
-			TestRoom roomB6 = new TestRoom { Id = 16, Core = core, Name = "B6" };
+			Cell roomB1 = new Cell { Id = 17, Name = "B1" };
+			Cell roomB2 = new Cell { Id = 18, Name = "B2" };
+			Cell roomB3 = new Cell { Id = 19, Name = "B3" };
+			Cell roomB4 = new Cell { Id = 20, Name = "B4" };
+			Cell roomB5 = new Cell { Id = 21, Name = "B5" };
+			Cell roomB6 = new Cell { Id = 22, Name = "B6" };
 
 			core.Originators.AddChild(roomB1);
 			core.Originators.AddChild(roomB2);
@@ -402,12 +892,12 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			roomB.Originators.Add(roomB6.Id, eCombineMode.Always);
 
 			// Add children to Room C
-			TestRoom roomC1 = new TestRoom { Id = 17, Core = core, Name = "C1" };
-			TestRoom roomC2 = new TestRoom { Id = 18, Core = core, Name = "C2" };
-			TestRoom roomC3 = new TestRoom { Id = 19, Core = core, Name = "C3" };
-			TestRoom roomC4 = new TestRoom { Id = 20, Core = core, Name = "C4" };
-			TestRoom roomC5 = new TestRoom { Id = 21, Core = core, Name = "C5" };
-			TestRoom roomC6 = new TestRoom { Id = 22, Core = core, Name = "C6" };
+			Cell roomC1 = new Cell { Id = 23, Name = "C1" };
+			Cell roomC2 = new Cell { Id = 24, Name = "C2" };
+			Cell roomC3 = new Cell { Id = 25, Name = "C3" };
+			Cell roomC4 = new Cell { Id = 26, Name = "C4" };
+			Cell roomC5 = new Cell { Id = 27, Name = "C5" };
+			Cell roomC6 = new Cell { Id = 28, Name = "C6" };
 
 			core.Originators.AddChild(roomC1);
 			core.Originators.AddChild(roomC2);
@@ -424,9 +914,32 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			roomC.Originators.Add(roomC6.Id, eCombineMode.Always);
 
 			// Get recursive
+			IOriginator[] parentContents = parent.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
 			IOriginator[] roomAContents = roomA.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
 			IOriginator[] roomBContents = roomB.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
 			IOriginator[] roomCContents = roomC.Originators.GetInstancesRecursive(eCombineMode.Always).ToArray();
+
+			// Parent Room Contents
+			Assert.IsFalse(parentContents.Contains(roomA1));
+			Assert.IsFalse(parentContents.Contains(roomA2));
+			Assert.IsFalse(parentContents.Contains(roomA3));
+			Assert.IsTrue(parentContents.Contains(roomA4));
+			Assert.IsTrue(parentContents.Contains(roomA5));
+			Assert.IsTrue(parentContents.Contains(roomA6));
+
+			Assert.IsFalse(parentContents.Contains(roomB1));
+			Assert.IsFalse(parentContents.Contains(roomB2));
+			Assert.IsTrue(parentContents.Contains(roomB3));
+			Assert.IsFalse(parentContents.Contains(roomB4));
+			Assert.IsTrue(parentContents.Contains(roomB5));
+			Assert.IsTrue(parentContents.Contains(roomB6));
+
+			Assert.IsFalse(parentContents.Contains(roomC1));
+			Assert.IsFalse(parentContents.Contains(roomC2));
+			Assert.IsTrue(parentContents.Contains(roomC3));
+			Assert.IsFalse(parentContents.Contains(roomC4));
+			Assert.IsTrue(parentContents.Contains(roomC5));
+			Assert.IsTrue(parentContents.Contains(roomC6));
 
 			// Room A Contents
 			Assert.IsFalse(roomAContents.Contains(roomA1));
@@ -435,20 +948,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsTrue(roomAContents.Contains(roomA4));
 			Assert.IsTrue(roomAContents.Contains(roomA5));
 			Assert.IsTrue(roomAContents.Contains(roomA6));
-
-			Assert.IsFalse(roomAContents.Contains(roomB1));
-			Assert.IsFalse(roomAContents.Contains(roomB2));
-			Assert.IsFalse(roomAContents.Contains(roomB3));
-			Assert.IsTrue(roomAContents.Contains(roomB4));
-			Assert.IsTrue(roomAContents.Contains(roomB5));
-			Assert.IsTrue(roomAContents.Contains(roomB6));
-
-			Assert.IsFalse(roomAContents.Contains(roomC1));
-			Assert.IsFalse(roomAContents.Contains(roomC2));
-			Assert.IsTrue(roomAContents.Contains(roomC3));
-			Assert.IsFalse(roomAContents.Contains(roomC4));
-			Assert.IsTrue(roomAContents.Contains(roomC5));
-			Assert.IsTrue(roomAContents.Contains(roomC6));
 
 			// Room B Contents
 			Assert.IsFalse(roomBContents.Contains(roomB1));
@@ -465,7 +964,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.IsTrue(roomCContents.Contains(roomC4));
 			Assert.IsTrue(roomCContents.Contains(roomC5));
 			Assert.IsTrue(roomCContents.Contains(roomC6));
-			*/
 		}
 
 		[Test]

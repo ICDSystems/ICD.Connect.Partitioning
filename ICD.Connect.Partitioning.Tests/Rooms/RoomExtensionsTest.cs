@@ -1,4 +1,6 @@
-﻿using ICD.Common.Utils.Services;
+﻿using System.Linq;
+using ICD.Common.Utils.Services;
+using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
@@ -111,43 +113,88 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room a = new Room
+			TestRoom parent = new TestRoom(core)
 			{
-				Id = 2
+				Core = core,
+				Id = 10
 			};
 
-			Room b = new Room
+			TestRoom a = new TestRoom(core)
 			{
-				Id = 3
+				Core = core,
+				Id = 2,
+				CombinePriority = 5
 			};
 
-			Room c = new Room
+			TestRoom b = new TestRoom(core)
 			{
-				Id = 4
+				Core = core,
+				Id = 3,
+				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			TestRoom c = new TestRoom(core)
 			{
-				Id = 5
+				Core = core,
+				Id = 4,
+				CombinePriority = 1
 			};
 
+			Cell cellA = new Cell
+			{
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
+			};
+
+			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-
-			c.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			Assert.IsFalse(a.IsCombineRoom());
 			Assert.IsFalse(b.IsCombineRoom());
-			Assert.IsTrue(c.IsCombineRoom());
-			*/
+			Assert.IsFalse(c.IsCombineRoom());
+			Assert.IsTrue(parent.IsCombineRoom());
 		}
 
 		[Test]
@@ -158,54 +205,88 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room parent = new Room
+			TestRoom parent = new TestRoom(core)
 			{
+				Core = core,
 				Id = 10
 			};
 
-			Room a = new Room
+			TestRoom a = new TestRoom(core)
 			{
+				Core = core,
 				Id = 2,
 				CombinePriority = 5
 			};
 
-			Room b = new Room
+			TestRoom b = new TestRoom(core)
 			{
+				Core = core,
 				Id = 3,
 				CombinePriority = 1
 			};
 
-			Room c = new Room
+			TestRoom c = new TestRoom(core)
 			{
+				Core = core,
 				Id = 4,
 				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			Cell cellA = new Cell
 			{
-				Id = 5
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
 			};
 
 			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-			partition.AddRoom(c.Id);
-
-			parent.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			Assert.IsNull(a.GetMasterRoom());
 			Assert.IsNull(b.GetMasterRoom());
 			Assert.IsNull(c.GetMasterRoom());
 			Assert.AreEqual(b, parent.GetMasterRoom());
-			*/
 		}
 
 		[Test]
@@ -216,48 +297,83 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room parent = new Room
+			TestRoom parent = new TestRoom(core)
 			{
+				Core = core,
 				Id = 10
 			};
 
-			Room a = new Room
+			TestRoom a = new TestRoom(core)
 			{
+				Core = core,
 				Id = 2,
 				CombinePriority = 5
 			};
 
-			Room b = new Room
+			TestRoom b = new TestRoom(core)
 			{
+				Core = core,
 				Id = 3,
 				CombinePriority = 1
 			};
 
-			Room c = new Room
+			TestRoom c = new TestRoom(core)
 			{
+				Core = core,
 				Id = 4,
 				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			Cell cellA = new Cell
 			{
-				Id = 5
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
 			};
 
 			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-			partition.AddRoom(c.Id);
-
-			parent.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			Assert.IsEmpty(a.GetSlaveRooms());
 			Assert.IsEmpty(b.GetSlaveRooms());
@@ -268,7 +384,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.AreEqual(2, slaves.Length);
 			Assert.IsTrue(slaves.Contains(a));
 			Assert.IsTrue(slaves.Contains(c));
-			*/
 		}
 
 		[Test]
@@ -279,48 +394,83 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room parent = new Room
+			TestRoom parent = new TestRoom(core)
 			{
+				Core = core,
 				Id = 10
 			};
 
-			Room a = new Room
+			TestRoom a = new TestRoom(core)
 			{
+				Core = core,
 				Id = 2,
 				CombinePriority = 5
 			};
 
-			Room b = new Room
+			TestRoom b = new TestRoom(core)
 			{
+				Core = core,
 				Id = 3,
 				CombinePriority = 1
 			};
 
-			Room c = new Room
+			TestRoom c = new TestRoom(core)
 			{
+				Core = core,
 				Id = 4,
 				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			Cell cellA = new Cell
 			{
-				Id = 5
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
 			};
 
 			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-			partition.AddRoom(c.Id);
-
-			parent.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			Assert.IsEmpty(a.GetSlaveRooms());
 			Assert.IsEmpty(b.GetSlaveRooms());
@@ -332,7 +482,6 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 			Assert.AreEqual(b, masterAndSlaves[0]);
 			Assert.IsTrue(masterAndSlaves.Contains(a));
 			Assert.IsTrue(masterAndSlaves.Contains(c));
-			*/
 		}
 
 		[Test]
@@ -343,50 +492,97 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room a = new Room
+			TestRoom parent = new TestRoom(core)
 			{
-				Id = 2
+				Core = core,
+				Id = 10
 			};
 
-			Room b = new Room
+			TestRoom a = new TestRoom(core)
 			{
-				Id = 3
+				Core = core,
+				Id = 2,
+				CombinePriority = 5
 			};
 
-			Room c = new Room
+			TestRoom b = new TestRoom(core)
 			{
-				Id = 4
+				Core = core,
+				Id = 3,
+				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			TestRoom c = new TestRoom(core)
 			{
-				Id = 5
+				Core = core,
+				Id = 4,
+				CombinePriority = 1
 			};
 
+			Cell cellA = new Cell
+			{
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
+			};
+
+			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-
-			c.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			IRoom[] aRooms = a.GetRooms().ToArray();
 			IRoom[] bRooms = b.GetRooms().ToArray();
 			IRoom[] cRooms = c.GetRooms().ToArray();
+			IRoom[] parentRooms = parent.GetRooms().ToArray();
 
 			Assert.AreEqual(0, aRooms.Length);
 			Assert.AreEqual(0, bRooms.Length);
-			Assert.AreEqual(2, cRooms.Length);
+			Assert.AreEqual(0, cRooms.Length);
+			Assert.AreEqual(3, parentRooms.Length);
 
-			Assert.IsTrue(cRooms.Contains(a));
-			Assert.IsTrue(cRooms.Contains(b));
-			*/
+			Assert.IsTrue(parentRooms.Contains(a));
+			Assert.IsTrue(parentRooms.Contains(b));
+			Assert.IsTrue(parentRooms.Contains(c));
 		}
 
 		[Test]
@@ -397,55 +593,102 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 				Id = 1
 			};
 
-			Room a = new Room
+			TestRoom parent = new TestRoom(core)
 			{
-				Id = 2
+				Core = core,
+				Id = 10
 			};
 
-			Room b = new Room
+			TestRoom a = new TestRoom(core)
 			{
-				Id = 3
+				Core = core,
+				Id = 2,
+				CombinePriority = 5
 			};
 
-			Room c = new Room
+			TestRoom b = new TestRoom(core)
 			{
-				Id = 4
+				Core = core,
+				Id = 3,
+				CombinePriority = 1
 			};
 
-			Partition partition = new Partition
+			TestRoom c = new TestRoom(core)
 			{
-				Id = 5
+				Core = core,
+				Id = 4,
+				CombinePriority = 1
 			};
 
+			Cell cellA = new Cell
+			{
+				Id = 5,
+				Room = a,
+				Column = 1,
+				Row = 1
+			};
+
+			Cell cellB = new Cell
+			{
+				Id = 6,
+				Room = b,
+				Column = 2,
+				Row = 1
+			};
+
+			Cell cellC = new Cell
+			{
+				Id = 7,
+				Room = c,
+				Column = 3,
+				Row = 1
+			};
+
+			Partition partitionAb = new Partition
+			{
+				Id = 8,
+				CellA = cellA,
+				CellB = cellB
+			};
+
+			Partition partitionBc = new Partition
+			{
+				Id = 9,
+				CellA = cellB,
+				CellB = cellC
+			};
+
+			core.Originators.AddChild(parent);
 			core.Originators.AddChild(a);
 			core.Originators.AddChild(b);
 			core.Originators.AddChild(c);
-			core.Originators.AddChild(partition);
+			core.Originators.AddChild(cellA);
+			core.Originators.AddChild(cellB);
+			core.Originators.AddChild(cellC);
+			core.Originators.AddChild(partitionAb);
+			core.Originators.AddChild(partitionBc);
 
-			Assert.Fail();
-
-			/*
-			partition.AddRoom(a.Id);
-			partition.AddRoom(b.Id);
-
-			c.Originators.Add(partition.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionAb.Id, eCombineMode.Always);
+			parent.Originators.Add(partitionBc.Id, eCombineMode.Always);
 
 			IRoom[] aRooms = a.GetRoomsRecursive().ToArray();
 			IRoom[] bRooms = b.GetRoomsRecursive().ToArray();
 			IRoom[] cRooms = c.GetRoomsRecursive().ToArray();
+			IRoom[] parentRooms = parent.GetRoomsRecursive().ToArray();
 
 			Assert.AreEqual(1, aRooms.Length);
 			Assert.AreEqual(1, bRooms.Length);
-			Assert.AreEqual(3, cRooms.Length);
+			Assert.AreEqual(1, cRooms.Length);
+			Assert.AreEqual(4, parentRooms.Length);
 
 			Assert.IsTrue(aRooms.Contains(a));
-
 			Assert.IsTrue(bRooms.Contains(b));
-
-			Assert.IsTrue(cRooms.Contains(a));
-			Assert.IsTrue(cRooms.Contains(b));
 			Assert.IsTrue(cRooms.Contains(c));
-			*/
+
+			Assert.IsTrue(parentRooms.Contains(a));
+			Assert.IsTrue(parentRooms.Contains(b));
+			Assert.IsTrue(parentRooms.Contains(c));
+			Assert.IsTrue(parentRooms.Contains(parent));
 		}
 
 		#endregion
