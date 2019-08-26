@@ -33,6 +33,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Gets the parent core instance.
 		/// </summary>
+		[NotNull]
 		ICore Core { get; }
 
 		/// <summary>
@@ -48,6 +49,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Gets the originators that are contained within this room.
 		/// </summary>
+		[NotNull]
 		RoomOriginatorIdCollection Originators { get; }
 
 		#endregion
