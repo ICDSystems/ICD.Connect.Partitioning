@@ -99,7 +99,6 @@
     <Compile Include="Partitions\IPartition.cs" />
     <Compile Include="PartitionManagers\IPartitionManager.cs" />
     <Compile Include="Partitions\IPartitionSettings.cs" />
-    <Compile Include="Rooms\DialingPlanInfo.cs" />
     <Compile Include="Rooms\IRoom.cs" />
     <Compile Include="PartitionManagers\IRoomLayout.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
