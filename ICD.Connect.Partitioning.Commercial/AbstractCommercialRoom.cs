@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services;
@@ -70,6 +71,12 @@ namespace ICD.Connect.Partitioning.Commercial
 			SchedulerService.Remove(m_WakeSchedule);
 		}
 
+		/// <summary>
+		/// Returns true if a source is actively routed to a display or we are in a conference.
+		/// </summary>
+		/// <returns></returns>
+		protected abstract bool GetIsInActiveMeeting();
+
 		#region WakeSchedule Callbacks
 
 		private void Subscribe(WakeSchedule schedule)
@@ -86,12 +93,25 @@ namespace ICD.Connect.Partitioning.Commercial
 
 		private void ScheduleOnSleepActionRequested(object sender, EventArgs eventArgs)
 		{
+			if (CombineState)
+				return;
+
+			if (GetIsInActiveMeeting())
+				return;
+
+
 			Log(eSeverity.Informational, "Scheduled sleep occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
 			Sleep();
 		}
 
 		private void ScheduleOnWakeActionRequested(object sender, EventArgs eventArgs)
 		{
+			if (CombineState)
+				return;
+
+			if (GetIsInActiveMeeting())
+				return;
+
 			Log(eSeverity.Informational, "Scheduled wake occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
 			Wake();
 		}
