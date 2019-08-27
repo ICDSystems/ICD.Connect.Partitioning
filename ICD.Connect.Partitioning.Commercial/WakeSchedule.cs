@@ -38,11 +38,12 @@ namespace ICD.Connect.Partitioning.Commercial
 			get { return m_WeekdayWakeTime; }
 			set
 			{
-				while (value >= TimeSpan.FromHours(24))
-					value -= TimeSpan.FromHours(24);
-				while (value < TimeSpan.Zero)
-					value += TimeSpan.FromHours(24);
-
+				if (value != null)
+				{
+					int hour = value.Value.Hours % 24;
+					value = new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+				}
+				
 				if (m_WeekdayWakeTime == value)
 					return;
 
@@ -59,10 +60,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			get { return m_WeekdaySleepTime; }
 			set
 			{
-				while (value >= TimeSpan.FromHours(24))
-					value -= TimeSpan.FromHours(24);
-				while (value < TimeSpan.Zero)
-					value += TimeSpan.FromHours(24);
+				if (value != null)
+				{
+					int hour = value.Value.Hours % 24;
+					value = new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+				}
 
 				if (m_WeekdaySleepTime == value)
 					return;
@@ -80,10 +82,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			get { return m_WeekendWakeTime; }
 			set
 			{
-				while (value >= TimeSpan.FromHours(24))
-					value -= TimeSpan.FromHours(24);
-				while (value < TimeSpan.Zero)
-					value += TimeSpan.FromHours(24);
+				if (value != null)
+				{
+					int hour = value.Value.Hours % 24;
+					value = new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+				}
 
 				if (m_WeekendWakeTime == value)
 					return;
@@ -101,10 +104,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			get { return m_WeekendSleepTime; }
 			set
 			{
-				while (value >= TimeSpan.FromHours(24))
-					value -= TimeSpan.FromHours(24);
-				while (value < TimeSpan.Zero)
-					value += TimeSpan.FromHours(24);
+				if (value != null)
+				{
+					int hour = value.Value.Hours % 24;
+					value = new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+				}
 
 				if (m_WeekendSleepTime == value)
 					return;
