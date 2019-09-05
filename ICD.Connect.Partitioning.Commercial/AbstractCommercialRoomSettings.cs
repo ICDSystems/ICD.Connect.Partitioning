@@ -9,7 +9,7 @@ namespace ICD.Connect.Partitioning.Commercial
 	public abstract class AbstractCommercialRoomSettings : AbstractRoomSettings, ICommercialRoomSettings
 	{
 		private const string WAKE_SCHEDULE_ELEMENT = "WakeSchedule";
-		private const string DIALINGPLAN_ELEMENT = "DialingPlan";
+		private const string DIALING_PLAN_ELEMENT = "DialingPlan";
 
 		private readonly WakeSchedule m_WakeScheduleSettings;
 
@@ -81,7 +81,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			base.WriteElements(writer);
 
-			m_DialingPlan.WriteToXml(writer, DIALINGPLAN_ELEMENT);
+			m_DialingPlan.WriteToXml(writer, DIALING_PLAN_ELEMENT);
 
 			m_WakeScheduleSettings.WriteElements(writer, WAKE_SCHEDULE_ELEMENT);
 		}
@@ -99,7 +99,7 @@ namespace ICD.Connect.Partitioning.Commercial
 				m_WakeScheduleSettings.ParseXml(wakeScheduleXml);
 
 			string dialingPlan;
-			XmlUtils.TryGetChildElementAsString(xml, DIALINGPLAN_ELEMENT, out dialingPlan);
+			XmlUtils.TryGetChildElementAsString(xml, DIALING_PLAN_ELEMENT, out dialingPlan);
 
 			m_DialingPlan = string.IsNullOrEmpty(dialingPlan)
 							  ? new DialingPlanInfo()
