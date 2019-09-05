@@ -1,9 +1,15 @@
-﻿using ICD.Connect.Partitioning.Rooms;
+﻿using System;
+using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Conferencing.ConferenceManagers;
+using ICD.Connect.Partitioning.Rooms;
 
 namespace ICD.Connect.Partitioning.Commercial
 {
 	public interface ICommercialRoom : IRoom
 	{
+		event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
+
 		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
@@ -13,5 +19,11 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
 		/// </summary>
 		DialingPlanInfo DialingPlan { get; }
+
+		/// <summary>
+		/// Gets the conference manager
+		/// </summary>
+		[CanBeNull]
+		IConferenceManager ConferenceManager { get; }
 	}
 }

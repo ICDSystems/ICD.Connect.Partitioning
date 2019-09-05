@@ -21,8 +21,9 @@ namespace ICD.Connect.Partitioning.Commercial
 	public abstract class AbstractCommercialRoom<TSettings> : AbstractRoom<TSettings>, ICommercialRoom
 		where TSettings : ICommercialRoomSettings, new()
 	{
-		private readonly WakeSchedule m_WakeSchedule;
-		private readonly IConferenceManager m_ConferenceManager;
+		public event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
+
+		private IConferenceManager m_ConferenceManager;
 
 		/// <summary>
 		/// Gets the scheduler service.
@@ -35,7 +36,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
-		public WakeSchedule WakeSchedule { get { return m_WakeSchedule; } }
+		public WakeSchedule WakeSchedule { get; }
 
 		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
@@ -45,17 +46,27 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Gets the conference manager.
 		/// </summary>
-		public IConferenceManager ConferenceManager { get { return m_ConferenceManager; } }
+		public IConferenceManager ConferenceManager
+		{
+			get { return m_ConferenceManager; }
+			protected set
+			{
+				if (m_ConferenceManager == value)
+					return;
+
+				m_ConferenceManager = value;
+
+				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
+			}
+		}
 
 		protected AbstractCommercialRoom()
 		{
-			m_WakeSchedule = new WakeSchedule();
+			WakeSchedule = new WakeSchedule();
 
-			Subscribe(m_WakeSchedule);
+			Subscribe(WakeSchedule);
 
-			SchedulerService.Add(m_WakeSchedule);
-            
-			m_ConferenceManager = new ConferenceManager();
+			SchedulerService.Add(WakeSchedule);
 		}
 
 		/// <summary>
@@ -66,9 +77,9 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			base.DisposeFinal(disposing);
 
-			Unsubscribe(m_WakeSchedule);
+			Unsubscribe(WakeSchedule);
 
-			SchedulerService.Remove(m_WakeSchedule);
+			SchedulerService.Remove(WakeSchedule);
 		}
 
 		/// <summary>
@@ -133,7 +144,7 @@ namespace ICD.Connect.Partitioning.Commercial
 			base.ApplySettingsFinal(settings, factory);
 
 			// Wake Schedule
-			m_WakeSchedule.Copy(settings.WakeSchedule);
+			WakeSchedule.Copy(settings.WakeSchedule);
 
 			// Dialing plan
 			SetDialingPlan(settings.DialingPlan, factory);
@@ -146,7 +157,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			base.ClearSettingsFinal();
 
-			m_WakeSchedule.Clear();
+			WakeSchedule.Clear();
 			DialingPlan = default(DialingPlanInfo);
 
 			m_ConferenceManager.ClearDialingProviders();
@@ -162,7 +173,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.WakeSchedule.Copy(m_WakeSchedule);
+			settings.WakeSchedule.Copy(WakeSchedule);
 
 			settings.DialingPlan = DialingPlan;
 		}
