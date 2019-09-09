@@ -36,7 +36,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
-		public WakeSchedule WakeSchedule { get; }
+		public WakeSchedule WakeSchedule { get; private set; }
 
 		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
