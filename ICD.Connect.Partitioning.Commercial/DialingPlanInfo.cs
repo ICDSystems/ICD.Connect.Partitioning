@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices.Controls;
 
-namespace ICD.Connect.Partitioning.Rooms
+namespace ICD.Connect.Partitioning.Commercial
 {
 	public struct DialingPlanInfo
 	{
