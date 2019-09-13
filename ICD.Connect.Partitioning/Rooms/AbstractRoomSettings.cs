@@ -27,6 +27,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		private const string SOURCE_ELEMENT = "Source";
 		private const string DESTINATIONS_ELEMENT = "Destinations";
 		private const string DESTINATION_ELEMENT = "Destination";
+		private const string SOURCE_GROUPS_ELEMENT = "SourceGroups";
+		private const string SOURCE_GROUP_ELEMENT = "SourceGroup";
+		private const string DESTINATION_GROUPS_ELEMENT = "DestinationGroups";
+		private const string DESTINATION_GROUP_ELEMENT = "DestinationGroup";
 		private const string VOLUME_POINTS_ELEMENT = "VolumePoints";
 		private const string VOLUME_POINT_ELEMENT = "VolumePoint";
 		private const string CONFERENCE_POINTS_ELEMENT = "ConferencePoints";
@@ -39,6 +43,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly Dictionary<int, eCombineMode> m_Panels;
 		private readonly Dictionary<int, eCombineMode> m_Sources;
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
+		private readonly Dictionary<int, eCombineMode> m_SourceGroups;
+		private readonly Dictionary<int, eCombineMode> m_DestinationGroups;
 		private readonly Dictionary<int, eCombineMode> m_VolumePoints;
 		private readonly Dictionary<int, eCombineMode> m_ConferencePoints;
 
@@ -54,6 +60,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		public Dictionary<int, eCombineMode> Panels { get { return m_Panels; } }
 		public Dictionary<int, eCombineMode> Sources { get { return m_Sources; } }
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
+		public Dictionary<int, eCombineMode> SourceGroups { get { return m_SourceGroups; } }
+		public Dictionary<int, eCombineMode> DestinationGroups { get { return m_DestinationGroups; } }
 		public Dictionary<int, eCombineMode> VolumePoints { get { return m_VolumePoints; } }
 		public Dictionary<int, eCombineMode> ConferencePoints { get { return m_ConferencePoints; } }
 
@@ -69,6 +77,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_Panels = new Dictionary<int, eCombineMode>();
 			m_Sources = new Dictionary<int, eCombineMode>();
 			m_Destinations = new Dictionary<int, eCombineMode>();
+			m_SourceGroups = new Dictionary<int, eCombineMode>();
+			m_DestinationGroups = new Dictionary<int, eCombineMode>();
 			m_VolumePoints = new Dictionary<int, eCombineMode>();
 			m_ConferencePoints = new Dictionary<int, eCombineMode>();
 		}
@@ -90,6 +100,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
 			WriteChildrenToXml(writer, m_Destinations, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
+			WriteChildrenToXml(writer, m_SourceGroups, SOURCE_GROUPS_ELEMENT, SOURCE_GROUP_ELEMENT);
+			WriteChildrenToXml(writer, m_DestinationGroups, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			WriteChildrenToXml(writer, m_VolumePoints, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
 			WriteChildrenToXml(writer, m_ConferencePoints, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
         }
@@ -111,6 +123,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> devices = ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> sources = ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> destinations = ReadListFromXml(xml, DESTINATIONS_ELEMENT, DESTINATION_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> sourceGroups = ReadListFromXml(xml, SOURCE_GROUPS_ELEMENT, SOURCE_GROUP_ELEMENT);
+			IEnumerable<KeyValuePair<int, eCombineMode>> destinationGroups = ReadListFromXml(xml, DESTINATION_GROUPS_ELEMENT, DESTINATION_GROUP_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> conferencePoints = ReadListFromXml(xml, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
 
@@ -119,6 +133,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			Devices.Clear();
 			Sources.Clear();
 			Destinations.Clear();
+			SourceGroups.Clear();
+			DestinationGroups.Clear();
 			VolumePoints.Clear();
 			ConferencePoints.Clear();
 
@@ -127,6 +143,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			Devices.Update(devices);
 			Sources.Update(sources);
 			Destinations.Update(destinations);
+			SourceGroups.Update(sourceGroups);
+			DestinationGroups.Update(destinationGroups);
 			VolumePoints.Update(volumePoints);
 			ConferencePoints.Update(conferencePoints);
 		}

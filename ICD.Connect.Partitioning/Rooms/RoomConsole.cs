@@ -12,6 +12,8 @@ using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Sources;
+using ICD.Connect.Routing.Groups.Endpoints.Destinations;
+using ICD.Connect.Routing.Groups.Endpoints.Sources;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -32,6 +34,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			yield return ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstancesRecursive<IDevice>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstancesRecursive<ISource>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Destinations", instance.Originators.GetInstancesRecursive<IDestination>(), p => (uint)p.Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("SourceGroups", instance.Originators.GetInstancesRecursive<ISourceGroup>(), p => (uint)p.Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("DestinationGroups", instance.Originators.GetInstancesRecursive<IDestinationGroup>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Partitions", instance.Originators.GetInstancesRecursive<IPartition>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("VolumePoints", instance.Originators.GetInstancesRecursive<IVolumePoint>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("ConferencePoints", instance.Originators.GetInstancesRecursive<IConferencePoint>(), p => (uint)p.Id);

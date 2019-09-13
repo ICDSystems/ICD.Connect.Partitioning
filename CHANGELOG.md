@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added SourceGroups and DestinationGroups to rooms
+
 ### Changed
  - RoomOriginatorIdCollection pre-caches originators for faster lookup
 

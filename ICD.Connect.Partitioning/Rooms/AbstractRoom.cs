@@ -14,6 +14,8 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Sources;
+using ICD.Connect.Routing.Groups.Endpoints.Destinations;
+using ICD.Connect.Routing.Groups.Endpoints.Sources;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Cores;
 using ICD.Connect.Settings.Originators;
@@ -144,6 +146,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Panels.Clear();
 			settings.Sources.Clear();
 			settings.Destinations.Clear();
+			settings.SourceGroups.Clear();
+			settings.DestinationGroups.Clear();
 			settings.VolumePoints.Clear();
 			settings.ConferencePoints.Clear();
 
@@ -152,6 +156,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.Panels.AddRange(GetChildren<IPanelDevice>());
 			settings.Sources.AddRange(GetChildren<ISource>());
 			settings.Destinations.AddRange(GetChildren<IDestination>());
+			settings.SourceGroups.AddRange(GetChildren<ISourceGroup>());
+			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
 			settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
 			settings.ConferencePoints.AddRange(GetChildren<IConferencePoint>());
 		}
@@ -184,6 +190,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IPanelDevice>(settings.Panels, factory);
 			AddOriginatorsSkipExceptions<ISourceBase>(settings.Sources, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
+			AddOriginatorsSkipExceptions<ISourceGroup>(settings.SourceGroups, factory);
+			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 		}
