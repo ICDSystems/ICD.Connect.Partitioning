@@ -69,7 +69,8 @@ namespace ICD.Connect.Partitioning.Partitions
 			if (deviceControl == null)
 				throw new ArgumentNullException("deviceControl");
 
-			return GetPartitions(deviceControl.DeviceControlInfo);
+			DeviceControlInfo info = deviceControl.GetDeviceControlInfo();
+			return GetPartitions(info);
 		}
 
 		/// <summary>
