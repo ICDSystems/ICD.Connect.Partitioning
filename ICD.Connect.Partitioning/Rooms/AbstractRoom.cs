@@ -188,7 +188,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IDevice>(settings.Devices, factory);
 			AddOriginatorsSkipExceptions<IPort>(settings.Ports, factory);
 			AddOriginatorsSkipExceptions<IPanelDevice>(settings.Panels, factory);
-			AddOriginatorsSkipExceptions<ISourceBase>(settings.Sources, factory);
+			AddOriginatorsSkipExceptions<ISource>(settings.Sources, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<ISourceGroup>(settings.SourceGroups, factory);
 			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
