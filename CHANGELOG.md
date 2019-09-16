@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.1.0] - 2019-09-16
 ### Added
  - Added SourceGroups and DestinationGroups to rooms
 
