@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="DialingPlanInfo.cs" />
     <None Include="ObfuscationSettings.cs" />
-    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rooms\AbstractCommercialRoom.cs" />
     <Compile Include="Rooms\AbstractCommercialRoomSettings.cs" />
