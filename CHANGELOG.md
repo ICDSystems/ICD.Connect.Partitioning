@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.4.0] - 2019-09-17
+### Added
+ - Added commercial room abstractions and interfaces
+ - Added WakeSchedule features
+ - Added DialingPlanInfo
+
 ## [10.3.0] - 2019-08-02
 ### Added
  - Added console command to print child rooms for a given room
