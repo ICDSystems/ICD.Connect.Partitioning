@@ -4,7 +4,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Partitioning.Rooms;
 
-namespace ICD.Connect.Partitioning.Commercial
+namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public interface ICommercialRoom : IRoom
 	{

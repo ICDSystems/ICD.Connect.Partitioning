@@ -16,7 +16,7 @@ using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Partitioning.Commercial
+namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public abstract class AbstractCommercialRoom<TSettings> : AbstractRoom<TSettings>, ICommercialRoom
 		where TSettings : ICommercialRoomSettings, new()
