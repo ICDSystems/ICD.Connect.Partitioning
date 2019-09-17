@@ -363,8 +363,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				IEnumerable<int> ids =
 					m_Ids.Where(kvp => EnumUtils.GetFlagsIntersection(kvp.Value, mask) != eCombineMode.None)
-					     .Select(kvp => kvp.Key)
-						 .ToArray();
+					     .Select(kvp => kvp.Key);
 
                 return Originators.GetChildren(ids, selector);
 			}
@@ -574,9 +573,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			{
 				eCombineMode childMask = mask & (master ? eCombineMode.Master : eCombineMode.Slave);
 
-				TInstance[] instances = room.Originators.GetInstances(childMask, selector).ToArray();
-
-				foreach (TInstance instance in instances)
+				foreach (TInstance instance in room.Originators.GetInstances(childMask, selector))
 					yield return instance;
 
 				master = false;
