@@ -66,7 +66,7 @@ namespace ICD.Connect.Partitioning.Cells
 						m_GridCells.Add(info, cells);
 					}
 
-					cells.AddSorted(cell, c => info.CompareTo(new CellColumnRowInfo(c.Column, c.Row)));
+					cells.InsertSorted(cell, c => info.CompareTo(new CellColumnRowInfo(c.Column, c.Row)));
 				}
 			}
 			finally

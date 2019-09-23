@@ -178,7 +178,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				IOriginator originator = m_Room.Core.Originators[id];
 
 				foreach (Type type in originator.GetType().GetAllTypes())
-					m_TypeToChildrenCache.GetOrAddNew(type).AddSorted(originator, m_ChildIdComparer);
+					m_TypeToChildrenCache.GetOrAddNew(type).InsertSorted(originator, m_ChildIdComparer);
 
 				return true;
 			}
