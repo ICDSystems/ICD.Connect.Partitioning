@@ -8,7 +8,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public interface ICommercialRoom : IRoom
 	{
+		/// <summary>
+		/// Raised when the conference manager changes.
+		/// </summary>
 		event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
+
+		/// <summary>
+		/// Raised when the wake schedule changes.
+		/// </summary>
+		event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
 		/// <summary>
 		/// Gets the wake/sleep schedule.

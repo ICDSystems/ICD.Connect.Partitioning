@@ -24,27 +24,53 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
 
+		/// <summary>
+		/// Raised when the wake schedule changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
+
 		private IConferenceManager m_ConferenceManager;
+		private WakeSchedule m_WakeSchedule;
 
 		#region Properties
 
 		/// <summary>
 		/// Gets the scheduler service.
 		/// </summary>
-		private IActionSchedulerService SchedulerService
+		private static IActionSchedulerService SchedulerService
 		{
 			get { return ServiceProvider.TryGetService<IActionSchedulerService>(); }
 		}
 
 		/// <summary>
-		/// Gets the wake/sleep schedule.
-		/// </summary>
-		public WakeSchedule WakeSchedule { get; private set; }
-
-		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
 		/// </summary>
 		public virtual string DialingPlan { get; private set; }
+
+		/// <summary>
+		/// Gets the wake/sleep schedule.
+		/// </summary>
+		public WakeSchedule WakeSchedule
+		{
+			get { return m_WakeSchedule; }
+			protected set
+			{
+				if (value == m_WakeSchedule)
+					return;
+
+				Unsubscribe(m_WakeSchedule);
+				if (m_WakeSchedule != null)
+					SchedulerService.Remove(m_WakeSchedule);
+
+				m_WakeSchedule = value;
+
+				Subscribe(m_WakeSchedule);
+				if (m_WakeSchedule != null)
+					SchedulerService.Add(m_WakeSchedule);
+
+				OnWakeScheduleChanged.Raise(this, new GenericEventArgs<WakeSchedule>(m_WakeSchedule));
+			}
+		}
 
 		/// <summary>
 		/// Gets the conference manager.
@@ -54,41 +80,18 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			get { return m_ConferenceManager; }
 			protected set
 			{
-				if (m_ConferenceManager == value)
+				if (value == m_ConferenceManager)
 					return;
 
+				Unsubscribe(m_ConferenceManager);
 				m_ConferenceManager = value;
+				Subscribe(m_ConferenceManager);
 
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
 			}
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractCommercialRoom()
-		{
-			WakeSchedule = new WakeSchedule();
-
-			Subscribe(WakeSchedule);
-
-			SchedulerService.Add(WakeSchedule);
-		}
-
-		/// <summary>
-		/// Release resources
-		/// </summary>
-		/// <param name="disposing"></param>
-		protected override void DisposeFinal(bool disposing)
-		{
-			base.DisposeFinal(disposing);
-
-			Unsubscribe(WakeSchedule);
-
-			SchedulerService.Remove(WakeSchedule);
-		}
 
 		#region Methods
 
@@ -116,8 +119,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Subscribe to the schedule events.
 		/// </summary>
 		/// <param name="schedule"></param>
-		private void Subscribe(WakeSchedule schedule)
+		protected virtual void Subscribe(WakeSchedule schedule)
 		{
+			if (schedule == null)
+				return;
+
 			schedule.OnWakeActionRequested += ScheduleOnWakeActionRequested;
 			schedule.OnSleepActionRequested += ScheduleOnSleepActionRequested;
 		}
@@ -126,8 +132,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Unsubscribe from the schedule events.
 		/// </summary>
 		/// <param name="schedule"></param>
-		private void Unsubscribe(WakeSchedule schedule)
+		protected virtual void Unsubscribe(WakeSchedule schedule)
 		{
+			if (schedule == null)
+				return;
+
 			schedule.OnWakeActionRequested -= ScheduleOnWakeActionRequested;
 			schedule.OnSleepActionRequested -= ScheduleOnSleepActionRequested;
 		}
@@ -168,6 +177,26 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#endregion
 
+		#region ConferenceManager Callbacks
+
+		/// <summary>
+		/// Subscribe to the conference manager events.
+		/// </summary>
+		/// <param name="conferenceManager"></param>
+		protected virtual void Subscribe(IConferenceManager conferenceManager)
+		{
+		}
+
+		/// <summary>
+		/// Unsubscribe from the conference manager events.
+		/// </summary>
+		/// <param name="conferenceManager"></param>
+		protected virtual void Unsubscribe(IConferenceManager conferenceManager)
+		{
+		}
+
+		#endregion
+
 		#region Settings
 
 		/// <summary>
@@ -193,12 +222,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ClearSettingsFinal();
 
-			WakeSchedule.Clear();
 			DialingPlan = null;
 
-			m_ConferenceManager.ClearDialingProviders();
-			m_ConferenceManager.Favorites = null;
-			m_ConferenceManager.DialingPlan.ClearMatchers();
+			if (m_WakeSchedule != null)
+				m_WakeSchedule.Clear();
+
+			if (m_ConferenceManager != null)
+			{
+				m_ConferenceManager.ClearDialingProviders();
+				m_ConferenceManager.Favorites = null;
+				m_ConferenceManager.DialingPlan.ClearMatchers();
+			}
 		}
 
 		/// <summary>
@@ -209,7 +243,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.WakeSchedule.Copy(WakeSchedule);
+			if (m_WakeSchedule != null)
+				settings.WakeSchedule.Copy(m_WakeSchedule);
 
 			settings.DialingPlan = DialingPlan;
 		}
@@ -220,6 +255,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <param name="path"></param>
 		private void SetDialingPlan(string path)
 		{
+			if (m_ConferenceManager == null)
+				throw new InvalidOperationException("Room has no conference manager");
+
 			DialingPlan = path;
 
 			if (!string.IsNullOrEmpty(path))
