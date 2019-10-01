@@ -1,6 +1,6 @@
 ﻿using ICD.Connect.Partitioning.Rooms;
 
-namespace ICD.Connect.Partitioning.Commercial
+namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public interface ICommercialRoomSettings : IRoomSettings
 	{

@@ -4,7 +4,7 @@ using ICD.Common.Utils.Xml;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
-namespace ICD.Connect.Partitioning.Commercial
+namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public abstract class AbstractCommercialRoomSettings : AbstractRoomSettings, ICommercialRoomSettings
 	{
