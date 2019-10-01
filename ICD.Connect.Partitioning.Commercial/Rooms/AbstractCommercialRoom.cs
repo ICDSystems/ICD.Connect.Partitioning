@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICD.Common.Utils;
@@ -8,6 +9,7 @@ using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Services.Scheduler;
+using ICD.Connect.API.Commands;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.EventArguments;
@@ -21,9 +23,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 	public abstract class AbstractCommercialRoom<TSettings> : AbstractRoom<TSettings>, ICommercialRoom
 		where TSettings : ICommercialRoomSettings, new()
 	{
+		/// <summary>
+		/// Raised when the conference manager changes.
+		/// </summary>
 		public event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
 
 		private IConferenceManager m_ConferenceManager;
+
+		#region Properties
 
 		/// <summary>
 		/// Gets the scheduler service.
@@ -60,6 +67,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
+		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		protected AbstractCommercialRoom()
 		{
 			WakeSchedule = new WakeSchedule();
@@ -82,26 +94,53 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			SchedulerService.Remove(WakeSchedule);
 		}
 
+		#region Methods
+
+		/// <summary>
+		/// Shuts down the room.
+		/// </summary>
+		public abstract void Sleep();
+
+		/// <summary>
+		/// Wakes up the room.
+		/// </summary>
+		public abstract void Wake();
+
 		/// <summary>
 		/// Returns true if a source is actively routed to a display or we are in a conference.
 		/// </summary>
 		/// <returns></returns>
 		protected abstract bool GetIsInActiveMeeting();
 
+		#endregion
+
 		#region WakeSchedule Callbacks
 
+		/// <summary>
+		/// Subscribe to the schedule events.
+		/// </summary>
+		/// <param name="schedule"></param>
 		private void Subscribe(WakeSchedule schedule)
 		{
 			schedule.OnWakeActionRequested += ScheduleOnWakeActionRequested;
 			schedule.OnSleepActionRequested += ScheduleOnSleepActionRequested;
 		}
 
+		/// <summary>
+		/// Unsubscribe from the schedule events.
+		/// </summary>
+		/// <param name="schedule"></param>
 		private void Unsubscribe(WakeSchedule schedule)
 		{
 			schedule.OnWakeActionRequested -= ScheduleOnWakeActionRequested;
 			schedule.OnSleepActionRequested -= ScheduleOnSleepActionRequested;
 		}
 
+		/// <summary>
+		/// Called when a sleep action is scheduled.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
 		private void ScheduleOnSleepActionRequested(object sender, EventArgs eventArgs)
 		{
 			if (CombineState)
@@ -110,11 +149,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (GetIsInActiveMeeting())
 				return;
 
-
 			Log(eSeverity.Informational, "Scheduled sleep occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
 			Sleep();
 		}
 
+		/// <summary>
+		/// Called when a wake action is scheduled.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
 		private void ScheduleOnWakeActionRequested(object sender, EventArgs eventArgs)
 		{
 			if (CombineState)
@@ -126,9 +169,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			Log(eSeverity.Informational, "Scheduled wake occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
 			Wake();
 		}
-
-		public abstract void Sleep();
-		public abstract void Wake();
 
 		#endregion
 
@@ -246,6 +286,32 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			{
 				Log(eSeverity.Error, "failed add {0} dialing provider - {1}", sourceType, e.Message);
 			}
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new ConsoleCommand("Wake", "Wakes the room", () => Wake());
+			yield return new ConsoleCommand("Sleep", "Puts the room to sleep", () => Sleep());
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
