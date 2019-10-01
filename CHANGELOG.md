@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.5.0] - 2019-10-01
+### Added
+ - Added wake and sleep console commands to commercial room
+
+### Changed
+ - Moved commercial room abstractions and interfaces into Rooms subdirectory
+
 ## [10.4.0] - 2019-09-17
 ### Added
  - Added commercial room abstractions and interfaces

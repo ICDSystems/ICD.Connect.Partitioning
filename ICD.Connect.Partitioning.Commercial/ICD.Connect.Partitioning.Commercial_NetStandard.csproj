@@ -28,6 +28,7 @@
     <Compile Remove="ObfuscationSettings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="ICD.Connect.Partitioning.projectinfo" />
     <None Remove="ICD.Connect.projectinfo" />
     <None Remove="ICD.Connect.Rooms_SimplSharp.suo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
