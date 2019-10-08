@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
@@ -50,6 +51,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
+		[CanBeNull]
 		public WakeSchedule WakeSchedule
 		{
 			get { return m_WakeSchedule; }
@@ -75,6 +77,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the conference manager.
 		/// </summary>
+		[CanBeNull]
 		public IConferenceManager ConferenceManager
 		{
 			get { return m_ConferenceManager; }
