@@ -16,9 +16,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 	public interface IPartitionManager : IOriginator
 	{
 		/// <summary>
-		/// Raised when a parition control opens/closes.
+		/// Raised when a partition control opens/closes.
 		/// </summary>
-		event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
+		event PartitionControlOpenStateCallback OnPartitionControlOpenStateChange;
 
 		/// <summary>
 		/// Gets the partitions in the system.

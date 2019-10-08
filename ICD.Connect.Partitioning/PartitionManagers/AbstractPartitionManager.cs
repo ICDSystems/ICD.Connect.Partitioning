@@ -13,7 +13,10 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 	public abstract class AbstractPartitionManager<TSettings> : AbstractOriginator<TSettings>, IPartitionManager
 		where TSettings : IPartitionManagerSettings, new()
 	{
-		public abstract event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
+		/// <summary>
+		/// Raised when a partition control opens/closes.
+		/// </summary>
+		public abstract event PartitionControlOpenStateCallback OnPartitionControlOpenStateChange;
 
 		#region Properties
 

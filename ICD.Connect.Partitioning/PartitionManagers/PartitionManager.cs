@@ -22,9 +22,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 	public sealed class PartitionManager : AbstractPartitionManager<PartitionManagerSettings>
 	{
 		/// <summary>
-		/// Raised when a parition control opens/closes.
+		/// Raised when a partition control opens/closes.
 		/// </summary>
-		public override event PartitionControlOpenStateCallback OnPartitionOpenStateChange;
+		public override event PartitionControlOpenStateCallback OnPartitionControlOpenStateChange;
 
 		private readonly CellsCollection m_Cells;
 		private readonly PartitionsCollection m_Partitions;
@@ -67,7 +67,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="disposing"></param>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnPartitionOpenStateChange = null;
+			OnPartitionControlOpenStateChange = null;
 
 			base.DisposeFinal(disposing);
 
@@ -663,19 +663,19 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		}
 
 		/// <summary>
-		/// Subscribe to the partition events.
+		/// Subscribe to the partition control events.
 		/// </summary>
-		/// <param name="partition"></param>
-		private void Subscribe(IPartitionDeviceControl partition)
+		/// <param name="partitionControl"></param>
+		private void Subscribe(IPartitionDeviceControl partitionControl)
 		{
-			if (partition == null)
+			if (partitionControl == null)
 				return;
 
-			partition.OnOpenStatusChanged += PartitionOnOpenStatusChanged;
+			partitionControl.OnOpenStatusChanged += PartitionControlOnOpenStatusChanged;
 		}
 
 		/// <summary>
-		/// Unsubscribe from the partition events.
+		/// Unsubscribe from the partition control events.
 		/// </summary>
 		/// <param name="partition"></param>
 		private void Unsubscribe(IPartitionDeviceControl partition)
@@ -683,17 +683,17 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			if (partition == null)
 				return;
 
-			partition.OnOpenStatusChanged -= PartitionOnOpenStatusChanged;
+			partition.OnOpenStatusChanged -= PartitionControlOnOpenStatusChanged;
 		}
 
 		/// <summary>
-		/// Called when a partitions open state changes.
+		/// Called when a partition control open state changes.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void PartitionOnOpenStatusChanged(object sender, BoolEventArgs args)
+		private void PartitionControlOnOpenStatusChanged(object sender, BoolEventArgs args)
 		{
-			PartitionControlOpenStateCallback handler = OnPartitionOpenStateChange;
+			PartitionControlOpenStateCallback handler = OnPartitionControlOpenStateChange;
 			if (handler != null)
 				handler(sender as IPartitionDeviceControl, args.Data);
 		}
