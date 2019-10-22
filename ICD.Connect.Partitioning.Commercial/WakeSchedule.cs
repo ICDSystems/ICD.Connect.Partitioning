@@ -133,6 +133,14 @@ namespace ICD.Connect.Partitioning.Commercial
 		}
 
 		/// <summary>
+		/// Returns if the wake schedule is enabled for operation today.
+		/// </summary>
+		public bool IsEnabledToday
+		{
+			get { return DateTime.Today.DayOfWeek.IsWeekday() ? WeekdayEnable : WeekendEnable; }
+		}
+
+		/// <summary>
 		/// Returns true if the system should be awake at the current time.
 		/// </summary>
 		public bool IsWakeTime
