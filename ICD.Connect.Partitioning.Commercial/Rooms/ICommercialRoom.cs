@@ -19,6 +19,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
 		/// <summary>
+		/// Raised when the room wakes or goes to sleep.
+		/// </summary>
+		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
+
+		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
 		WakeSchedule WakeSchedule { get; }
@@ -33,5 +38,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		IConferenceManager ConferenceManager { get; }
+
+		/// <summary>
+		/// Gets the awake state.
+		/// </summary>
+		bool IsAwake { get; }
 	}
 }

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added IsAwake property and event to ICommercialRoom and abstraction
+
 ## [14.0.0] - 2019-10-08
 ### Changed
  - Renamed partition state change events for clarification

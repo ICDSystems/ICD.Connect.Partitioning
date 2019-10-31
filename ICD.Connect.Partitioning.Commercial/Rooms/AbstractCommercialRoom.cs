@@ -10,6 +10,7 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Services.Scheduler;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Partitioning.Rooms;
@@ -30,8 +31,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
+		/// <summary>
+		/// Raised when the room wakes or goes to sleep.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
+
 		private IConferenceManager m_ConferenceManager;
 		private WakeSchedule m_WakeSchedule;
+		private bool m_IsAwake;
 
 		#region Properties
 
@@ -91,6 +98,23 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				Subscribe(m_ConferenceManager);
 
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
+			}
+		}
+
+		/// <summary>
+		/// Gets the awake state.
+		/// </summary>
+		public bool IsAwake
+		{
+			get { return m_IsAwake; }
+			protected set
+			{
+				if (value == m_IsAwake)
+					return;
+
+				m_IsAwake = value;
+
+				OnIsAwakeStateChanged.Raise(this, new BoolEventArgs(m_IsAwake));
 			}
 		}
 
@@ -290,6 +314,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#endregion
 
 		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("IsAwake", IsAwake);
+		}
 
 		/// <summary>
 		/// Gets the child console commands.
