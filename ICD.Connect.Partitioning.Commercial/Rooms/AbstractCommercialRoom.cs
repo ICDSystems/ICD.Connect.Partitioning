@@ -36,8 +36,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
+		[CanBeNull]
 		private IConferenceManager m_ConferenceManager;
+
+		[CanBeNull]
 		private WakeSchedule m_WakeSchedule;
+
 		private bool m_IsAwake;
 
 		#region Properties
@@ -236,7 +240,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.ApplySettingsFinal(settings, factory);
 
 			// Wake Schedule
-			WakeSchedule.Copy(settings.WakeSchedule);
+			if (m_WakeSchedule != null)
+				m_WakeSchedule.Copy(settings.WakeSchedule);
 
 			// Dialing plan
 			SetDialingPlan(settings.DialingPlan);
