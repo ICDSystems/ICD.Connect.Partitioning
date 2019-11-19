@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Scheduler;
@@ -8,7 +9,14 @@ namespace ICD.Connect.Partitioning.Commercial
 {
 	public sealed class WakeSchedule : AbstractScheduledAction
 	{
+		/// <summary>
+		/// Raised when the wake action occurs.
+		/// </summary>
 		public event EventHandler OnWakeActionRequested;
+
+		/// <summary>
+		/// Raised when the sleep action occurs.
+		/// </summary>
 		public event EventHandler OnSleepActionRequested;
 
 		private const string WEEKDAY_ELEMENT = "Weekday";
@@ -37,11 +45,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			set
 			{
 				value = Wrap24Hours(value);
-
 				if (m_WeekdayWakeTime == value)
 					return;
 
 				m_WeekdayWakeTime = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -55,11 +63,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			set
 			{
 				value = Wrap24Hours(value);
-
 				if (m_WeekdaySleepTime == value)
 					return;
 
 				m_WeekdaySleepTime = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -73,11 +81,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			set
 			{
 				value = Wrap24Hours(value);
-
 				if (m_WeekendWakeTime == value)
 					return;
 
 				m_WeekendWakeTime = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -91,11 +99,11 @@ namespace ICD.Connect.Partitioning.Commercial
 			set
 			{
 				value = Wrap24Hours(value);
-
 				if (m_WeekendSleepTime == value)
 					return;
 
 				m_WeekendSleepTime = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -112,6 +120,7 @@ namespace ICD.Connect.Partitioning.Commercial
 					return;
 
 				m_WeekdayEnable = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -128,6 +137,7 @@ namespace ICD.Connect.Partitioning.Commercial
 					return;
 
 				m_WeekendEnable = value;
+
 				UpdateNextRunTime();
 			}
 		}
@@ -137,7 +147,12 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// </summary>
 		public bool IsEnabledToday
 		{
-			get { return DateTime.Today.DayOfWeek.IsWeekday() ? WeekdayEnable : WeekendEnable; }
+			get
+			{
+				return IcdEnvironment.GetLocalTime().DayOfWeek.IsWeekday()
+					? WeekdayEnable
+					: WeekendEnable;
+			}
 		}
 
 		/// <summary>
@@ -148,17 +163,7 @@ namespace ICD.Connect.Partitioning.Commercial
 			get
 			{
 				DateTime now = IcdEnvironment.GetLocalTime();
-				DateTime? wakeTime = GetWakeTimeForDay(now.Date);
-				DateTime? sleepTime = GetSleepTimeForDay(now.Date);
-
-				if (sleepTime == null || wakeTime == null)
-					return wakeTime != null && now >= wakeTime;
-
-				DateTime? time = now.PreviousLatestTime(true, sleepTime.Value, wakeTime.Value);
-				if (time == null)
-					return false;
-
-				return time == wakeTime.Value;
+				return GetIsWakeTime(now);
 			}
 		}
 
@@ -170,17 +175,7 @@ namespace ICD.Connect.Partitioning.Commercial
 			get
 			{
 				DateTime now = IcdEnvironment.GetLocalTime();
-				DateTime? wakeTime = GetWakeTimeForDay(now.Date);
-				DateTime? sleepTime = GetSleepTimeForDay(now.Date);
-
-				if (sleepTime == null || wakeTime == null)
-					return sleepTime != null && now >= sleepTime;
-
-				DateTime? time = now.PreviousLatestTime(true, sleepTime.Value, wakeTime.Value);
-				if (time == null)
-					return false;
-
-				return time == sleepTime.Value;
+				return GetIsSleepTime(now);
 			}
 		}
 
@@ -188,38 +183,26 @@ namespace ICD.Connect.Partitioning.Commercial
 
 		#region Methods
 
+		/// <summary>
+		/// Runs when the action has hit its scheduled time
+		/// </summary>
 		public override void RunFinal()
 		{
 			if (IsSleepTime)
-				Sleep();
+				OnSleepActionRequested.Raise(this);
 			else if (IsWakeTime)
-				Wake();
+				OnWakeActionRequested.Raise(this);
 		}
 
+		/// <summary>
+		/// Runs after RunFinal in order to determine the next run time of this action
+		/// </summary>
 		public override DateTime? GetNextRunTime()
 		{
 			var now = IcdEnvironment.GetLocalTime();
-			var currentDay = now.Date;
-			while (currentDay < now.AddDays(7)) // if no action found for a week, means all 4 times are null
-			{
-				var sleepTime = GetSleepTimeForDay(currentDay);
-				var wakeTime = GetWakeTimeForDay(currentDay);
 
-				if (sleepTime != null && wakeTime != null)
-				{
-					var time = now.NextEarliestTime(false, sleepTime.Value, wakeTime.Value);
-					if (time != null)
-						return time;
-				}
-				else if (wakeTime != null && now < wakeTime)
-					return wakeTime.Value;
-				else if (sleepTime != null && now < sleepTime)
-					return sleepTime.Value;
-
-				currentDay = currentDay.AddDays(1); // no actions scheduled for today, check next day
-			}
-
-			return null;
+			bool? unused;
+			return GetNextRunTime(now, out unused);
 		}
 
 		/// <summary>
@@ -235,6 +218,160 @@ namespace ICD.Connect.Partitioning.Commercial
 			WeekdayEnable = false;
 			WeekendEnable = false;
 		}
+
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Wraps the given time to a 24 hour span.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		private static TimeSpan? Wrap24Hours(TimeSpan? value)
+		{
+			if (value == null)
+				return null;
+
+			int hour = MathUtils.Modulus(value.Value.Hours, 24);
+			return new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+		}
+
+		/// <summary>
+		/// Gets the run time following the given time.
+		/// </summary>
+		/// <param name="now"></param>
+		/// <param name="wake">Outputs true if the result is a wake time, false if the result is a sleep time.</param>
+		/// <returns></returns>
+		private DateTime? GetNextRunTime(DateTime now, out bool? wake)
+		{
+			DateTime currentDay = now.Date;
+
+			// If no action found for a week, means all 4 times are null
+			while (currentDay < now.AddDays(7))
+			{
+				List<DateTime> times = new List<DateTime>();
+
+				DateTime? sleepTime = GetSleepTimeForDay(currentDay);
+				if (sleepTime.HasValue)
+					times.Add(sleepTime.Value);
+
+				DateTime? wakeTime = GetWakeTimeForDay(currentDay);
+				if (wakeTime.HasValue)
+					times.Add(wakeTime.Value);
+
+				DateTime? time = now.NextEarliestTime(false, times);
+				if (time != null)
+				{
+					wake = time == wakeTime;
+					return time;
+				}
+
+				// No actions scheduled for today, check next day
+				currentDay = currentDay.AddDays(1);
+			}
+
+			wake = null;
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the run time preceding the given time.
+		/// </summary>
+		/// <param name="now"></param>
+		/// <param name="wake">Outputs true if the result is a wake time.</param>
+		/// <returns></returns>
+		private DateTime? GetLastRunTimeInclusive(DateTime now, out bool? wake)
+		{
+			DateTime currentDay = now.Date;
+
+			// If no action found for a week, means all 4 times are null
+			while (currentDay > now.AddDays(-7))
+			{
+				List<DateTime> times = new List<DateTime>();
+
+				DateTime? sleepTime = GetSleepTimeForDay(currentDay);
+				if (sleepTime.HasValue)
+					times.Add(sleepTime.Value);
+
+				DateTime? wakeTime = GetWakeTimeForDay(currentDay);
+				if (wakeTime.HasValue)
+					times.Add(wakeTime.Value);
+
+				DateTime? time = now.PreviousLatestTime(true, times);
+				if (time != null)
+				{
+					wake = time == wakeTime;
+					return time;
+				}
+
+				// No actions scheduled for today, check next day
+				currentDay = currentDay.AddDays(-1);
+			}
+
+			wake = null;
+			return null;
+		}
+
+		/// <summary>
+		/// Returns true if the system should be awake at the given time.
+		/// </summary>
+		private bool GetIsWakeTime(DateTime now)
+		{
+			bool? wake;
+			return GetLastRunTimeInclusive(now, out wake).HasValue && wake == true;
+		}
+
+		/// <summary>
+		/// Returns true if the system should be asleep at the given time.
+		/// </summary>
+		private bool GetIsSleepTime(DateTime now)
+		{
+			bool? wake;
+			return GetLastRunTimeInclusive(now, out wake).HasValue && wake == false;
+		}
+
+		/// <summary>
+		/// Returns the sleep time for the given day.
+		/// </summary>
+		/// <param name="day"></param>
+		/// <returns></returns>
+		private DateTime? GetSleepTimeForDay(DateTime day)
+		{
+			// Remove any time info
+			day = day.Date;
+
+			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdaySleepTime != null)
+				return day.Add(WeekdaySleepTime.Value);
+			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendSleepTime != null)
+				return day.Add(WeekendSleepTime.Value);
+
+			// Should not sleep today
+			return null;
+		}
+
+		/// <summary>
+		/// Returns the wake time for the given day.
+		/// </summary>
+		/// <param name="day"></param>
+		/// <returns></returns>
+		private DateTime? GetWakeTimeForDay(DateTime day)
+		{
+			// Remove any time info
+			day = day.Date;
+
+			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdayWakeTime != null)
+				return day.Add(WeekdayWakeTime.Value);
+			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendWakeTime != null)
+				return day.Add(WeekendWakeTime.Value);
+
+			// Should not wake today
+			return null;
+		}
+
+		#endregion
+
+		#region Serialization
 
 		/// <summary>
 		/// Copies the properties from the other instance.
@@ -272,6 +409,28 @@ namespace ICD.Connect.Partitioning.Commercial
 		}
 
 		/// <summary>
+		/// Updates the weekday settings from xml.
+		/// </summary>
+		/// <param name="xml"></param>
+		private void ParseWeekday(string xml)
+		{
+			WeekdayWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
+			WeekdaySleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
+			WeekdayEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+		}
+
+		/// <summary>
+		/// Updates the weekend settings from xml.
+		/// </summary>
+		/// <param name="xml"></param>
+		private void ParseWeekend(string xml)
+		{
+			WeekendWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
+			WeekendSleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
+			WeekendEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+		}
+
+		/// <summary>
 		/// Writes the settings to xml.
 		/// </summary>
 		/// <param name="writer"></param>
@@ -297,73 +456,6 @@ namespace ICD.Connect.Partitioning.Commercial
 				writer.WriteEndElement();
 			}
 			writer.WriteEndElement();
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		private TimeSpan? Wrap24Hours(TimeSpan? value)
-		{
-			if (value == null)
-				return null;
-
-			int hour = value.Value.Hours % 24;
-			return new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
-		}
-
-		/// <summary>
-		/// Updates the weekday settings from xml.
-		/// </summary>
-		/// <param name="xml"></param>
-		private void ParseWeekday(string xml)
-		{
-			WeekdayWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
-			WeekdaySleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
-			WeekdayEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
-		}
-
-		/// <summary>
-		/// Updates the weekend settings from xml.
-		/// </summary>
-		/// <param name="xml"></param>
-		private void ParseWeekend(string xml)
-		{
-			WeekendWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
-			WeekendSleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
-			WeekendEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
-		}
-
-		private DateTime? GetSleepTimeForDay(DateTime day)
-		{
-			day = day.Date; // remove any time info
-			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdaySleepTime != null)
-				return day.Add(WeekdaySleepTime.Value);
-			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendSleepTime != null)
-				return day.Add(WeekendSleepTime.Value);
-
-			return null; // should not sleep today
-		}
-
-		private DateTime? GetWakeTimeForDay(DateTime day)
-		{
-			day = day.Date; // remove any time info
-			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdayWakeTime != null)
-				return day.Add(WeekdayWakeTime.Value);
-			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendWakeTime != null)
-				return day.Add(WeekendWakeTime.Value);
-
-			return null; // should not wake today
-		}
-
-		private void Wake()
-		{
-			OnWakeActionRequested.Raise(this);
-		}
-
-		private void Sleep()
-		{
-			OnSleepActionRequested.Raise(this);
 		}
 
 		#endregion
