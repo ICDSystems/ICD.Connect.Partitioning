@@ -124,6 +124,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#endregion
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnConferenceManagerChanged = null;
+			OnWakeScheduleChanged = null;
+			OnIsAwakeStateChanged = null;
+
+			base.DisposeFinal(disposing);
+		}
+
 		#region Methods
 
 		/// <summary>
