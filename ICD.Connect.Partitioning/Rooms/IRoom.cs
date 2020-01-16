@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Extensions;
@@ -78,7 +79,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <param name="controlInfo"></param>
 		/// <returns></returns>
-		public static bool ContainsControl(this IRoom extends, DeviceControlInfo controlInfo)
+		public static bool ContainsControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -93,7 +94,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		[PublicAPI]
-		public static T GetControl<T>(this IRoom extends)
+		public static T GetControl<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -110,7 +111,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		[NotNull]
-		public static IDeviceControl GetControl(this IRoom extends, DeviceControlInfo controlInfo)
+		public static IDeviceControl GetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -132,7 +133,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		[NotNull]
-		public static T GetControl<T>(this IRoom extends, DeviceControlInfo controlInfo)
+		public static T GetControl<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
 			where T : IDeviceControl
 		{
 			if (extends == null)
@@ -151,7 +152,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		[PublicAPI]
-		public static IEnumerable<T> GetControls<T>(this IRoom extends)
+		public static IEnumerable<T> GetControls<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -168,7 +169,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControl(this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
+		public static bool TryGetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -189,7 +190,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControl<T>(this IRoom extends, DeviceControlInfo controlInfo, out T control)
+		public static bool TryGetControl<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out T control)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -220,7 +221,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[CanBeNull]
 		[PublicAPI]
-		public static T GetControlRecursive<T>(this IRoom extends)
+		public static T GetControlRecursive<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -235,7 +236,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		[NotNull]
-		public static IDeviceControl GetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo)
+		public static IDeviceControl GetControlRecursive([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -256,7 +257,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <returns></returns>
 		[PublicAPI]
 		[NotNull]
-		public static T GetControlRecursive<T>(this IRoom extends, DeviceControlInfo controlInfo)
+		public static T GetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -275,7 +276,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IEnumerable<T> GetControlsRecursive<T>(this IRoom extends)
+		public static IEnumerable<T> GetControlsRecursive<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
 			if (extends == null)
@@ -291,7 +292,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControlRecursive(this IRoom extends, DeviceControlInfo controlInfo,
+		public static bool TryGetControlRecursive([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
 		                                          out IDeviceControl control)
 		{
 			if (extends == null)
@@ -309,7 +310,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControlRecursive<T>(this IRoom extends, DeviceControlInfo controlInfo, out T control)
+		public static bool TryGetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out T control)
 			where T : IDeviceControl
 		{
 			if (extends == null)
@@ -339,7 +340,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public static bool ContainsRoom(this IRoom extends, IRoom other)
+		public static bool ContainsRoom([NotNull] this IRoom extends, IRoom other)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -357,7 +358,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static bool IsCombineRoom(this IRoom extends)
+		public static bool IsCombineRoom([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -370,7 +371,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static bool IsMasterRoom(this IRoom extends)
+		public static bool IsMasterRoom([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -392,7 +393,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <returns></returns>
 		[CanBeNull]
-		public static IRoom GetMasterRoom(this IRoom extends)
+		public static IRoom GetMasterRoom([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -405,7 +406,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static IEnumerable<IRoom> GetSlaveRooms(this IRoom extends)
+		public static IEnumerable<IRoom> GetSlaveRooms([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -418,7 +419,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static IEnumerable<IRoom> GetMasterAndSlaveRooms(this IRoom extends)
+		public static IEnumerable<IRoom> GetMasterAndSlaveRooms([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -436,7 +437,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static IEnumerable<IRoom> GetRooms(this IRoom extends)
+		public static IEnumerable<IRoom> GetRooms([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -458,7 +459,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static IEnumerable<IRoom> GetRoomsRecursive(this IRoom extends)
+		public static IEnumerable<IRoom> GetRoomsRecursive([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -476,7 +477,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="extends"></param>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static bool HasDestinationOfType(this IRoom extends, eConnectionType type)
+		public static bool HasDestinationOfType([NotNull] this IRoom extends, eConnectionType type)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -484,6 +485,23 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.Originators
 			              .GetInstancesRecursive<IDestination>()
 			              .Any(d => d.ConnectionType.HasFlags(type));
+		}
+
+		#endregion
+
+		#region Volume
+
+		/// <summary>
+		/// Gets the volume points.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		public static IEnumerable<IVolumePoint> GetVolumePoints([NotNull] this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.Originators.GetInstances<IVolumePoint>();
 		}
 
 		#endregion

@@ -37,7 +37,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
 		private ICore m_CachedCore;
-
 		private bool m_CombineState;
 
 		#region Properties
@@ -91,10 +90,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_OriginatorIds.OnChildrenChanged += OriginatorsOnChildrenChanged;
 		}
 
-		#endregion
-
-		#region Methods
-
 		/// <summary>
 		/// Release resources.
 		/// </summary>
@@ -107,6 +102,10 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_OriginatorIds.Clear();
 		}
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		/// Informs the room it is part of a combined room.
 		/// </summary>
@@ -115,6 +114,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			CombineState = combine;
 		}
+
+		#endregion
 
 		/// <summary>
 		/// Called when the room combine state changes.
@@ -126,8 +127,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected virtual void OriginatorsOnChildrenChanged(object sender, EventArgs args)
 		{
 		}
-
-		#endregion
 
 		#region Settings
 
