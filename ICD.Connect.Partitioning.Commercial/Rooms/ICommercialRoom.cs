@@ -95,7 +95,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					type = eVolumeType.Vtc;
 
 				eVolumeType typeCopy = type;
-				return extends.Originators.GetInstancesRecursive<IVolumePoint>(p => p.VolumeType == typeCopy);
+
+				IVolumePoint[] callVolume =
+					extends.Originators
+					       .GetInstancesRecursive<IVolumePoint>(p => p.VolumeType == typeCopy)
+					       .ToArray();
+
+				if (callVolume.Length > 0)
+					return callVolume;
 			}
 
 			// Otherwise return Room and Program volume points
