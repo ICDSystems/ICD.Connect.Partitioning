@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Conferencing.ConferenceManagers;
@@ -73,51 +74,58 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					                   .SelectMany(c => c.GetOnlineParticipants())
 					                   .ToArray();
 
-			IParticipant lastAudioCall = sources.Where(s => s.CallType == eCallType.Audio)
+			IParticipant lastAudioCall = sources.Where(s => s.CallType.HasFlag(eCallType.Audio))
 			                                    .OrderByDescending(s => s.Start)
 			                                    .FirstOrDefault();
-			IParticipant lastVideoCall = sources.Where(s => s.CallType == eCallType.Video)
+			IParticipant lastVideoCall = sources.Where(s => s.CallType.HasFlag(eCallType.Video))
 			                                    .OrderByDescending(s => s.Start)
 			                                    .FirstOrDefault();
+
+			eVolumeType type = eVolumeType.Room;
 
 			bool inAudioCall = lastAudioCall != null;
 			bool inVideoCall = lastVideoCall != null;
 
-			if (inAudioCall || inVideoCall)
-			{
-				eVolumeType type;
+			if (inAudioCall)
+				type |= eVolumeType.Atc;
 
-				if (inVideoCall && inAudioCall)
-					type = lastVideoCall.Start > lastAudioCall.Start ? eVolumeType.Vtc : eVolumeType.Atc;
-				else if (inAudioCall)
-					type = eVolumeType.Atc;
-				else
-					type = eVolumeType.Vtc;
-
-				eVolumeType typeCopy = type;
-
-				IVolumePoint[] callVolume =
-					extends.Originators
-					       .GetInstancesRecursive<IVolumePoint>(p => p.VolumeType == typeCopy)
-					       .ToArray();
-
-				if (callVolume.Length > 0)
-					return callVolume;
-			}
+			if (inVideoCall)
+				type |= eVolumeType.Vtc;
 
 			// Otherwise return Room and Program volume points
-			return extends.Originators
-			              .GetInstancesRecursive<IVolumePoint>(p =>
-			                                                   {
-				                                                   switch (p.VolumeType)
-				                                                   {
-					                                                   case eVolumeType.Room:
-					                                                   case eVolumeType.Program:
-						                                                   return true;
-				                                                   }
+			IVolumePoint[] points = extends.Originators
+			                               .GetInstancesRecursive<IVolumePoint>(p => EnumUtils.HasAnyFlags(p.VolumeType,
+			                                                                                               type))
+			                               .ToArray();
 
-				                                                   return false;
-			                                                   });
+			return points.OrderBy(p => p, new VolumeContextComparer(type));
+		}
+
+		/// <summary>
+		/// Comparer which determines the greater volume point based on contextual priority using flags.
+		/// </summary>
+		private sealed class VolumeContextComparer : IComparer<IVolumePoint>
+		{
+			private readonly eVolumeType m_Context;
+
+			public VolumeContextComparer(eVolumeType context)
+			{
+				m_Context = context;
+			}
+
+			public int Compare(IVolumePoint x, IVolumePoint y)
+			{
+				foreach (eVolumeType flag in EnumUtils.GetFlagsExceptNone(m_Context))
+				{
+					if (x.VolumeType.HasFlag(flag))
+						return 1;
+
+					if (y.VolumeType.HasFlag(flag))
+						return -1;
+				}
+
+				return 0;
+			}
 		}
 	}
 }
