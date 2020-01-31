@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -11,8 +12,12 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Services.Scheduler;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
+using ICD.Connect.Conferencing.Conferences;
+using ICD.Connect.Conferencing.EventArguments;
+using ICD.Connect.Conferencing.Participants;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings;
 
@@ -154,6 +159,34 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		/// <returns></returns>
 		protected abstract bool GetIsInActiveMeeting();
+
+		/// <summary>
+		/// Gets the volume type for the current context.
+		/// </summary>
+		public override eVolumeType GetVolumeTypeForContext()
+		{
+			eVolumeType output =  base.GetVolumeTypeForContext();
+
+			// Return ATC/VTC if we are in a call
+			IConferenceManager conferenceManager = ConferenceManager;
+			IParticipant[] sources =
+				conferenceManager == null
+					? new IParticipant[0]
+					: conferenceManager.ActiveConferences
+									   .SelectMany(c => c.GetOnlineParticipants())
+									   .ToArray();
+
+			bool inAudioCall = sources.Any(s => s.CallType.HasFlag(eCallType.Audio));
+			bool inVideoCall = sources.Any(s => s.CallType.HasFlag(eCallType.Video));
+
+			if (inAudioCall)
+				output |= eVolumeType.Atc;
+
+			if (inVideoCall)
+				output |= eVolumeType.Vtc;
+
+			return output;
+		}
 
 		#endregion
 

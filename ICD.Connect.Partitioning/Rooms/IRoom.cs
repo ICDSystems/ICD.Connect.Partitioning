@@ -63,6 +63,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="combine"></param>
 		void EnterCombineState(bool combine);
 
+		/// <summary>
+		/// Gets the volume type for the current context.
+		/// </summary>
+		eVolumeType GetVolumeTypeForContext();
+
 		#endregion
 	}
 
@@ -485,23 +490,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.Originators
 			              .GetInstancesRecursive<IDestination>()
 			              .Any(d => d.ConnectionType.HasFlags(type));
-		}
-
-		#endregion
-
-		#region Volume
-
-		/// <summary>
-		/// Gets the volume points.
-		/// </summary>
-		/// <returns></returns>
-		[NotNull]
-		public static IEnumerable<IVolumePoint> GetVolumePoints([NotNull] this IRoom extends)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.Originators.GetInstances<IVolumePoint>();
 		}
 
 		#endregion

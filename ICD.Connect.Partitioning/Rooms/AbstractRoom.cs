@@ -115,6 +115,14 @@ namespace ICD.Connect.Partitioning.Rooms
 			CombineState = combine;
 		}
 
+		/// <summary>
+		/// Gets the volume type for the current context.
+		/// </summary>
+		public virtual eVolumeType GetVolumeTypeForContext()
+		{
+			return eVolumeType.Room;
+		}
+
 		#endregion
 
 		/// <summary>
