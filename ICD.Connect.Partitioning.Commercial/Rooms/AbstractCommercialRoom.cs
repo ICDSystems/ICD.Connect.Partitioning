@@ -254,13 +254,18 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			{
 				IDialingDeviceControl[] dialers = this.GetControlsRecursive<IDialingDeviceControl>().ToArray();
 
-				DeviceControlInfo video = dialers.Where(d => d.Supports == eConferenceSourceType.Video)
+				DeviceControlInfo video = dialers.Where(d => d.Supports.HasFlag(eConferenceSourceType.Video))
 												 .Select(d => d.DeviceControlInfo)
 												 .FirstOrDefault();
 
 				DeviceControlInfo audio = dialers.Where(d => d.Supports == eConferenceSourceType.Audio)
 												 .Select(d => d.DeviceControlInfo)
-												 .FirstOrDefault(video);
+												 .FirstOrDefault();
+
+				if (audio.DeviceId == 0)
+					audio = dialers.Where(d => d.Supports.HasFlag(eConferenceSourceType.Audio))
+					               .Select(d => d.DeviceControlInfo)
+					               .FirstOrDefault();
 
 				DialingPlan = new DialingPlanInfo(DialingPlan.ConfigPath, video, audio);
 			}
