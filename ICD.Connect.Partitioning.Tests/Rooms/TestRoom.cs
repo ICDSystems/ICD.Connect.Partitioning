@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings.Cores;
 using ICD.Connect.Settings.Tests;
@@ -34,6 +35,14 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		public void EnterCombineState(bool combine)
 		{
 			CombineState = combine;
+		}
+
+		/// <summary>
+		/// Gets the volume type for the current context.
+		/// </summary>
+		public eVolumeType GetVolumeTypeForContext()
+		{
+			return default(eVolumeType);
 		}
 	}
 
