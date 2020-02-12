@@ -45,11 +45,11 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		/// <summary>
-		/// Gets the volume type for the current context.
+		/// Gets the current volume context.
 		/// </summary>
-		public eVolumeType GetVolumeTypeForContext()
+		public eVolumePointContext GetVolumeContext()
 		{
-			return default(eVolumeType);
+			return default(eVolumePointContext);
 		}
 	}
 

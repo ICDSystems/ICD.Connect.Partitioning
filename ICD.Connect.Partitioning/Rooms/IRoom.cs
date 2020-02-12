@@ -69,9 +69,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		void HandlePreUncombine();
 
 		/// <summary>
-		/// Gets the volume type for the current context.
+		/// Gets the current volume context.
 		/// </summary>
-		eVolumeType GetVolumeTypeForContext();
+		eVolumePointContext GetVolumeContext();
 
 		#endregion
 	}

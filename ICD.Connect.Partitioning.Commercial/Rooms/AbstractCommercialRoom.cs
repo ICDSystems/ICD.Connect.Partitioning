@@ -163,9 +163,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the volume type for the current context.
 		/// </summary>
-		public override eVolumeType GetVolumeTypeForContext()
+		public override eVolumePointContext GetVolumeContext()
 		{
-			eVolumeType output =  base.GetVolumeTypeForContext();
+			eVolumePointContext output =  base.GetVolumeContext();
 
 			// Return ATC/VTC if we are in a call
 			IConferenceManager conferenceManager = ConferenceManager;
@@ -180,10 +180,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			bool inVideoCall = sources.Any(s => s.CallType.HasFlag(eCallType.Video));
 
 			if (inAudioCall)
-				output |= eVolumeType.Atc;
+				output |= eVolumePointContext.Atc;
 
 			if (inVideoCall)
-				output |= eVolumeType.Vtc;
+				output |= eVolumePointContext.Vtc;
 
 			return output;
 		}

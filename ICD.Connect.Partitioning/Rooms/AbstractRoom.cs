@@ -125,9 +125,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Gets the volume type for the current context.
 		/// </summary>
-		public virtual eVolumeType GetVolumeTypeForContext()
+		public virtual eVolumePointContext GetVolumeContext()
 		{
-			return eVolumeType.Room;
+			return eVolumePointContext.Room;
 		}
 
 		#endregion
