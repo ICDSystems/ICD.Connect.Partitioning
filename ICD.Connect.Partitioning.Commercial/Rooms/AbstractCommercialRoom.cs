@@ -306,11 +306,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_WakeSchedule.Clear();
 
 			if (m_ConferenceManager != null)
-			{
-				m_ConferenceManager.ClearDialingProviders();
-				m_ConferenceManager.Favorites = null;
-				m_ConferenceManager.DialingPlan.ClearMatchers();
-			}
+				m_ConferenceManager.Clear();
 		}
 
 		/// <summary>
@@ -358,8 +354,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				Log(eSeverity.Error, "failed to load Dialing Plan {0} - {1}", path, e.Message);
 			}
 
+			// Add the dialing endpoints to the conference manager
 			foreach (IConferencePoint conferencePoint in Originators.GetInstancesRecursive<IConferencePoint>())
 				m_ConferenceManager.RegisterDialingProvider(conferencePoint);
+
+			// Add the volume points to the conference manager
+			foreach (IVolumePoint volumePoint in Originators.GetInstancesRecursive<IVolumePoint>())
+				m_ConferenceManager.VolumePoints.RegisterVolumePoint(volumePoint);
 		}
 
 		#endregion
