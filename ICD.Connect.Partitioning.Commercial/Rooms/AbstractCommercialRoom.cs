@@ -172,9 +172,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			IParticipant[] sources =
 				conferenceManager == null
 					? new IParticipant[0]
-					: conferenceManager.ActiveConferences
-									   .SelectMany(c => c.GetOnlineParticipants())
-									   .ToArray();
+					: conferenceManager.Dialers
+					                   .ActiveConferences
+					                   .SelectMany(c => c.GetOnlineParticipants())
+					                   .ToArray();
 
 			bool inAudioCall = sources.Any(s => s.CallType.HasFlag(eCallType.Audio));
 			bool inVideoCall = sources.Any(s => s.CallType.HasFlag(eCallType.Video));
@@ -356,7 +357,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			// Add the dialing endpoints to the conference manager
 			foreach (IConferencePoint conferencePoint in Originators.GetInstancesRecursive<IConferencePoint>())
-				m_ConferenceManager.RegisterDialingProvider(conferencePoint);
+				m_ConferenceManager.Dialers.RegisterDialingProvider(conferencePoint);
 
 			// Add the volume points to the conference manager
 			foreach (IVolumePoint volumePoint in Originators.GetInstancesRecursive<IVolumePoint>())
