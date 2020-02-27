@@ -454,6 +454,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			{
 				Log(eSeverity.Informational, "Destroying combined room {0}", room);
 
+				room.HandlePreUncombine();
+
 				int[] partitionIds = room.Originators.GetInstances<IPartition>().Select(p => p.Id).ToArray();
 				room.Originators.RemoveRange(partitionIds);
 			}

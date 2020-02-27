@@ -62,6 +62,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="combine"></param>
 		void EnterCombineState(bool combine);
 
+		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		void HandlePreUncombine();
+
 		#endregion
 	}
 

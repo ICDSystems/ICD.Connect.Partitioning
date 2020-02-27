@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added HandlePreUncombine method to IRoom that is called before combined spaces are torn down
+
 ## [14.1.1] - 2019-11-20
 ### Changed
  - More reliable WakeSchedule logic for determining if the system should be awake or asleep

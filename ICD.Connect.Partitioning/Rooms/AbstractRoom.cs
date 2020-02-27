@@ -117,12 +117,24 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		public virtual void HandlePreUncombine()
+		{
+		}
+
+		/// <summary>
 		/// Called when the room combine state changes.
 		/// </summary>
 		protected virtual void HandleCombineState()
 		{
 		}
 
+		/// <summary>
+		/// Called when an originator is added to/removed from the room.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		protected virtual void OriginatorsOnChildrenChanged(object sender, EventArgs args)
 		{
 		}

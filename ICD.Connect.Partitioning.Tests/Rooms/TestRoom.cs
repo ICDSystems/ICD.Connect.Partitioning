@@ -35,6 +35,13 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		{
 			CombineState = combine;
 		}
+
+		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		public void HandlePreUncombine()
+		{
+		}
 	}
 
 	public sealed class TestRoomSettings : AbstractTestSettings
