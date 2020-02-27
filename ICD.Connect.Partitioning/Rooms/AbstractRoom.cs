@@ -116,6 +116,13 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		public virtual void HandlePreUncombine()
+		{
+		}
+
+		/// <summary>
 		/// Gets the volume type for the current context.
 		/// </summary>
 		public virtual eVolumeType GetVolumeTypeForContext()
@@ -132,6 +139,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 		}
 
+		/// <summary>
+		/// Called when an originator is added to/removed from the room.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		protected virtual void OriginatorsOnChildrenChanged(object sender, EventArgs args)
 		{
 		}

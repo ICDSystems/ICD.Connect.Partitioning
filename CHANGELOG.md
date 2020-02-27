@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added an ICommercialRoom extensions class which has a method for determing the contextual volume point the room should be using.
 
+## [14.2.0] - 2020-02-27
+### Added
+ - Added HandlePreUncombine method to IRoom that is called before combined spaces are torn down
+
 ## [14.1.1] - 2019-11-20
 ### Changed
  - More reliable WakeSchedule logic for determining if the system should be awake or asleep

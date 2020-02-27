@@ -64,6 +64,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		void EnterCombineState(bool combine);
 
 		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		void HandlePreUncombine();
+
+		/// <summary>
 		/// Gets the volume type for the current context.
 		/// </summary>
 		eVolumeType GetVolumeTypeForContext();

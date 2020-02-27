@@ -38,6 +38,13 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		}
 
 		/// <summary>
+		/// Called before this combine space is destroyed as part of an uncombine operation.
+		/// </summary>
+		public void HandlePreUncombine()
+		{
+		}
+
+		/// <summary>
 		/// Gets the volume type for the current context.
 		/// </summary>
 		public eVolumeType GetVolumeTypeForContext()
