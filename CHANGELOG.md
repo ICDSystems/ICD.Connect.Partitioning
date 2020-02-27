@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.2.0] - 2020-02-27
 ### Added
  - Added HandlePreUncombine method to IRoom that is called before combined spaces are torn down
 
