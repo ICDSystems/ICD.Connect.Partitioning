@@ -197,12 +197,18 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ClearSettingsFinal();
 
-			WakeSchedule.Clear();
+			if (WakeSchedule != null)
+				WakeSchedule.Clear();
+
 			DialingPlan = default(DialingPlanInfo);
 
-			m_ConferenceManager.ClearDialingProviders();
-			m_ConferenceManager.Favorites = null;
-			m_ConferenceManager.DialingPlan.ClearMatchers();
+			if (m_ConferenceManager != null)
+			{
+				m_ConferenceManager.ClearDialingProviders();
+				m_ConferenceManager.Favorites = null;
+				if (m_ConferenceManager.DialingPlan != null)
+					m_ConferenceManager.DialingPlan.ClearMatchers();
+			}
 		}
 
 		/// <summary>
