@@ -234,7 +234,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			{
 				m_ConferenceManager.ClearDialingProviders();
 				m_ConferenceManager.Favorites = null;
-				m_ConferenceManager.DialingPlan.ClearMatchers();
+				if (m_ConferenceManager.DialingPlan != null)
+					m_ConferenceManager.DialingPlan.ClearMatchers();
 			}
 		}
 
