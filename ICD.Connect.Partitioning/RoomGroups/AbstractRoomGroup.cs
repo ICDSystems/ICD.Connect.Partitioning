@@ -12,7 +12,7 @@ namespace ICD.Connect.Partitioning.RoomGroups
 {
 	public abstract class AbstractRoomGroup<T> : AbstractOriginator<T>, IRoomGroup where T : IRoomGroupSettings, new()
 	{
-		private List<IRoom> m_Rooms;
+		private readonly List<IRoom> m_Rooms;
 
 		protected AbstractRoomGroup()
 		{
