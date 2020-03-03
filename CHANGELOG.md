@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - DialingPlan configuration is now a single path
  - Added VolumePoints and Partitions to the room console
 
+## [10.6.2] - 2020-03-03
+### Changed
+ - AbstractCommercailRoom - fixed null reference exceptions when clearing settings without WakeSchedule or ConferenceManager
+
 ## [10.6.1] - 2020-02-10
 ### Changed
  - Fixed a bug where an empty dialing plan in the room config would ignore video dialers
