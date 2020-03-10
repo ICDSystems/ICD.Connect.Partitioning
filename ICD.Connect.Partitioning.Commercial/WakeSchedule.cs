@@ -197,12 +197,12 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Runs after RunFinal in order to determine the next run time of this action
 		/// </summary>
-		public override DateTime? GetNextRunTime()
+		public override DateTime? GetNextRunTimeUtc()
 		{
-			var now = IcdEnvironment.GetLocalTime();
+			var now = IcdEnvironment.GetUtcTime();
 
 			bool? unused;
-			return GetNextRunTime(now, out unused);
+			return GetNextRunTimeUtc(now, out unused);
 		}
 
 		/// <summary>
@@ -240,35 +240,36 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Gets the run time following the given time.
 		/// </summary>
-		/// <param name="now"></param>
+		/// <param name="nowUtc"></param>
 		/// <param name="wake">Outputs true if the result is a wake time, false if the result is a sleep time.</param>
 		/// <returns></returns>
-		private DateTime? GetNextRunTime(DateTime now, out bool? wake)
+		private DateTime? GetNextRunTimeUtc(DateTime nowUtc, out bool? wake)
 		{
-			DateTime currentDay = now.Date;
+			DateTime nowLocal = nowUtc.ToLocalTime();
+			DateTime currentDayLocal = nowLocal.Date;
 
 			// If no action found for a week, means all 4 times are null
-			while (currentDay < now.AddDays(7))
+			while (currentDayLocal < nowLocal.AddDays(7))
 			{
 				List<DateTime> times = new List<DateTime>();
 
-				DateTime? sleepTime = GetSleepTimeForDay(currentDay);
+				DateTime? sleepTime = GetSleepTimeForDay(currentDayLocal);
 				if (sleepTime.HasValue)
 					times.Add(sleepTime.Value);
 
-				DateTime? wakeTime = GetWakeTimeForDay(currentDay);
+				DateTime? wakeTime = GetWakeTimeForDay(currentDayLocal);
 				if (wakeTime.HasValue)
 					times.Add(wakeTime.Value);
 
-				DateTime? time = now.NextEarliestTime(false, times);
-				if (time != null)
+				DateTime? time = nowLocal.NextEarliestTime(false, times);
+				if (time.HasValue)
 				{
 					wake = time == wakeTime;
-					return time;
+					return time.Value.ToUniversalTime();
 				}
 
 				// No actions scheduled for today, check next day
-				currentDay = currentDay.AddDays(1);
+				currentDayLocal = currentDayLocal.AddDays(1);
 			}
 
 			wake = null;
