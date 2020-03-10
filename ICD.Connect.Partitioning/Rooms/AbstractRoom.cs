@@ -170,15 +170,15 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.VolumePoints.Clear();
 			settings.ConferencePoints.Clear();
 
-			settings.Ports.AddRange(GetChildren<IPort>());
-			settings.Devices.AddRange(GetChildren<IDevice>());
-			settings.Panels.AddRange(GetChildren<IPanelDevice>());
-			settings.Sources.AddRange(GetChildren<ISource>());
-			settings.Destinations.AddRange(GetChildren<IDestination>());
-			settings.SourceGroups.AddRange(GetChildren<ISourceGroup>());
-			settings.DestinationGroups.AddRange(GetChildren<IDestinationGroup>());
-			settings.VolumePoints.AddRange(GetChildren<IVolumePoint>());
-			settings.ConferencePoints.AddRange(GetChildren<IConferencePoint>());
+			settings.Ports.AddRange(GetSerializableChildren<IPort>());
+			settings.Devices.AddRange(GetSerializableChildren<IDevice>());
+			settings.Panels.AddRange(GetSerializableChildren<IPanelDevice>());
+			settings.Sources.AddRange(GetSerializableChildren<ISource>());
+			settings.Destinations.AddRange(GetSerializableChildren<IDestination>());
+			settings.SourceGroups.AddRange(GetSerializableChildren<ISourceGroup>());
+			settings.DestinationGroups.AddRange(GetSerializableChildren<IDestinationGroup>());
+			settings.VolumePoints.AddRange(GetSerializableChildren<IVolumePoint>());
+			settings.ConferencePoints.AddRange(GetSerializableChildren<IConferencePoint>());
 		}
 
 		/// <summary>
@@ -215,10 +215,10 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 		}
 
-		private IEnumerable<KeyValuePair<int, eCombineMode>> GetChildren<TInstance>()
+		private IEnumerable<KeyValuePair<int, eCombineMode>> GetSerializableChildren<TInstance>()
 			where TInstance : class, IOriginator
 		{
-			return m_OriginatorIds.GetInstances<TInstance>()
+			return m_OriginatorIds.GetInstances<TInstance>().Where(i => i.Serialize)
 			                      .Select(p => new KeyValuePair<int, eCombineMode>(p.Id, m_OriginatorIds.GetCombineMode(p.Id)));
 		}
 
