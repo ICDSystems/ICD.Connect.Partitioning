@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added an ICommercialRoom extensions class which has a method for determing the contextual volume point the room should be using.
+ 
+### Changed
+ - Fixed issue where rooms would add non-serialized originators to their room collection in CopySettings
 
 ## [14.2.0] - 2020-02-27
 ### Added
