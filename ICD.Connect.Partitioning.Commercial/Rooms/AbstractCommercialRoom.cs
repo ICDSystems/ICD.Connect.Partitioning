@@ -232,7 +232,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (GetIsInActiveMeeting())
 				return;
 
-			Log(eSeverity.Informational, "Scheduled sleep occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
+			Log(eSeverity.Informational, "Performing scheduled Sleep");
 			Sleep();
 		}
 
@@ -249,7 +249,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (GetIsInActiveMeeting())
 				return;
 
-			Log(eSeverity.Informational, "Scheduled wake occurring at {0}", IcdEnvironment.GetLocalTime().ToShortTimeString());
+			Log(eSeverity.Informational, "Performing scheduled Wake");
 			Wake();
 		}
 
