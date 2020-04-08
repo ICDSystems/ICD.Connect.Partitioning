@@ -40,8 +40,7 @@ namespace ICD.Connect.Partitioning.RoomGroups
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, id, e.Message);
-					continue;
+					Logger.Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, id, e.Message);
 				}
 			}
 		}

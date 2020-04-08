@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
@@ -97,7 +98,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Error, "Unable to get partition control for {0} - {1}", info, e.Message);
+					Logger.Log(eSeverity.Error, "Unable to get partition control for {0} - {1}", info, e.Message);
 					continue;
 				}
 
@@ -452,7 +453,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			// Remove the partitions from the rooms.
 			foreach (IRoom room in roomsList)
 			{
-				Log(eSeverity.Informational, "Destroying combined room {0}", room);
+				Logger.Log(eSeverity.Informational, "Destroying combined room {0}", room);
 
 				room.HandlePreUncombine();
 
@@ -491,7 +492,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				room.Originators
 				    .AddRange(partitionsSet.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
-				Log(eSeverity.Informational, "Created new combine room {0}", room);
+				Logger.Log(eSeverity.Informational, "Created new combine room {0}", room);
 
 				rooms.Add(room);
 			}
@@ -767,7 +768,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
+					Logger.Log(eSeverity.Error, e, "Failed to instantiate {0} with id {1}", typeof(T).Name, settings.Id);
 					continue;
 				}
 

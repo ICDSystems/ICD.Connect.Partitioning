@@ -70,7 +70,7 @@ namespace ICD.Connect.Partitioning.Cells
 			}
 			catch (KeyNotFoundException)
 			{
-				Log(eSeverity.Error, "No room with id {0}", settings.Room);
+				Logger.Log(eSeverity.Error, "No room with id {0}", settings.Room);
 			}
 		}
 	}

@@ -59,7 +59,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_CombineState = value;
 
-				Log(eSeverity.Informational, "Combine state changed to {0}", m_CombineState);
+				Logger.Set("Combined", eSeverity.Informational, m_CombineState);
 
 				HandleCombineState();
 
@@ -239,7 +239,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				}
 				catch (Exception e)
 				{
-					Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, kvp.Key, e.Message);
+					Logger.Log(eSeverity.Error, "Failed to add {0} with id {1} - {2}", typeof(T).Name, kvp.Key, e.Message);
 					continue;
 				}
 

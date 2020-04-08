@@ -42,7 +42,7 @@ namespace ICD.Connect.Partitioning.Controls
 
 				m_IsOpen = value;
 
-				Log(eSeverity.Informational, "IsOpen set to {0}", m_IsOpen);
+				Logger.Set("Open", eSeverity.Informational, m_IsOpen);
 
 				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
 			}

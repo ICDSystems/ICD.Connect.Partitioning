@@ -232,7 +232,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (GetIsInActiveMeeting())
 				return;
 
-			Log(eSeverity.Informational, "Performing scheduled Sleep");
+			Logger.Log(eSeverity.Informational, "Performing scheduled Sleep");
 			Sleep();
 		}
 
@@ -249,7 +249,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (GetIsInActiveMeeting())
 				return;
 
-			Log(eSeverity.Informational, "Performing scheduled Wake");
+			Logger.Log(eSeverity.Informational, "Performing scheduled Wake");
 			Wake();
 		}
 
@@ -341,7 +341,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			try
 			{
 				if (string.IsNullOrEmpty(path))
-					Log(eSeverity.Warning, "No Dialing Plan configured");
+					Logger.Log(eSeverity.Warning, "No Dialing Plan configured");
 				else
 				{
 					string xml = IcdFile.ReadToEnd(path, new UTF8Encoding(false));
@@ -352,7 +352,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 			catch (Exception e)
 			{
-				Log(eSeverity.Error, "failed to load Dialing Plan {0} - {1}", path, e.Message);
+				Logger.Log(eSeverity.Error, "failed to load Dialing Plan {0} - {1}", path, e.Message);
 			}
 
 			// Add the dialing endpoints to the conference manager

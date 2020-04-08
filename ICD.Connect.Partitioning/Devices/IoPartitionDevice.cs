@@ -237,7 +237,7 @@ namespace ICD.Connect.Partitioning.Devices
 			}
 			catch (KeyNotFoundException)
 			{
-				Log(eSeverity.Error, "No Serial Port with id {0}", portId);
+				Logger.Log(eSeverity.Error, "No Serial Port with id {0}", portId);
 			}
 
 			return null;
