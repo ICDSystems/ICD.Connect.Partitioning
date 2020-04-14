@@ -73,6 +73,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rooms\AbstractCommercialRoom.cs" />
     <Compile Include="Rooms\AbstractCommercialRoomSettings.cs" />
+    <Compile Include="Rooms\CommercialRoomTelemetryNames.cs" />
     <Compile Include="Rooms\ICommercialRoom.cs" />
     <Compile Include="Rooms\ICommercialRoomSettings.cs" />
     <Compile Include="WakeSchedule.cs" />

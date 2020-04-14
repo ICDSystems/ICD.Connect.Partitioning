@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Partitioning.Rooms;
+using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
@@ -44,5 +45,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Gets the awake state.
 		/// </summary>
 		bool IsAwake { get; }
+
+		/// <summary>
+		/// Gets the number of seats for this room.
+		/// </summary>
+		[StaticPropertyTelemetry(CommercialRoomTelemetryNames.SEAT_COUNT)]
+		int SeatCount { get; }
 	}
 }

@@ -8,6 +8,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
 	public abstract class AbstractCommercialRoomSettings : AbstractRoomSettings, ICommercialRoomSettings
 	{
+		private const string SEAT_COUNT_ELEMENT = "SeatCount";
 		private const string WAKE_SCHEDULE_ELEMENT = "WakeSchedule";
 		private const string DIALING_PLAN_ELEMENT = "DialingPlan";
 
@@ -63,6 +64,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[PathSettingsProperty("DialingPlans", ".xml")]
 		public string DialingPlan { get; set; }
 
+		[HiddenSettingsProperty]
+		public int SeatCount { get; set; }
+
 		#endregion
 
 		/// <summary>
@@ -80,7 +84,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		protected override void WriteElements(IcdXmlTextWriter writer)
 		{
 			base.WriteElements(writer);
-
+			
+			writer.WriteElementString(SEAT_COUNT_ELEMENT, IcdXmlConvert.ToString(SeatCount));
 			writer.WriteElementString(DIALING_PLAN_ELEMENT, DialingPlan);
 
 			m_WakeScheduleSettings.WriteElements(writer, WAKE_SCHEDULE_ELEMENT);
@@ -99,6 +104,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_WakeScheduleSettings.ParseXml(wakeScheduleXml);
 
 			DialingPlan = XmlUtils.TryReadChildElementContentAsString(xml, DIALING_PLAN_ELEMENT);
+			SeatCount = XmlUtils.TryReadChildElementContentAsInt(xml, SEAT_COUNT_ELEMENT) ?? 0;
 		}
 	}
 }

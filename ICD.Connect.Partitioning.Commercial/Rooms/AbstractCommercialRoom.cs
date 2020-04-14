@@ -127,6 +127,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
+		/// <summary>
+		/// Gets the number of seats for this room.
+		/// </summary>
+		public int SeatCount { get; private set; }
+
 		#endregion
 
 		/// <summary>
@@ -286,6 +291,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ApplySettingsFinal(settings, factory);
 
+			SeatCount = settings.SeatCount;
+
 			// Wake Schedule
 			if (m_WakeSchedule != null)
 				m_WakeSchedule.Copy(settings.WakeSchedule);
@@ -301,6 +308,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ClearSettingsFinal();
 
+			SeatCount = 0;
 			DialingPlan = null;
 
 			if (m_WakeSchedule != null)
@@ -317,6 +325,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		protected override void CopySettingsFinal(TSettings settings)
 		{
 			base.CopySettingsFinal(settings);
+
+			settings.SeatCount = SeatCount;
 
 			if (m_WakeSchedule != null)
 				settings.WakeSchedule.Copy(m_WakeSchedule);
@@ -377,6 +387,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.BuildConsoleStatus(addRow);
 
 			addRow("IsAwake", IsAwake);
+			addRow("Seat Count", SeatCount);
 		}
 
 		/// <summary>
