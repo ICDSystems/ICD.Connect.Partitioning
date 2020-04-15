@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Attributes;
@@ -25,6 +26,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
+		/// Raised when the calendar control changes.
+		/// </summary>
+		event EventHandler<GenericEventArgs<ICalendarControl>> OnCalendarControlChanged; 
+
+		#region Properties
+
+		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
 		[CanBeNull]
@@ -42,6 +50,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		IConferenceManager ConferenceManager { get; }
 
 		/// <summary>
+		/// Gets the CalendarControl for the room.
+		/// </summary>
+		[CanBeNull]
+		ICalendarControl CalendarControl { get; }
+
+		/// <summary>
 		/// Gets the awake state.
 		/// </summary>
 		bool IsAwake { get; }
@@ -51,5 +65,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[StaticPropertyTelemetry(CommercialRoomTelemetryNames.SEAT_COUNT)]
 		int SeatCount { get; }
+
+		#endregion
 	}
 }
