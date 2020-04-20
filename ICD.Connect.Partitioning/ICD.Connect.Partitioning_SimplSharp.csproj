@@ -115,6 +115,7 @@
     <Compile Include="PartitionManagers\IPartitionManager.cs" />
     <Compile Include="Partitions\IPartitionSettings.cs" />
     <Compile Include="Rooms\IRoom.cs" />
+    <Compile Include="Rooms\IRoomExternalTelemetryProvider.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rooms\AbstractRoom.cs" />
     <Compile Include="Rooms\RoomConsole.cs" />
+    <Compile Include="Rooms\RoomExternalTelemetryProvider.cs" />
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />

@@ -16,12 +16,14 @@ using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Settings.Cores;
 using ICD.Connect.Settings.Originators;
+using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
 	/// <summary>
 	/// Represents a room of devices.
 	/// </summary>
+	[ExternalTelemetry("Room Telemetry", typeof(RoomExternalTelemetryProvider))]
 	public interface IRoom : IOriginator
 	{
 		/// <summary>
