@@ -57,7 +57,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			IcdHashSet<Guid> originatorIds =
 				Parent.Originators
 				      .GetInstancesRecursive(eCombineMode.Always)
-				      .Select(d => d.NewId)
+				      .Select(d => d.Uuid)
 				      .ToIcdHashSet();
 
 			m_OriginatorIdsSection.Enter();
