@@ -18,11 +18,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		Dictionary<int, eCombineMode> Ports { get; }
 
 		/// <summary>
-		/// Gets the panel settings.
-		/// </summary>
-		Dictionary<int, eCombineMode> Panels { get; }
-
-		/// <summary>
 		/// Gets the source settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> Sources { get; }

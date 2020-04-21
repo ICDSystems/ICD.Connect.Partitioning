@@ -7,7 +7,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels.Devices;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
@@ -29,7 +28,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-			yield return ConsoleNodeGroup.KeyNodeMap("Panels", instance.Originators.GetInstancesRecursive<IPanelDevice>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Ports", instance.Originators.GetInstancesRecursive<IPort>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Devices", instance.Originators.GetInstancesRecursive<IDevice>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Sources", instance.Originators.GetInstancesRecursive<ISource>(), p => (uint)p.Id);

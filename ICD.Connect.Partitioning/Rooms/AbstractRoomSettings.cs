@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -15,8 +17,8 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		private const string COMBINE_PRIORITY_ELEMENT = "CombinePriority";
 
-		private const string PANELS_ELEMENT = "Panels";
-		private const string PANEL_ELEMENT = "Panel";
+		[Obsolete] private const string PANELS_ELEMENT = "Panels";
+		[Obsolete] private const string PANEL_ELEMENT = "Panel";
 		private const string PORTS_ELEMENT = "Ports";
 		private const string PORT_ELEMENT = "Port";
 		private const string DEVICES_ELEMENT = "Devices";
@@ -38,7 +40,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		private readonly Dictionary<int, eCombineMode> m_Devices;
 		private readonly Dictionary<int, eCombineMode> m_Ports;
-		private readonly Dictionary<int, eCombineMode> m_Panels;
 		private readonly Dictionary<int, eCombineMode> m_Sources;
 		private readonly Dictionary<int, eCombineMode> m_Destinations;
 		private readonly Dictionary<int, eCombineMode> m_SourceGroups;
@@ -52,7 +53,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		public Dictionary<int, eCombineMode> Devices { get { return m_Devices; } }
 		public Dictionary<int, eCombineMode> Ports { get { return m_Ports; } }
-		public Dictionary<int, eCombineMode> Panels { get { return m_Panels; } }
 		public Dictionary<int, eCombineMode> Sources { get { return m_Sources; } }
 		public Dictionary<int, eCombineMode> Destinations { get { return m_Destinations; } }
 		public Dictionary<int, eCombineMode> SourceGroups { get { return m_SourceGroups; } }
@@ -69,7 +69,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			m_Devices = new Dictionary<int, eCombineMode>();
 			m_Ports = new Dictionary<int, eCombineMode>();
-			m_Panels = new Dictionary<int, eCombineMode>();
 			m_Sources = new Dictionary<int, eCombineMode>();
 			m_Destinations = new Dictionary<int, eCombineMode>();
 			m_SourceGroups = new Dictionary<int, eCombineMode>();
@@ -88,7 +87,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			writer.WriteElementString(COMBINE_PRIORITY_ELEMENT, IcdXmlConvert.ToString(CombinePriority));
 
-			WriteChildrenToXml(writer, m_Panels, PANELS_ELEMENT, PANEL_ELEMENT);
 			WriteChildrenToXml(writer, m_Ports, PORTS_ELEMENT, PORT_ELEMENT);
 			WriteChildrenToXml(writer, m_Devices, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			WriteChildrenToXml(writer, m_Sources, SOURCES_ELEMENT, SOURCE_ELEMENT);
@@ -109,7 +107,10 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			CombinePriority = XmlUtils.TryReadChildElementContentAsInt(xml, COMBINE_PRIORITY_ELEMENT) ?? 0;
 
+// ReSharper disable CSharpWarnings::CS0612
+			// Backwards compatibility
 			IEnumerable<KeyValuePair<int, eCombineMode>> panels = ReadListFromXml(xml, PANELS_ELEMENT, PANEL_ELEMENT);
+// ReSharper restore CSharpWarnings::CS0612
 			IEnumerable<KeyValuePair<int, eCombineMode>> ports = ReadListFromXml(xml, PORTS_ELEMENT, PORT_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> devices = ReadListFromXml(xml, DEVICES_ELEMENT, DEVICE_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> sources = ReadListFromXml(xml, SOURCES_ELEMENT, SOURCE_ELEMENT);
@@ -119,7 +120,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			IEnumerable<KeyValuePair<int, eCombineMode>> volumePoints = ReadListFromXml(xml, VOLUME_POINTS_ELEMENT, VOLUME_POINT_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> conferencePoints = ReadListFromXml(xml, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
 
-			Panels.Clear();
+			devices = devices.Concat(panels);
+
 			Ports.Clear();
 			Devices.Clear();
 			Sources.Clear();
@@ -129,7 +131,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			VolumePoints.Clear();
 			ConferencePoints.Clear();
 
-			Panels.Update(panels);
 			Ports.Update(ports);
 			Devices.Update(devices);
 			Sources.Update(sources);
@@ -145,7 +146,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			XmlUtils.WriteListToXml(writer, children.OrderByKey(), listElement, (w, kvp) => WriteChildToXml(w, kvp, childElement));
 		}
 
-		private void WriteChildToXml(IcdXmlTextWriter writer, KeyValuePair<int, eCombineMode> kvp, string childElement)
+		private static void WriteChildToXml(IcdXmlTextWriter writer, KeyValuePair<int, eCombineMode> kvp, string childElement)
 		{
 			writer.WriteStartElement(childElement);
 			{

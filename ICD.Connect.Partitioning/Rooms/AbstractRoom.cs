@@ -10,7 +10,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Routing.Endpoints.Sources;
@@ -162,7 +161,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			settings.Ports.Clear();
 			settings.Devices.Clear();
-			settings.Panels.Clear();
 			settings.Sources.Clear();
 			settings.Destinations.Clear();
 			settings.SourceGroups.Clear();
@@ -172,7 +170,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			settings.Ports.AddRange(GetSerializableChildren<IPort>());
 			settings.Devices.AddRange(GetSerializableChildren<IDevice>());
-			settings.Panels.AddRange(GetSerializableChildren<IPanelDevice>());
 			settings.Sources.AddRange(GetSerializableChildren<ISource>());
 			settings.Destinations.AddRange(GetSerializableChildren<IDestination>());
 			settings.SourceGroups.AddRange(GetSerializableChildren<ISourceGroup>());
@@ -206,7 +203,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 			AddOriginatorsSkipExceptions<IDevice>(settings.Devices, factory);
 			AddOriginatorsSkipExceptions<IPort>(settings.Ports, factory);
-			AddOriginatorsSkipExceptions<IPanelDevice>(settings.Panels, factory);
 			AddOriginatorsSkipExceptions<ISource>(settings.Sources, factory);
 			AddOriginatorsSkipExceptions<IDestination>(settings.Destinations, factory);
 			AddOriginatorsSkipExceptions<ISourceGroup>(settings.SourceGroups, factory);
