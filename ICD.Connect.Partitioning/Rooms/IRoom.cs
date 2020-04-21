@@ -170,7 +170,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.Originators.GetInstances<IDeviceBase>().SelectMany(o => o.Controls.GetControls<T>());
+			return extends.Originators.GetInstances<IDevice>().SelectMany(o => o.Controls.GetControls<T>());
 		}
 
 		/// <summary>
