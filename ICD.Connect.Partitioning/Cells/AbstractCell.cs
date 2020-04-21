@@ -9,6 +9,13 @@ namespace ICD.Connect.Partitioning.Cells
 	public abstract class AbstractCell<TSettings> : AbstractOriginator<TSettings>, ICell
 		where TSettings : ICellSettings, new()
 	{
+		#region Properties
+
+		/// <summary>
+		/// Gets the category for this originator type (e.g. Device, Port, etc)
+		/// </summary>
+		public override string Category { get { return "Cell"; } }
+
 		/// <summary>
 		/// Gets/sets the room occupying this cell.
 		/// </summary>
@@ -23,6 +30,10 @@ namespace ICD.Connect.Partitioning.Cells
 		/// Gets the vertical position of the cell in the grid.
 		/// </summary>
 		public int Row { get; set; }
+
+		#endregion
+
+		#region Settings
 
 		/// <summary>
 		/// Override to clear the instance settings.
@@ -73,5 +84,7 @@ namespace ICD.Connect.Partitioning.Cells
 				Logger.Log(eSeverity.Error, "No room with id {0}", settings.Room);
 			}
 		}
+
+		#endregion
 	}
 }

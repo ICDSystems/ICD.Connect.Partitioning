@@ -21,6 +21,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		#region Properties
 
 		/// <summary>
+		/// Gets the category for this originator type (e.g. Device, Port, etc)
+		/// </summary>
+		public override string Category { get { return "PartitionManager"; } }
+
+		/// <summary>
 		/// Gets the partitions in the system.
 		/// </summary>
 		public abstract IPartitionsCollection Partitions { get; }

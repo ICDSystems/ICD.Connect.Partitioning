@@ -11,6 +11,8 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		public override string Category { get { return "Room"; } }
+
 		public ICore Core { get; set; }
 
 		public bool CombineState { get; set; }

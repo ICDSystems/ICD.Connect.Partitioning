@@ -41,6 +41,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Properties
 
 		/// <summary>
+		/// Gets the category for this originator type (e.g. Device, Port, etc)
+		/// </summary>
+		public override string Category { get { return "Room"; } }
+
+		/// <summary>
 		/// Gets the parent core instance.
 		/// </summary>
 		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
