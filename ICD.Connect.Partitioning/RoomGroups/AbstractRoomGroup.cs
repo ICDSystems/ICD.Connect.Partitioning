@@ -14,6 +14,11 @@ namespace ICD.Connect.Partitioning.RoomGroups
 	{
 		private readonly List<IRoom> m_Rooms;
 
+		/// <summary>
+		/// Gets the category for this originator type (e.g. Device, Port, etc)
+		/// </summary>
+		public override string Category { get { return "Room Group"; } }
+
 		protected AbstractRoomGroup()
 		{
 			m_Rooms = new List<IRoom>();
