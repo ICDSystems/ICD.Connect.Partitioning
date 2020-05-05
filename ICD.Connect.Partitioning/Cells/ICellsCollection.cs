@@ -18,9 +18,7 @@ namespace ICD.Connect.Partitioning.Cells
 
 	public static class CellsCollectionExtensions
 	{
-		
-
-		public static ICell GetNeighboringCell(this ICellsCollection extends, int column, int row, eCellDirection direction)
+		public static ICell GetNeighboringCell([NotNull] this ICellsCollection extends, int column, int row, eCellDirection direction)
 		{
 			// get coordinates of neighbor cell based on direction
 			int neighborColumn = column;

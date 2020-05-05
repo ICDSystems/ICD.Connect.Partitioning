@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Connect.Telemetry;
 using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Nodes.External;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -10,7 +11,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		[EventTelemetry("OnOriginatorIdsChanged")]
 		event EventHandler OnOriginatorIdsChanged;
 
-		[DynamicPropertyTelemetry("OriginatorIds", null, "OnOriginatorIdsChanged")]
+		[PropertyTelemetry("OriginatorIds", null, "OnOriginatorIdsChanged")]
 		IEnumerable<Guid> OriginatorIds { get; }
 	}
 }

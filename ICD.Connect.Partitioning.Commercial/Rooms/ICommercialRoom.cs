@@ -63,7 +63,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the number of seats for this room.
 		/// </summary>
-		[StaticPropertyTelemetry(CommercialRoomTelemetryNames.SEAT_COUNT)]
+		[PropertyTelemetry(CommercialRoomTelemetryNames.SEAT_COUNT, null, null)]
 		int SeatCount { get; }
 
 		#endregion
