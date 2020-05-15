@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Conferencing.ConferenceManagers;
+using ICD.Connect.Conferencing.Conferences;
+using ICD.Connect.Conferencing.Controls.Dialing;
+using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Nodes.External;
 
@@ -15,8 +19,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[EventTelemetry(CommercialRoomTelemetryNames.MUTE_PRIVACY_CHANGED)]
 		public event EventHandler<BoolEventArgs> OnPrivacyMuteChanged;
 
+		/// <summary>
+		/// Raised when the privacy mute state changed.
+		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
+		public event EventHandler<GenericEventArgs<Guid>> OnActiveConferenceDeviceChanged;
+
 		private IConferenceManager m_ConferenceManager;
 		private bool m_PrivacyMute;
+		private Guid m_ActiveConferenceDevice;
 
 		#region Properties
 
@@ -40,6 +51,26 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
+		/// Gets the active conference device by UUID.
+		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE,
+			null,
+			CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
+		public Guid ActiveConferenceDevice
+		{
+			get { return m_ActiveConferenceDevice; }
+			private set
+			{
+				if (value == m_ActiveConferenceDevice)
+					return;
+
+				m_ActiveConferenceDevice = value;
+
+				OnActiveConferenceDeviceChanged.Raise(this, new GenericEventArgs<Guid>(m_ActiveConferenceDevice));
+			}
+		}
+
+		/// <summary>
 		/// Gets/sets the wrapped conference manager.
 		/// </summary>
 		private IConferenceManager ConferenceManager
@@ -55,6 +86,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				Subscribe(m_ConferenceManager);
 
 				UpdatePrivacyMute();
+				UpdateActiveConferenceDevice();
 			}
 		}
 
@@ -102,6 +134,23 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void UpdatePrivacyMute()
 		{
 			PrivacyMute = m_ConferenceManager != null && m_ConferenceManager.PrivacyMuted;
+		}
+
+		/// <summary>
+		/// Updates the active conference device.
+		/// </summary>
+		private void UpdateActiveConferenceDevice()
+		{
+			IConferenceDeviceControl control =
+				m_ConferenceManager == null
+					? null
+					: m_ConferenceManager.Dialers
+					                     .GetDialingProviders()
+					                     .FirstOrDefault(d => d.GetConferences()
+					                                           .Any(c => c.GetOnlineParticipants()
+					                                                      .Any()));
+
+			ActiveConferenceDevice = control == null ? Guid.Empty : control.Parent.Uuid;
 		}
 
 		#endregion
@@ -160,6 +209,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			conferenceManager.OnPrivacyMuteStatusChange += ConferenceManagerOnPrivacyMuteStatusChange;
+			conferenceManager.Dialers.OnInCallChanged += DialersOnInCallChanged;
 		}
 
 		/// <summary>
@@ -172,6 +222,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			conferenceManager.OnPrivacyMuteStatusChange -= ConferenceManagerOnPrivacyMuteStatusChange;
+			conferenceManager.Dialers.OnInCallChanged -= DialersOnInCallChanged;
 		}
 
 		/// <summary>
@@ -182,6 +233,16 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void ConferenceManagerOnPrivacyMuteStatusChange(object sender, BoolEventArgs boolEventArgs)
 		{
 			UpdatePrivacyMute();
+		}
+
+		/// <summary>
+		/// Called when the conference manager enters/leaves a call.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="inCallEventArgs"></param>
+		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
+		{
+			UpdateActiveConferenceDevice();
 		}
 
 		#endregion
