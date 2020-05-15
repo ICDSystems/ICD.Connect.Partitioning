@@ -8,6 +8,7 @@ using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
+	[ExternalTelemetry("Commercial Room Telemetry", typeof(CommercialRoomExternalTelemetryProvider))]
 	public interface ICommercialRoom : IRoom
 	{
 		/// <summary>

@@ -17,7 +17,7 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler OnOriginatorIdsChanged;
 
-		[EventTelemetry("Volume Percent Changed")]
+		[EventTelemetry("VolumePercentChanged")]
 		public event EventHandler<FloatEventArgs> OnVolumePercentChanged;
 
 		private readonly IcdHashSet<Guid> m_OriginatorIds;
@@ -29,7 +29,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		public IEnumerable<Guid> OriginatorIds { get { return m_OriginatorIdsSection.Execute(() => m_OriginatorIds.ToArray()); } }
 
-		[PropertyTelemetry("VolumePercent", null, "Volume Percent Changed")]
+		[PropertyTelemetry("VolumePercent", null, "VolumePercentChanged")]
 		public float VolumePercent
 		{
 			get { return m_VolumePercent; }
