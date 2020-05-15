@@ -31,6 +31,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		/// <summary>
+		/// Raised when the current volume context changes.
+		/// </summary>
+		event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged; 
+
 		#region Properties
 
 		/// <summary>
@@ -55,6 +60,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		[NotNull]
 		RoomOriginatorIdCollection Originators { get; }
 
+		/// <summary>
+		/// Gets the current volume context.
+		/// </summary>
+		eVolumePointContext VolumeContext { get; }
+
 		#endregion
 
 		#region Methods
@@ -69,11 +79,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Called before this combine space is destroyed as part of an uncombine operation.
 		/// </summary>
 		void HandlePreUncombine();
-
-		/// <summary>
-		/// Gets the current volume context.
-		/// </summary>
-		eVolumePointContext GetVolumeContext();
 
 		#endregion
 	}
@@ -497,6 +502,27 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.Originators
 			              .GetInstancesRecursive<IDestination>()
 			              .Any(d => d.ConnectionType.HasFlags(type));
+		}
+
+		#endregion
+
+		#region Volume
+
+		/// <summary>
+		/// Gets the ordered volume points for the current context.
+		/// </summary>
+		[NotNull]
+		public static IEnumerable<IVolumePoint> GetContextualVolumePoints([NotNull] this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			eVolumePointContext type = extends.VolumeContext;
+
+			return extends.Originators
+			              .GetInstancesRecursive<IVolumePoint>()
+			              .Where(v => EnumUtils.HasAnyFlags(v.Context, type))
+			              .OrderBy(v => v, new VolumeContextComparer(type));
 		}
 
 		#endregion

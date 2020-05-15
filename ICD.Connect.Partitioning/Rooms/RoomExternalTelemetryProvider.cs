@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Telemetry;
+using ICD.Connect.Audio.Utils;
+using ICD.Connect.Audio.VolumePoints;
+using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Nodes.External;
 
 namespace ICD.Connect.Partitioning.Rooms
@@ -14,13 +17,33 @@ namespace ICD.Connect.Partitioning.Rooms
 	{
 		public event EventHandler OnOriginatorIdsChanged;
 
+		[EventTelemetry("Volume Percent Changed")]
+		public event EventHandler<FloatEventArgs> OnVolumePercentChanged;
+
 		private readonly IcdHashSet<Guid> m_OriginatorIds;
 		private readonly SafeCriticalSection m_OriginatorIdsSection;
+		private readonly VolumePointHelper m_VolumePointHelper;
+		private float m_VolumePercent;
 
 		#region Properties
 
 		public IEnumerable<Guid> OriginatorIds { get { return m_OriginatorIdsSection.Execute(() => m_OriginatorIds.ToArray()); } }
-		
+
+		[PropertyTelemetry("VolumePercent", null, "Volume Percent Changed")]
+		public float VolumePercent
+		{
+			get { return m_VolumePercent; }
+			private set
+			{
+				if (Math.Abs(value - m_VolumePercent) < 0.001f)
+					return;
+
+				m_VolumePercent = value;
+
+				OnVolumePercentChanged.Raise(this, new FloatEventArgs(m_VolumePercent));
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -30,6 +53,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			m_OriginatorIds = new IcdHashSet<Guid>();
 			m_OriginatorIdsSection = new SafeCriticalSection();
+			m_VolumePointHelper = new VolumePointHelper();
+
+			m_VolumePointHelper.OnVolumeControlVolumeChanged += VolumePointHelperOnVolumeControlVolumeChanged;
 		}
 
 		#region Methods
@@ -43,6 +69,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			base.SetParent(parent);
 
 			UpdateOriginatorIds();
+			UpdateVolumePoint();
 		}
 
 		#endregion
@@ -79,6 +106,27 @@ namespace ICD.Connect.Partitioning.Rooms
 			OnOriginatorIdsChanged.Raise(this);
 		}
 
+		/// <summary>
+		/// Called when the current room volume changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="floatEventArgs"></param>
+		private void VolumePointHelperOnVolumeControlVolumeChanged(object sender, FloatEventArgs floatEventArgs)
+		{
+			VolumePercent = m_VolumePointHelper.GetVolumePercent();
+		}
+
+		/// <summary>
+		/// Updates the volume point helper to wrap the current room volume control.
+		/// </summary>
+		private void UpdateVolumePoint()
+		{
+			m_VolumePointHelper.VolumePoint =
+				Parent == null
+					? null
+					: Parent.GetContextualVolumePoints().FirstOrDefault();
+		}
+
 		#endregion
 
 		#region Parent Callbacks
@@ -95,6 +143,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				return;
 
 			parent.Originators.OnChildrenChanged += OriginatorsOnChildrenChanged;
+			parent.OnVolumeContextChanged += ParentOnVolumeContextChanged;
 		}
 
 		/// <summary>
@@ -109,6 +158,7 @@ namespace ICD.Connect.Partitioning.Rooms
 				return;
 
 			parent.Originators.OnChildrenChanged -= OriginatorsOnChildrenChanged;
+			parent.OnVolumeContextChanged -= ParentOnVolumeContextChanged;
 		}
 
 		/// <summary>
@@ -119,6 +169,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		private void OriginatorsOnChildrenChanged(object sender, EventArgs args)
 		{
 			UpdateOriginatorIds();
+		}
+
+		/// <summary>
+		/// Called when the room volume context changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void ParentOnVolumeContextChanged(object sender, GenericEventArgs<eVolumePointContext> eventArgs)
+		{
+			UpdateVolumePoint();
 		}
 
 		#endregion

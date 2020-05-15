@@ -11,6 +11,11 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 	{
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		/// <summary>
+		/// Raised when the current volume context changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged;
+
 		public override string Category { get { return "Room"; } }
 
 		public ICore Core { get; set; }
@@ -20,6 +25,11 @@ namespace ICD.Connect.Partitioning.Tests.Rooms
 		public int CombinePriority { get; set; }
 
 		public RoomOriginatorIdCollection Originators { get; set; }
+
+		/// <summary>
+		/// Gets the current volume context.
+		/// </summary>
+		public eVolumePointContext VolumeContext { get; set; }
 
 		/// <summary>
 		/// Constructor.

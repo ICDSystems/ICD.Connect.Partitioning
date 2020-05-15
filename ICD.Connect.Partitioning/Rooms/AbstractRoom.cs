@@ -33,10 +33,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnCombineStateChanged;
 
+		/// <summary>
+		/// Raised when the current volume context changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged;
+
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
 		private ICore m_CachedCore;
 		private bool m_CombineState;
+		private eVolumePointContext m_VolumeContext;
 
 		#region Properties
 
@@ -81,6 +87,23 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public RoomOriginatorIdCollection Originators { get { return m_OriginatorIds; } }
 
+		/// <summary>
+		/// Gets the current volume context.
+		/// </summary>
+		public eVolumePointContext VolumeContext
+		{
+			get { return m_VolumeContext; }
+			protected set
+			{
+				if (value == m_VolumeContext)
+					return;
+
+				m_VolumeContext = value;
+
+				OnVolumeContextChanged.Raise(this, new GenericEventArgs<eVolumePointContext>(m_VolumeContext));
+			}
+		}
+
 		#endregion
 
 		#region Constructors
@@ -100,6 +123,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnCombineStateChanged = null;
+			OnVolumeContextChanged = null;
 
 			base.DisposeFinal(disposing);
 
@@ -126,15 +150,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 		}
 
-		/// <summary>
-		/// Gets the volume type for the current context.
-		/// </summary>
-		public virtual eVolumePointContext GetVolumeContext()
-		{
-			return eVolumePointContext.Room;
-		}
-
 		#endregion
+
+		#region Private Methods
 
 		/// <summary>
 		/// Called when the room combine state changes.
@@ -151,6 +169,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected virtual void OriginatorsOnChildrenChanged(object sender, EventArgs args)
 		{
 		}
+
+		#endregion
 
 		#region Settings
 
@@ -191,6 +211,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			base.ClearSettingsFinal();
 
 			CombinePriority = 0;
+			VolumeContext = eVolumePointContext.Room;
 
 			m_OriginatorIds.Clear();
 		}

@@ -110,6 +110,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_ConferenceManager = value;
 				Subscribe(m_ConferenceManager);
 
+				UpdateVolumeContext();
+
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
 			}
 		}
@@ -187,12 +189,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		protected abstract bool GetIsInActiveMeeting();
 
 		/// <summary>
-		/// Gets the volume type for the current context.
+		/// Updates the current volume context.
 		/// </summary>
-		public override eVolumePointContext GetVolumeContext()
+		private void UpdateVolumeContext()
 		{
-			eVolumePointContext output =  base.GetVolumeContext();
-
 			// Return ATC/VTC if we are in a call
 			IConferenceManager conferenceManager = ConferenceManager;
 			IParticipant[] sources =
@@ -207,12 +207,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			bool inVideoCall = sources.Any(s => s.CallType.HasFlag(eCallType.Video));
 
 			if (inAudioCall)
-				output |= eVolumePointContext.Atc;
+				VolumeContext |= eVolumePointContext.Atc;
+			else
+				VolumeContext &= eVolumePointContext.Atc;
 
 			if (inVideoCall)
-				output |= eVolumePointContext.Vtc;
-
-			return output;
+				VolumeContext |= eVolumePointContext.Vtc;
+			else
+				VolumeContext &= eVolumePointContext.Vtc;
 		}
 
 		#endregion
@@ -289,6 +291,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <param name="conferenceManager"></param>
 		protected virtual void Subscribe(IConferenceManager conferenceManager)
 		{
+			if (conferenceManager == null)
+				return;
+
+			conferenceManager.Dialers.OnInCallChanged += DialersOnInCallChanged;
 		}
 
 		/// <summary>
@@ -297,6 +303,20 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <param name="conferenceManager"></param>
 		protected virtual void Unsubscribe(IConferenceManager conferenceManager)
 		{
+			if (conferenceManager == null)
+				return;
+
+			conferenceManager.Dialers.OnInCallChanged -= DialersOnInCallChanged;
+		}
+
+		/// <summary>
+		/// Called when the in call state changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="inCallEventArgs"></param>
+		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
+		{
+			UpdateVolumeContext();
 		}
 
 		#endregion
