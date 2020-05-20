@@ -12,5 +12,9 @@
 		// Active conference device
 		public const string ACTIVE_CONFERENCE_DEVICE = "ActiveConferenceDevice";
 		public const string ACTIVE_CONFERENCE_DEVICE_CHANGED = "ActiveConferenceDeviceChanged";
+
+		// Bookings
+		public const string BOOKINGS = "Bookings";
+		public const string BOOKINGS_CHANGED = "BookingsChanged";
 	}
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Calendaring.Bookings;
+using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.Controls.Dialing;
@@ -24,6 +27,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
 		public event EventHandler<GenericEventArgs<Guid>> OnActiveConferenceDeviceChanged;
+
+		/// <summary>
+		/// Raised when the bookings change.
+		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
+		public event EventHandler OnBookingsChanged;
+
+		private readonly List<Booking> m_Bookings;
+		private readonly List<ICalendarControl> m_CalendarControls;
 
 		private IConferenceManager m_ConferenceManager;
 		private bool m_PrivacyMute;
@@ -71,6 +83,22 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
+		/// Gets the current bookings for the room.
+		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.BOOKINGS, null, CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
+		public IEnumerable<Booking> Bookings
+		{
+			get { return m_Bookings.ToArray(); }
+			private set
+			{
+				m_Bookings.Clear();
+				m_Bookings.AddRange(value);
+
+				OnBookingsChanged.Raise(this);
+			}
+		}
+
+		/// <summary>
 		/// Gets/sets the wrapped conference manager.
 		/// </summary>
 		private IConferenceManager ConferenceManager
@@ -90,7 +118,33 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
+		/// <summary>
+		/// Gets/sets the wrapped calendar controls.
+		/// </summary>
+		public IEnumerable<ICalendarControl> CalendarControls
+		{
+			get { return m_CalendarControls.ToArray(); }
+			private set
+			{
+				UnsubscribeCalendarControls(m_CalendarControls);
+				m_CalendarControls.Clear();
+				m_CalendarControls.AddRange(value);
+				SubscribeCalendarControls(m_CalendarControls);
+
+				UpdateBookings();
+			}
+		}
+
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public CommercialRoomExternalTelemetryProvider()
+		{
+			m_Bookings = new List<Booking>();
+			m_CalendarControls = new List<ICalendarControl>();
+		}
 
 		#region Methods
 
@@ -103,6 +157,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.SetParent(parent);
 
 			UpdateConferenceManager();
+			UpdateCalendarControls();
 		}
 
 		/// <summary>
@@ -119,6 +174,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Updates the wrapped calendar controls.
+		/// </summary>
+		private void UpdateCalendarControls()
+		{
+			CalendarControls =
+				Parent == null
+					? Enumerable.Empty<ICalendarControl>()
+					: Parent.GetCalendarControls();
+		}
 
 		/// <summary>
 		/// Updates the wrapped conference manager.
@@ -151,6 +217,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					                                                      .Any()));
 
 			ActiveConferenceDevice = control == null ? Guid.Empty : control.Parent.Uuid;
+		}
+
+		/// <summary>
+		/// Updates the available bookings.
+		/// </summary>
+		private void UpdateBookings()
+		{
+			Bookings = m_CalendarControls.SelectMany(c => c.GetBookings()).Select(b => Booking.Copy(b));
 		}
 
 		#endregion
@@ -243,6 +317,58 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
 		{
 			UpdateActiveConferenceDevice();
+		}
+
+		#endregion
+
+		#region Calendar Control Callbacks
+
+		/// <summary>
+		/// Subscribe to the calendar control events.
+		/// </summary>
+		/// <param name="calendarControls"></param>
+		private void SubscribeCalendarControls(IEnumerable<ICalendarControl> calendarControls)
+		{
+			foreach (ICalendarControl control in calendarControls)
+				Subscribe(control);
+		}
+
+		/// <summary>
+		/// Unsubscribe from the calendar control events.
+		/// </summary>
+		/// <param name="calendarControls"></param>
+		private void UnsubscribeCalendarControls(IEnumerable<ICalendarControl> calendarControls)
+		{
+			foreach (ICalendarControl control in calendarControls)
+				Unsubscribe(control);
+		}
+
+		/// <summary>
+		/// Subscribe to the calendar control events.
+		/// </summary>
+		/// <param name="calendarControl"></param>
+		private void Subscribe(ICalendarControl calendarControl)
+		{
+			calendarControl.OnBookingsChanged += CalendarControlOnBookingsChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the calendar control events.
+		/// </summary>
+		/// <param name="calendarControl"></param>
+		private void Unsubscribe(ICalendarControl calendarControl)
+		{
+			calendarControl.OnBookingsChanged -= CalendarControlOnBookingsChanged;
+		}
+
+		/// <summary>
+		/// Called when the control bookings change.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void CalendarControlOnBookingsChanged(object sender, EventArgs e)
+		{
+			UpdateBookings();
 		}
 
 		#endregion
