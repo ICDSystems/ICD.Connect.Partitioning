@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
@@ -8,6 +9,7 @@ using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.Controls.Dialing;
+using ICD.Connect.Conferencing.DialContexts;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Nodes.External;
@@ -17,16 +19,22 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 	public sealed class CommercialRoomExternalTelemetryProvider : AbstractExternalTelemetryProvider<ICommercialRoom>
 	{
 		/// <summary>
-		/// Raised when the privacy mute state changed.
+		/// Raised when the privacy mute state changes.
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.MUTE_PRIVACY_CHANGED)]
 		public event EventHandler<BoolEventArgs> OnPrivacyMuteChanged;
 
 		/// <summary>
-		/// Raised when the privacy mute state changed.
+		/// Raised when the active conference device changes.
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
 		public event EventHandler<GenericEventArgs<Guid>> OnActiveConferenceDeviceChanged;
+
+		/// <summary>
+		/// Raised when the active conference device call-in info changes.
+		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.CALL_IN_INFO_CHANGED)]
+		public event EventHandler<GenericEventArgs<DialContext>> OnCallInInfoChanged;
 
 		/// <summary>
 		/// Raised when the bookings change.
@@ -38,14 +46,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private readonly List<ICalendarControl> m_CalendarControls;
 
 		private IConferenceManager m_ConferenceManager;
-		private bool m_PrivacyMute;
 		private Guid m_ActiveConferenceDevice;
+		private bool m_PrivacyMute;
+		private IConferenceDeviceControl m_ActiveConferenceDeviceControl;
+		private DialContext m_CallInInfo;
 
 		#region Properties
 
 		/// <summary>
 		/// Gets the room privacy mute state.
 		/// </summary>
+		[PublicAPI("DAV-PRO - Room Dashboard")]
 		[PropertyTelemetry(CommercialRoomTelemetryNames.MUTE_PRIVACY, CommercialRoomTelemetryNames.MUTE_PRIVACY_COMMAND,
 			CommercialRoomTelemetryNames.MUTE_PRIVACY_CHANGED)]
 		public bool PrivacyMute
@@ -63,8 +74,34 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
-		/// Gets the active conference device by UUID.
+		/// Gets the active conference device control.
 		/// </summary>
+		[CanBeNull]
+		public IConferenceDeviceControl ActiveConferenceDeviceControl
+		{
+			get { return m_ActiveConferenceDeviceControl; }
+			private set
+			{
+				if (value == m_ActiveConferenceDeviceControl)
+					return;
+
+				Unsubscribe(m_ActiveConferenceDeviceControl);
+				m_ActiveConferenceDeviceControl = value;
+				Subscribe(m_ActiveConferenceDeviceControl);
+
+				ActiveConferenceDevice =
+					m_ActiveConferenceDeviceControl == null
+						? Guid.Empty
+						: m_ActiveConferenceDeviceControl.Parent.Uuid;
+
+				UpdateCallInInfo();
+			}
+		}
+
+		/// <summary>
+		/// Gets the UUID for the active conference device.
+		/// </summary>
+		[PublicAPI("DAV-PRO - Room Dashboard")]
 		[PropertyTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE,
 			null,
 			CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
@@ -83,8 +120,29 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
+		/// Gets the call in info for the active conference device..
+		/// </summary>
+		[PublicAPI("DAV-PRO - Room Dashboard")]
+		[PropertyTelemetry(CommercialRoomTelemetryNames.CALL_IN_INFO,
+			null, CommercialRoomTelemetryNames.CALL_IN_INFO_CHANGED)]
+		public DialContext CallInInfo
+		{
+			get { return m_CallInInfo; }
+			private set
+			{
+				if (value == m_CallInInfo)
+					return;
+
+				m_CallInInfo = value;
+
+				OnCallInInfoChanged.Raise(this, new GenericEventArgs<DialContext>(m_CallInInfo));
+			}
+		}
+
+		/// <summary>
 		/// Gets the current bookings for the room.
 		/// </summary>
+		[PublicAPI("DAV-PRO - Room Bookings")]
 		[PropertyTelemetry(CommercialRoomTelemetryNames.BOOKINGS, null, CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
 		public IEnumerable<Booking> Bookings
 		{
@@ -207,7 +265,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		private void UpdateActiveConferenceDevice()
 		{
-			IConferenceDeviceControl control =
+			ActiveConferenceDeviceControl =
 				m_ConferenceManager == null
 					? null
 					: m_ConferenceManager.Dialers
@@ -215,8 +273,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					                     .FirstOrDefault(d => d.GetConferences()
 					                                           .Any(c => c.GetOnlineParticipants()
 					                                                      .Any()));
-
-			ActiveConferenceDevice = control == null ? Guid.Empty : control.Parent.Uuid;
 		}
 
 		/// <summary>
@@ -225,6 +281,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void UpdateBookings()
 		{
 			Bookings = m_CalendarControls.SelectMany(c => c.GetBookings()).Select(b => Booking.Copy(b));
+		}
+
+		/// <summary>
+		/// Updates the current call-in info.
+		/// </summary>
+		private void UpdateCallInInfo()
+		{
+			IDialContext callIn = ActiveConferenceDeviceControl == null ? null : ActiveConferenceDeviceControl.CallInInfo;
+			CallInInfo = callIn == null ? null : DialContext.Copy(callIn);
 		}
 
 		#endregion
@@ -369,6 +434,44 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void CalendarControlOnBookingsChanged(object sender, EventArgs e)
 		{
 			UpdateBookings();
+		}
+
+		#endregion
+
+		#region Conference Control Callbacks
+
+		/// <summary>
+		/// Subscribe to the conference control events.
+		/// </summary>
+		/// <param name="conferenceControl"></param>
+		private void Subscribe(IConferenceDeviceControl conferenceControl)
+		{
+			if (conferenceControl == null)
+				return;
+
+			conferenceControl.OnCallInInfoChanged += ConferenceControlOnCallInInfoChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the conference control events.
+		/// </summary>
+		/// <param name="conferenceControl"></param>
+		private void Unsubscribe(IConferenceDeviceControl conferenceControl)
+		{
+			if (conferenceControl == null)
+				return;
+
+			conferenceControl.OnCallInInfoChanged -= ConferenceControlOnCallInInfoChanged;
+		}
+
+		/// <summary>
+		/// Called when the active conference control call-in info changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void ConferenceControlOnCallInInfoChanged(object sender, GenericEventArgs<IDialContext> eventArgs)
+		{
+			UpdateCallInInfo();
 		}
 
 		#endregion

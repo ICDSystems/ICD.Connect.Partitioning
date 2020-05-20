@@ -13,6 +13,10 @@
 		public const string ACTIVE_CONFERENCE_DEVICE = "ActiveConferenceDevice";
 		public const string ACTIVE_CONFERENCE_DEVICE_CHANGED = "ActiveConferenceDeviceChanged";
 
+		// Call-in Info
+		public const string CALL_IN_INFO = "CallInInfo";
+		public const string CALL_IN_INFO_CHANGED = "CallInInfoChanged";
+
 		// Bookings
 		public const string BOOKINGS = "Bookings";
 		public const string BOOKINGS_CHANGED = "BookingsChanged";
