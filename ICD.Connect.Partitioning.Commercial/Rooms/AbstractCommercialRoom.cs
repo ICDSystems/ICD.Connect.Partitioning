@@ -13,6 +13,7 @@ using ICD.Common.Utils.Services.Scheduler;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
+using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
@@ -340,6 +341,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			// Dialing plan
 			SetDialingPlan(settings.DialingPlan);
+
+			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
+			AddOriginatorsSkipExceptions<ICalendarPoint>(settings.CalendarPoints, factory);
 		}
 
 		/// <summary>
@@ -373,6 +377,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				settings.WakeSchedule.Copy(m_WakeSchedule);
 
 			settings.DialingPlan = DialingPlan;
+
+			settings.ConferencePoints.Clear();
+			settings.CalendarPoints.Clear();
+
+			settings.ConferencePoints.AddRange(GetSerializableChildren<IConferencePoint>());
+			settings.CalendarPoints.AddRange(GetSerializableChildren<ICalendarPoint>());
 		}
 
 		/// <summary>
@@ -427,8 +437,29 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("IsAwake", IsAwake);
-			addRow("Seat Count", SeatCount);
+			CommercialRoomConsole.BuildConsoleStatus(this, addRow);
+		}
+
+		/// <summary>
+		/// Gets the child console node groups.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in CommercialRoomConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		/// <summary>
@@ -440,8 +471,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("Wake", "Wakes the room", () => Wake());
-			yield return new ConsoleCommand("Sleep", "Puts the room to sleep", () => Sleep());
+			foreach (IConsoleCommand command in CommercialRoomConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>

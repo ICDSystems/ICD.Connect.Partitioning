@@ -68,5 +68,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		int SeatCount { get; }
 
 		#endregion
+
+		#region Methods
+
+		/// <summary>
+		/// Shuts down the room.
+		/// </summary>
+		void Sleep();
+
+		/// <summary>
+		/// Wakes up the room.
+		/// </summary>
+		void Wake();
+
+		#endregion
 	}
 }

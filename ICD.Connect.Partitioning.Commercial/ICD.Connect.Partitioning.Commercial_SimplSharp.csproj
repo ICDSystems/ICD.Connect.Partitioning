@@ -77,6 +77,7 @@
     <Compile Include="Rooms\CommercialRoomTelemetryNames.cs" />
     <Compile Include="Rooms\ICommercialRoom.cs" />
     <Compile Include="Rooms\ICommercialRoomSettings.cs" />
+    <Compile Include="Rooms\CommercialRoomConsole.cs" />
     <Compile Include="WakeSchedule.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

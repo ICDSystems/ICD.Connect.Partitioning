@@ -8,7 +8,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
-using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Routing.Endpoints.Destinations;
@@ -191,7 +190,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.SourceGroups.Clear();
 			settings.DestinationGroups.Clear();
 			settings.VolumePoints.Clear();
-			settings.ConferencePoints.Clear();
 
 			settings.Ports.AddRange(GetSerializableChildren<IPort>());
 			settings.Devices.AddRange(GetSerializableChildren<IDevice>());
@@ -200,7 +198,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			settings.SourceGroups.AddRange(GetSerializableChildren<ISourceGroup>());
 			settings.DestinationGroups.AddRange(GetSerializableChildren<IDestinationGroup>());
 			settings.VolumePoints.AddRange(GetSerializableChildren<IVolumePoint>());
-			settings.ConferencePoints.AddRange(GetSerializableChildren<IConferencePoint>());
 		}
 
 		/// <summary>
@@ -234,23 +231,16 @@ namespace ICD.Connect.Partitioning.Rooms
 			AddOriginatorsSkipExceptions<ISourceGroup>(settings.SourceGroups, factory);
 			AddOriginatorsSkipExceptions<IDestinationGroup>(settings.DestinationGroups, factory);
 			AddOriginatorsSkipExceptions<IVolumePoint>(settings.VolumePoints, factory);
-			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 		}
 
-		private IEnumerable<KeyValuePair<int, eCombineMode>> GetSerializableChildren<TInstance>()
+		protected IEnumerable<KeyValuePair<int, eCombineMode>> GetSerializableChildren<TInstance>()
 			where TInstance : class, IOriginator
 		{
 			return m_OriginatorIds.GetInstances<TInstance>().Where(i => i.Serialize)
 			                      .Select(p => new KeyValuePair<int, eCombineMode>(p.Id, m_OriginatorIds.GetCombineMode(p.Id)));
 		}
 
-		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory)
-			where T : class, IOriginator
-		{
-			AddOriginatorsSkipExceptions<T>(originatorIds, factory, Originators);
-		}
-
-		private void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory, RoomOriginatorIdCollection originators)
+		protected void AddOriginatorsSkipExceptions<T>(IEnumerable<KeyValuePair<int, eCombineMode>> originatorIds, IDeviceFactory factory)
 			where T : class, IOriginator
 		{
 			foreach (KeyValuePair<int, eCombineMode> kvp in originatorIds)
@@ -265,7 +255,7 @@ namespace ICD.Connect.Partitioning.Rooms
 					continue;
 				}
 
-				originators.Add(kvp.Key, kvp.Value);
+				Originators.Add(kvp.Key, kvp.Value);
 			}
 		}
 

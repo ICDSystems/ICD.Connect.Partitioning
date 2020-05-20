@@ -41,10 +41,5 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the volume point settings.
 		/// </summary>
 		Dictionary<int, eCombineMode> VolumePoints { get; }
-
-		/// <summary>
-		/// Gets the conference point settings.
-		/// </summary>
-		Dictionary<int, eCombineMode> ConferencePoints { get; }
 	}
 }

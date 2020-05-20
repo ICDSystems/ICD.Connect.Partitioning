@@ -5,7 +5,6 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
-using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Protocol.Ports;
@@ -36,7 +35,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			yield return ConsoleNodeGroup.KeyNodeMap("DestinationGroups", instance.Originators.GetInstancesRecursive<IDestinationGroup>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("Partitions", instance.Originators.GetInstancesRecursive<IPartition>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("VolumePoints", instance.Originators.GetInstancesRecursive<IVolumePoint>(), p => (uint)p.Id);
-			yield return ConsoleNodeGroup.KeyNodeMap("ConferencePoints", instance.Originators.GetInstancesRecursive<IConferencePoint>(), p => (uint)p.Id);
 		}
 
 		/// <summary>
