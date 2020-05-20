@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Partitioning.Rooms;
@@ -26,11 +29,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
-		/// <summary>
-		/// Raised when the calendar control changes.
-		/// </summary>
-		event EventHandler<GenericEventArgs<ICalendarControl>> OnCalendarControlChanged; 
-
 		#region Properties
 
 		/// <summary>
@@ -49,12 +47,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		IConferenceManager ConferenceManager { get; }
-
-		/// <summary>
-		/// Gets the CalendarControl for the room.
-		/// </summary>
-		[CanBeNull]
-		ICalendarControl CalendarControl { get; }
 
 		/// <summary>
 		/// Gets the awake state.
@@ -82,5 +74,25 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		void Wake();
 
 		#endregion
+	}
+
+	public static class CommercialRoomExtensions
+	{
+		/// <summary>
+		/// Gets the calendar controls from the calendar points.
+		/// </summary>
+		/// <param name="commercialRoom"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static IEnumerable<ICalendarControl> GetCalendarControls([NotNull] this ICommercialRoom commercialRoom)
+		{
+			if (commercialRoom == null)
+				throw new ArgumentNullException("commercialRoom");
+
+			return commercialRoom.Originators
+			                     .GetInstancesRecursive<ICalendarPoint>()
+			                     .Select(p => p.Control)
+			                     .Where(c => c != null);
+		}
 	}
 }

@@ -14,7 +14,6 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Calendaring.CalendarPoints;
-using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
@@ -43,14 +42,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
-		/// <summary>
-		/// Raised when the calendar control changes.
-		/// </summary>
-		public event EventHandler<GenericEventArgs<ICalendarControl>> OnCalendarControlChanged;
-
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
-		[CanBeNull] private ICalendarControl m_CalendarControl;
 
 		private bool m_IsAwake;
 
@@ -114,23 +107,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				UpdateVolumeContext();
 
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
-			}
-		}
-
-		/// <summary>
-		/// Gets the CalendarControl for the room.
-		/// </summary>
-		public ICalendarControl CalendarControl
-		{
-			get { return m_CalendarControl; }
-			protected set
-			{
-				if (value == m_CalendarControl)
-					return;
-
-				m_CalendarControl = value;
-
-				OnCalendarControlChanged.Raise(this, new GenericEventArgs<ICalendarControl>(m_CalendarControl));
 			}
 		}
 
