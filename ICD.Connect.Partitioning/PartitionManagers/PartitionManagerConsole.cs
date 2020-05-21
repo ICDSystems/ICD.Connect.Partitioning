@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Partitioning.Rooms;
-using ICD.Connect.Settings.Cores;
 
 namespace ICD.Connect.Partitioning.PartitionManagers
 {
@@ -51,7 +49,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			yield return new ConsoleCommand("PrintCells", "Prints the list of all cells.", () => PrintCells(instance));
 			yield return new ConsoleCommand("PrintPartitions", "Prints the list of all partitions.", () => PrintPartitions(instance));
-			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms());
+			yield return new ConsoleCommand("PrintRooms", "Prints the list of rooms and their children.", () => PrintRooms(instance));
 		}
 
 		private static string PrintCells(IPartitionManager instance)
@@ -80,16 +78,13 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			return builder.ToString();
 		}
 
-		private static string PrintRooms()
+		private static string PrintRooms(IPartitionManager instance)
 		{
 			TableBuilder builder = new TableBuilder("Id", "Room", "Children", "Combine Pritority", "Combine State");
 
-			IEnumerable<IRoom> rooms =
-				ServiceProvider.GetService<ICore>()
-				               .Originators
-				               .GetChildren<IRoom>();
+			IEnumerable<IRoom> rooms = instance.GetTopLevelRooms().OrderBy(r => r.Id);
 
-			foreach (IRoom room in rooms.OrderBy(r => r.Id))
+			foreach (IRoom room in rooms)
 			{
 				int id = room.Id;
 				string children = StringUtils.ArrayFormat(room.GetRooms().Select(r => r.Id).Order());

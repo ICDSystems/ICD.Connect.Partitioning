@@ -31,11 +31,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		private readonly PartitionsCollection m_Partitions;
 		private readonly IcdHashSet<IPartitionDeviceControl> m_SubscribedPartitions;
 
-		private ICore m_CachedCore;
-
 		#region Properties
-
-		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Gets the cells in the system.

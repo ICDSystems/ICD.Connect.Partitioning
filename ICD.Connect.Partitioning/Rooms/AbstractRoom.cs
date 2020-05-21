@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -15,7 +14,6 @@ using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Routing.Groups.Endpoints.Destinations;
 using ICD.Connect.Routing.Groups.Endpoints.Sources;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Cores;
 using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Rooms
@@ -39,7 +37,6 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		private readonly RoomOriginatorIdCollection m_OriginatorIds;
 
-		private ICore m_CachedCore;
 		private bool m_CombineState;
 		private eVolumePointContext m_VolumeContext;
 
@@ -49,11 +46,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Gets the category for this originator type (e.g. Device, Port, etc)
 		/// </summary>
 		public override string Category { get { return "Room"; } }
-
-		/// <summary>
-		/// Gets the parent core instance.
-		/// </summary>
-		public ICore Core { get { return m_CachedCore = m_CachedCore ?? ServiceProvider.GetService<ICore>(); } }
 
 		/// <summary>
 		/// Returns true if the room is currently behaving as part of a combined room.
