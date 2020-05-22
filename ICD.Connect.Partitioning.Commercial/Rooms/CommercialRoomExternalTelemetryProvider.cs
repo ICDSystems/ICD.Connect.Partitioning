@@ -270,9 +270,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					? null
 					: m_ConferenceManager.Dialers
 					                     .GetDialingProviders()
-					                     .FirstOrDefault(d => d.GetConferences()
-					                                           .Any(c => c.GetOnlineParticipants()
-					                                                      .Any()));
+					                     .FirstOrDefault(d => d.GetActiveConference() != null);
 		}
 
 		/// <summary>
