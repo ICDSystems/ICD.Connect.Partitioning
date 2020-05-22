@@ -315,11 +315,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (m_WakeSchedule != null)
 				m_WakeSchedule.Copy(settings.WakeSchedule);
 
-			// Dialing plan
-			SetDialingPlan(settings.DialingPlan);
-
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 			AddOriginatorsSkipExceptions<ICalendarPoint>(settings.CalendarPoints, factory);
+
+			// Dialing plan
+			SetDialingPlan(settings.DialingPlan);
 		}
 
 		/// <summary>
