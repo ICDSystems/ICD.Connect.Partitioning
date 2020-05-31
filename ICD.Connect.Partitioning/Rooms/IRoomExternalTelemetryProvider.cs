@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Connect.Telemetry;
 using ICD.Connect.Telemetry.Attributes;
-using ICD.Connect.Telemetry.Nodes.External;
+using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Partitioning.Rooms
 {

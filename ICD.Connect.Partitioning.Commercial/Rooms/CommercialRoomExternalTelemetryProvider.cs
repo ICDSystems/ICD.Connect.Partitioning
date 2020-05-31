@@ -7,12 +7,11 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
 using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
-using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.DialContexts;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Telemetry.Attributes;
-using ICD.Connect.Telemetry.Nodes.External;
+using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
@@ -210,7 +209,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Sets the parent telemetry provider that this instance extends.
 		/// </summary>
 		/// <param name="parent"></param>
-		public override void SetParent(ICommercialRoom parent)
+		protected override void SetParent(ICommercialRoom parent)
 		{
 			base.SetParent(parent);
 
@@ -292,7 +291,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#endregion
 
-		#region Parent Callbacks
+		#region Provider Callbacks
 
 		/// <summary>
 		/// Subscribe to the parent events.

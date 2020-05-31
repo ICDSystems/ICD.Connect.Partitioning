@@ -8,7 +8,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Audio.Utils;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Telemetry.Attributes;
-using ICD.Connect.Telemetry.Nodes.External;
+using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
@@ -64,7 +64,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// Sets the parent telemetry provider that this instance extends.
 		/// </summary>
 		/// <param name="parent"></param>
-		public override void SetParent(IRoom parent)
+		protected override void SetParent(IRoom parent)
 		{
 			base.SetParent(parent);
 
@@ -129,7 +129,7 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#endregion
 
-		#region Parent Callbacks
+		#region Provider Callbacks
 
 		/// <summary>
 		/// Subscribe to the parent events.
