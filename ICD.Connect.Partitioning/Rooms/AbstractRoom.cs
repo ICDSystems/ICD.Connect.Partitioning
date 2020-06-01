@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -60,7 +61,10 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				m_CombineState = value;
 
-				Logger.Set("Combined", eSeverity.Informational, m_CombineState);
+				Logger.LogSetTo(eSeverity.Informational, "CombineState", m_CombineState);
+				Activities.LogActivity(m_CombineState
+					                   ? new Activity(Activity.ePriority.High, "Combined", "Combined", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Low, "Combined", "Uncombined", eSeverity.Informational));
 
 				HandleCombineState();
 

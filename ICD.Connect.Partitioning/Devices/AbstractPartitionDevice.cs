@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -42,7 +43,10 @@ namespace ICD.Connect.Partitioning.Devices
 
 				m_IsOpen = value;
 
-				Logger.Set("Open", eSeverity.Informational, m_IsOpen);
+				Logger.LogSetTo(eSeverity.Informational, "IsOpen", m_IsOpen);
+				Activities.LogActivity(m_IsOpen
+					                   ? new Activity(Activity.ePriority.Medium, "Is Open", "Open", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Medium, "Is Open", "Closed", eSeverity.Informational));
 
 				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
 			}

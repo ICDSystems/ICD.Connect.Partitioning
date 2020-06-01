@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
@@ -122,6 +123,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					return;
 
 				m_IsAwake = value;
+
+				Logger.LogSetTo(eSeverity.Informational, "IsAwake", m_IsAwake);
+				Activities.LogActivity(m_IsAwake
+					                   ? new Activity(Activity.ePriority.Low, "Is Awake", "Awake", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Lowest, "Is Awake", "Asleep", eSeverity.Informational));
 
 				OnIsAwakeStateChanged.Raise(this, new BoolEventArgs(m_IsAwake));
 			}
