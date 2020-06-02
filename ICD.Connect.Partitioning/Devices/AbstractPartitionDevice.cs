@@ -7,7 +7,9 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Partitioning.Controls;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.Devices
 {
@@ -55,14 +57,6 @@ namespace ICD.Connect.Partitioning.Devices
 		#endregion
 
 		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractPartitionDevice()
-		{
-			Controls.Add(new PartitionDeviceControl(this, 0));
-		}
-
-		/// <summary>
 		/// Release resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
@@ -93,6 +87,23 @@ namespace ICD.Connect.Partitioning.Devices
 				Close();
 			else
 				Open();
+		}
+
+		#endregion
+
+		#region New region
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(TSettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new PartitionDeviceControl(this, 0));
 		}
 
 		#endregion
