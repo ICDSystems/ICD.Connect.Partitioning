@@ -65,6 +65,17 @@ namespace ICD.Connect.Partitioning.Controls
 		}
 
 		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <param name="id"></param>
+		/// <param name="uuid"></param>
+		protected AbstractPartitionDeviceControl(TParent parent, int id, Guid uuid)
+			: base(parent, id, uuid)
+		{
+		}
+
+		/// <summary>
 		/// Override to release resources.
 		/// </summary>
 		/// <param name="disposing"></param>
