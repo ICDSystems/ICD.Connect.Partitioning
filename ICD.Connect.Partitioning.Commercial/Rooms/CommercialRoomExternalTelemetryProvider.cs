@@ -20,24 +20,28 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the privacy mute state changes.
 		/// </summary>
+		[PublicAPI("DAV-PRO")]
 		[EventTelemetry(CommercialRoomTelemetryNames.MUTE_PRIVACY_CHANGED)]
 		public event EventHandler<BoolEventArgs> OnPrivacyMuteChanged;
 
 		/// <summary>
 		/// Raised when the active conference device changes.
 		/// </summary>
+		[PublicAPI("DAV-PRO")]
 		[EventTelemetry(CommercialRoomTelemetryNames.ACTIVE_CONFERENCE_DEVICE_CHANGED)]
 		public event EventHandler<GenericEventArgs<Guid>> OnActiveConferenceDeviceChanged;
 
 		/// <summary>
 		/// Raised when the active conference device call-in info changes.
 		/// </summary>
+		[PublicAPI("DAV-PRO")]
 		[EventTelemetry(CommercialRoomTelemetryNames.CALL_IN_INFO_CHANGED)]
 		public event EventHandler<GenericEventArgs<DialContext>> OnCallInInfoChanged;
 
 		/// <summary>
 		/// Raised when the bookings change.
 		/// </summary>
+		[PublicAPI("DAV-PRO")]
 		[EventTelemetry(CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
 		public event EventHandler OnBookingsChanged;
 

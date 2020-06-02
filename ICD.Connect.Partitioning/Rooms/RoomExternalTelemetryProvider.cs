@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
@@ -12,11 +13,13 @@ using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
-	public sealed class RoomExternalTelemetryProvider : AbstractExternalTelemetryProvider<IRoom>,
-	                                                    IRoomExternalTelemetryProvider
+	public sealed class RoomExternalTelemetryProvider : AbstractExternalTelemetryProvider<IRoom>
 	{
+		[PublicAPI("DAV-PRO")]
+		[EventTelemetry("OnOriginatorIdsChanged")]
 		public event EventHandler OnOriginatorIdsChanged;
 
+		[PublicAPI("DAV-PRO")]
 		[EventTelemetry("VolumePercentChanged")]
 		public event EventHandler<FloatEventArgs> OnVolumePercentChanged;
 
@@ -27,8 +30,11 @@ namespace ICD.Connect.Partitioning.Rooms
 
 		#region Properties
 
+		[PublicAPI("DAV-PRO")]
+		[PropertyTelemetry("OriginatorIds", null, "OnOriginatorIdsChanged")]
 		public IEnumerable<Guid> OriginatorIds { get { return m_OriginatorIdsSection.Execute(() => m_OriginatorIds.ToArray()); } }
 
+		[PublicAPI("DAV-PRO")]
 		[PropertyTelemetry("VolumePercent", null, "VolumePercentChanged")]
 		public float VolumePercent
 		{

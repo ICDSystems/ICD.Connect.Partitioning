@@ -115,7 +115,6 @@
     <Compile Include="PartitionManagers\IPartitionManager.cs" />
     <Compile Include="Partitions\IPartitionSettings.cs" />
     <Compile Include="Rooms\IRoom.cs" />
-    <Compile Include="Rooms\IRoomExternalTelemetryProvider.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
