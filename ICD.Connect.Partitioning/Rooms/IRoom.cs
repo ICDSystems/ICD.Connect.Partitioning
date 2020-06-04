@@ -14,7 +14,6 @@ using ICD.Connect.Partitioning.PartitionManagers;
 using ICD.Connect.Partitioning.Partitions;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Endpoints.Destinations;
-using ICD.Connect.Settings.Cores;
 using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.Attributes;
 
@@ -37,12 +36,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged; 
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the parent core instance.
-		/// </summary>
-		[NotNull]
-		ICore Core { get; }
 
 		/// <summary>
 		/// Returns true if the room is currently behaving as part of a combined room.
