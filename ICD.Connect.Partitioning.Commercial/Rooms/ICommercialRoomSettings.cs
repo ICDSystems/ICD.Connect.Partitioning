@@ -16,6 +16,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		Dictionary<int, eCombineMode> CalendarPoints { get; }
 
 		/// <summary>
+		/// Gets the Occupancy point settings.
+		/// </summary>
+		Dictionary<int, eCombineMode> OccupancyPoints { get; }
+
+		/// <summary>
 		/// Gets the WakeSchedule settings.
 		/// </summary>
 		WakeSchedule WakeSchedule { get; }

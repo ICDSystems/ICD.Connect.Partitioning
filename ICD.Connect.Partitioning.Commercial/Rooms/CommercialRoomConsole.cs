@@ -4,6 +4,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Conferencing.ConferencePoints;
+using ICD.Connect.Partitioning.Commercial.OccupancyPoints;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
@@ -21,6 +22,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			yield return ConsoleNodeGroup.KeyNodeMap("ConferencePoints", instance.Originators.GetInstancesRecursive<IConferencePoint>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("CalendarPoints", instance.Originators.GetInstancesRecursive<ICalendarPoint>(), p => (uint)p.Id);
+			yield return ConsoleNodeGroup.KeyNodeMap("OccupancyPoints", instance.Originators.GetInstancesRecursive<IOccupancyPoint>(), p => (uint)p.Id);
 		}
 
 		/// <summary>

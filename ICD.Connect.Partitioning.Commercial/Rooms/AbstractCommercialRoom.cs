@@ -21,8 +21,11 @@ using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Conferencing.Participants;
+using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
+using ICD.Connect.Partitioning.Commercial.OccupancyPoints;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings;
+using ICD.Connect.Settings.Utils;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
 {
@@ -324,9 +327,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 			AddOriginatorsSkipExceptions<ICalendarPoint>(settings.CalendarPoints, factory);
+			AddOriginatorsSkipExceptions<IOccupancyPoint>(settings.OccupancyPoints, factory);
 
 			// Dialing plan
 			SetDialingPlan(settings.DialingPlan);
+
+			// Generate occupancy points
+			GenerateOccupancyPoints(factory);
 		}
 
 		/// <summary>
@@ -363,9 +370,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			settings.ConferencePoints.Clear();
 			settings.CalendarPoints.Clear();
+			settings.OccupancyPoints.Clear();
 
 			settings.ConferencePoints.AddRange(GetSerializableChildren<IConferencePoint>());
 			settings.CalendarPoints.AddRange(GetSerializableChildren<ICalendarPoint>());
+			settings.OccupancyPoints.AddRange(GetSerializableChildren<IOccupancyPoint>());
 		}
 
 		/// <summary>

@@ -75,6 +75,13 @@
     <Compile Include="Controls\Occupancy\IOccupancySensorControl.cs" />
     <Compile Include="Controls\Occupancy\OccupancySensorControlConsole.cs" />
     <Compile Include="Controls\Occupancy\OccupancyTelemetryNames.cs" />
+    <Compile Include="KrangPlugin.cs" />
+    <Compile Include="OccupancyPoints\AbstractOccupancyPoint.cs" />
+    <Compile Include="OccupancyPoints\AbstractOccupancyPointSettings.cs" />
+    <Compile Include="OccupancyPoints\IOccupancyPoint.cs" />
+    <Compile Include="OccupancyPoints\IOccupancyPointSettings.cs" />
+    <Compile Include="OccupancyPoints\OccupancyPoint.cs" />
+    <Compile Include="OccupancyPoints\OccupancyPointSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rooms\AbstractCommercialRoom.cs" />
     <Compile Include="Rooms\AbstractCommercialRoomSettings.cs" />
