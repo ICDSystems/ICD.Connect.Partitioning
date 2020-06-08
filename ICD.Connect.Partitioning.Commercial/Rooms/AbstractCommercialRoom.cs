@@ -417,6 +417,29 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_ConferenceManager.VolumePoints.RegisterVolumePoint(volumePoint);
 		}
 
+		/// <summary>
+		/// Generates occupancy points for the occupancy controls in the room.
+		/// </summary>
+		/// <param name="factory"></param>
+		private void GenerateOccupancyPoints(IDeviceFactory factory)
+		{
+			foreach (IOccupancySensorControl control in this.GetControls<IOccupancySensorControl>())
+			{
+				int id = IdUtils.GetNewId(Core.Originators.GetChildrenIds().Concat(factory.GetOriginatorIds()), eSubsystem.OccupancyPoints);
+				eCombineMode combineMode = Originators.GetCombineMode(control.Parent.Id);
+
+				OccupancyPoint point = new OccupancyPoint
+				{
+					Id = id,
+					Name = control.Name
+				};
+				point.SetControl(control);
+
+				Core.Originators.AddChild(point);
+				Originators.Add(id, combineMode);
+			}
+		}
+
 		#endregion
 
 		#region Console
