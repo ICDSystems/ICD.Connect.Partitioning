@@ -431,6 +431,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				OccupancyPoint point = new OccupancyPoint
 				{
 					Id = id,
+					Uuid = OriginatorUtils.GenerateUuid(Core, id),
 					Name = control.Name
 				};
 				point.SetControl(control);
