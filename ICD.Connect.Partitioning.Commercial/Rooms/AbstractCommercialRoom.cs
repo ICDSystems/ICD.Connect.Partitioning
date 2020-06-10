@@ -6,6 +6,7 @@ using ICD.Common.Logging.Activities;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
@@ -19,6 +20,7 @@ using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
+using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Conferencing.Participants;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
@@ -47,8 +49,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
+		/// <summary>
+		/// Raised when the room becomed occupied or vacated.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
+
+		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
+		private readonly SafeCriticalSection m_OccupancyControlsSection;
+
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
+		private eOccupancyState m_OccupancyState;
 
 		private bool m_IsAwake;
 
@@ -142,6 +153,33 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public int SeatCount { get; private set; }
 
+		/// <summary>
+		/// Gets the current occupancy state for the room.
+		/// </summary>
+		public eOccupancyState Occupied
+		{
+			get { return m_OccupancyState; }
+			private set
+			{
+				if(value == m_OccupancyState)
+					return;
+
+				m_OccupancyState = value;
+
+				HandleOccupiedChanged(m_OccupancyState);
+
+				OnOccupiedChanged.Raise(this, new GenericEventArgs<eOccupancyState>(m_OccupancyState));
+			}
+		}
+
+		/// <summary>
+		/// Override to handle the room becoming occupied or vacated.
+		/// </summary>
+		/// <param name="occupancyState"></param>
+		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
+		{
+		}
+
 		#endregion
 
 		/// <summary>
@@ -153,6 +191,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			OnConferenceManagerChanged = null;
 			OnWakeScheduleChanged = null;
 			OnIsAwakeStateChanged = null;
+			OnOccupiedChanged = null;
 
 			base.DisposeFinal(disposing);
 		}
@@ -202,6 +241,31 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				VolumeContext |= eVolumePointContext.Vtc;
 			else
 				VolumeContext &= eVolumePointContext.Vtc;
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Called when an originator is added to/removed from the room.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void OriginatorsOnChildrenChanged(object sender, EventArgs args)
+		{
+			base.OriginatorsOnChildrenChanged(sender, args);
+
+			SubscribeOccupancyControls();
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractCommercialRoom()
+		{
+			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
+			m_OccupancyControlsSection = new SafeCriticalSection();
 		}
 
 		#endregion
@@ -304,6 +368,68 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
 		{
 			UpdateVolumeContext();
+		}
+
+		#endregion
+
+		#region Occupancy Control Callbacks
+
+		private void SubscribeOccupancyControls()
+		{
+			m_OccupancyControlsSection.Enter();
+
+			try
+			{
+				foreach (IOccupancySensorControl control in m_OccupancyControls)
+					Unsubscribe(control);
+
+				IEnumerable<IOccupancySensorControl> controls =
+					Originators.GetInstancesRecursive<IOccupancyPoint>()
+					           .Select(p => p.Control)
+					           .Where(c => c != null);
+
+				m_OccupancyControls.Clear();
+				m_OccupancyControls.AddRange(controls);
+
+				foreach (IOccupancySensorControl control in m_OccupancyControls)
+					Subscribe(control);
+			}
+			finally
+			{
+				m_OccupancyControlsSection.Leave();
+			}
+
+			UpdateOccupancy();
+		}
+
+		private void Subscribe(IOccupancySensorControl control)
+		{
+			if (control == null)
+				return;
+
+			control.OnOccupancyStateChanged += ControlOnOccupancyStateChanged;
+		}
+
+		private void Unsubscribe(IOccupancySensorControl control)
+		{
+			if (control == null)
+				return;
+
+			control.OnOccupancyStateChanged -= ControlOnOccupancyStateChanged;
+		}
+
+		private void ControlOnOccupancyStateChanged(object sender, GenericEventArgs<eOccupancyState> genericEventArgs)
+		{
+			UpdateOccupancy();
+		}
+
+		private void UpdateOccupancy()
+		{
+			Occupied = Originators.GetInstancesRecursive<IOccupancyPoint>()
+			                      .Select(p => p.Control)
+			                      .Where(c => c != null)
+			                      .Select(c => c.OccupancyState)
+			                      .MaxOrDefault();
 		}
 
 		#endregion

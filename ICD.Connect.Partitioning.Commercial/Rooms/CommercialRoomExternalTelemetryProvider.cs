@@ -45,6 +45,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[EventTelemetry(CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
 		public event EventHandler OnBookingsChanged;
 
+
 		private readonly List<Booking> m_Bookings;
 		private readonly List<ICalendarControl> m_CalendarControls;
 

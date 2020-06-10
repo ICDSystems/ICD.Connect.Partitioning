@@ -6,6 +6,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
+using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Attributes;
 
@@ -29,7 +30,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
+		/// <summary>
+		/// Raised when the room becomed occupied or vacated.
+		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
+		event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
+
 		#region Properties
+
+		/// <summary>
+		/// Gets the Occupancy state.
+		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.OCCUPIED, null, CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
+		eOccupancyState Occupied { get; }
 
 		/// <summary>
 		/// Gets the wake/sleep schedule.

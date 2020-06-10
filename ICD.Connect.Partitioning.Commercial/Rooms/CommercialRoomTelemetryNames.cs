@@ -4,6 +4,10 @@
 	{
 		public const string SEAT_COUNT = "SeatCount";
 
+		// Occupied
+		public const string OCCUPIED_CHANGED = "OccupiedChanged";
+		public const string OCCUPIED = "Occupied";
+
 		// Privacy Mute
 		public const string MUTE_PRIVACY_CHANGED = "PrivacyMuteChanged";
 		public const string MUTE_PRIVACY = "PrivacyMute";
