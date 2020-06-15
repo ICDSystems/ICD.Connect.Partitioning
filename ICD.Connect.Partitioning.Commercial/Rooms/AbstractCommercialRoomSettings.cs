@@ -35,10 +35,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public WakeSchedule WakeSchedule { get { return m_WakeScheduleSettings; } }
 
 		[UsedImplicitly]
-		public bool WeekdayEnable
+		public bool WeekdayEnableWake
 		{
-			get { return m_WakeScheduleSettings.WeekdayEnable; }
-			set { m_WakeScheduleSettings.WeekdayEnable = value; }
+			get { return m_WakeScheduleSettings.WeekdayEnableWake; }
+			set { m_WakeScheduleSettings.WeekdayEnableWake = value; }
+		}
+
+		[UsedImplicitly]
+		public bool WeekdayEnableSleep
+		{
+			get { return m_WakeScheduleSettings.WeekdayEnableSleep; }
+			set { m_WakeScheduleSettings.WeekdayEnableSleep = value; }
 		}
 
 		[UsedImplicitly]
@@ -56,10 +63,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		[UsedImplicitly]
+		public bool WeekendEnableWake
+		{
+			get { return m_WakeScheduleSettings.WeekendEnableWake; }
+			set { m_WakeScheduleSettings.WeekendEnableWake = value; }
+		}
+
+		[UsedImplicitly]
 		public bool WeekendEnable
 		{
-			get { return m_WakeScheduleSettings.WeekendEnable; }
-			set { m_WakeScheduleSettings.WeekendEnable = value; }
+			get { return m_WakeScheduleSettings.WeekendEnableSleep; }
+			set { m_WakeScheduleSettings.WeekendEnableSleep = value; }
 		}
 
 		[UsedImplicitly]

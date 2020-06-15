@@ -24,6 +24,10 @@ namespace ICD.Connect.Partitioning.Commercial
 
 		private const string WAKE_ELEMENT = "Wake";
 		private const string SLEEP_ELEMENT = "Sleep";
+		private const string ENABLE_WAKE_ELEMENT = "EnableWake";
+		private const string ENABLE_SLEEP_ELEMENT = "EnableSleep";
+
+		[Obsolete("Use Enable Wake and Enable Sleep")]
 		private const string ENABLE_ELEMENT = "Enable";
 
 		private TimeSpan? m_WeekdayWakeTime;
@@ -31,8 +35,10 @@ namespace ICD.Connect.Partitioning.Commercial
 		private TimeSpan? m_WeekendWakeTime;
 		private TimeSpan? m_WeekendSleepTime;
 
-		private bool m_WeekdayEnable;
-		private bool m_WeekendEnable;
+		private bool m_WeekdayEnableWake;
+		private bool m_WeekendEnableWake;
+		private bool m_WeekdayEnableSleep;
+		private bool m_WeekendEnableSleep;
 
 		#region Properties
 
@@ -109,49 +115,66 @@ namespace ICD.Connect.Partitioning.Commercial
 		}
 
 		/// <summary>
-		/// Enables/disables the weekday wake/sleep schedule.
+		/// Enables/disables the weekday wake schedule.
 		/// </summary>
-		public bool WeekdayEnable
+		public bool WeekdayEnableWake
 		{
-			get { return m_WeekdayEnable; }
+			get { return m_WeekdayEnableWake; }
 			set
 			{
-				if (m_WeekdayEnable == value)
+				if (m_WeekdayEnableWake == value)
 					return;
-
-				m_WeekdayEnable = value;
+				m_WeekdayEnableWake = value;
 
 				UpdateNextRunTime();
 			}
 		}
 
 		/// <summary>
-		/// Enables/disables the weekend wake/sleep schedule.
+		/// Enables/disables the weekend wake schedule.
 		/// </summary>
-		public bool WeekendEnable
+		public bool WeekendEnableWake
 		{
-			get { return m_WeekendEnable; }
+			get { return m_WeekendEnableWake; }
 			set
 			{
-				if (m_WeekendEnable == value)
+				if (m_WeekendEnableWake == value)
 					return;
-
-				m_WeekendEnable = value;
+				m_WeekendEnableWake = value;
 
 				UpdateNextRunTime();
 			}
 		}
 
 		/// <summary>
-		/// Returns if the wake schedule is enabled for operation today.
+		/// Enables/disables the weekday sleep schedule.
 		/// </summary>
-		public bool IsEnabledToday
+		public bool WeekdayEnableSleep
 		{
-			get
+			get { return m_WeekdayEnableSleep; }
+			set
 			{
-				return IcdEnvironment.GetLocalTime().DayOfWeek.IsWeekday()
-					? WeekdayEnable
-					: WeekendEnable;
+				if (m_WeekdayEnableSleep == value)
+					return;
+				m_WeekdayEnableSleep = value;
+
+				UpdateNextRunTime();
+			}
+		}
+
+		/// <summary>
+		/// Enables/disables the weekend sleep schedule.
+		/// </summary>
+		public bool WeekendEnableSleep
+		{
+			get { return m_WeekendEnableSleep; }
+			set
+			{
+				if (m_WeekendEnableSleep == value)
+					return;
+				m_WeekendEnableSleep = value;
+
+				UpdateNextRunTime();
 			}
 		}
 
@@ -199,7 +222,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// </summary>
 		public override DateTime? GetNextRunTimeUtc()
 		{
-			var now = IcdEnvironment.GetUtcTime();
+			DateTime now = IcdEnvironment.GetUtcTime();
 
 			bool? unused;
 			return GetNextRunTimeUtc(now, out unused);
@@ -215,8 +238,10 @@ namespace ICD.Connect.Partitioning.Commercial
 			WeekendWakeTime = null;
 			WeekendSleepTime = null;
 
-			WeekdayEnable = false;
-			WeekendEnable = false;
+			WeekdayEnableWake = false;
+			WeekendEnableWake = false;
+			WeekdayEnableSleep = false;
+			WeekendEnableSleep = false;
 		}
 
 		#endregion
@@ -230,11 +255,7 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <returns></returns>
 		private static TimeSpan? Wrap24Hours(TimeSpan? value)
 		{
-			if (value == null)
-				return null;
-
-			int hour = MathUtils.Modulus(value.Value.Hours, 24);
-			return new TimeSpan(hour, value.Value.Minutes, value.Value.Seconds);
+			return value == null ? (TimeSpan?)null : value.Value.AddHoursAndWrap(0);
 		}
 
 		/// <summary>
@@ -342,9 +363,9 @@ namespace ICD.Connect.Partitioning.Commercial
 			// Remove any time info
 			day = day.Date;
 
-			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdaySleepTime != null)
+			if (day.DayOfWeek.IsWeekday() && WeekdayEnableSleep && WeekdaySleepTime != null)
 				return day.Add(WeekdaySleepTime.Value);
-			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendSleepTime != null)
+			if (day.DayOfWeek.IsWeekend() && WeekendEnableSleep && WeekendSleepTime != null)
 				return day.Add(WeekendSleepTime.Value);
 
 			// Should not sleep today
@@ -361,9 +382,9 @@ namespace ICD.Connect.Partitioning.Commercial
 			// Remove any time info
 			day = day.Date;
 
-			if (day.DayOfWeek.IsWeekday() && WeekdayEnable && WeekdayWakeTime != null)
+			if (day.DayOfWeek.IsWeekday() && WeekdayEnableWake && WeekdayWakeTime != null)
 				return day.Add(WeekdayWakeTime.Value);
-			if (day.DayOfWeek.IsWeekend() && WeekendEnable && WeekendWakeTime != null)
+			if (day.DayOfWeek.IsWeekend() && WeekendEnableWake && WeekendWakeTime != null)
 				return day.Add(WeekendWakeTime.Value);
 
 			// Should not wake today
@@ -388,8 +409,10 @@ namespace ICD.Connect.Partitioning.Commercial
 			WeekendWakeTime = other.WeekendWakeTime;
 			WeekendSleepTime = other.WeekendSleepTime;
 
-			WeekdayEnable = other.WeekdayEnable;
-			WeekendEnable = other.WeekendEnable;
+			WeekdayEnableWake = other.WeekdayEnableWake;
+			WeekdayEnableSleep = other.WeekdayEnableSleep;
+			WeekendEnableWake = other.WeekendEnableWake;
+			WeekendEnableSleep = other.WeekendEnableSleep;
 		}
 
 		/// <summary>
@@ -417,7 +440,12 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			WeekdayWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
 			WeekdaySleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
-			WeekdayEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+
+			// Backwards compatibility
+			bool enable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+
+			WeekdayEnableWake = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_WAKE_ELEMENT) ?? enable;
+			WeekdayEnableSleep = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_SLEEP_ELEMENT) ?? enable;
 		}
 
 		/// <summary>
@@ -428,7 +456,12 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			WeekendWakeTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, WAKE_ELEMENT);
 			WeekendSleepTime = XmlUtils.TryReadChildElementContentAsTimeSpan(xml, SLEEP_ELEMENT);
-			WeekendEnable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+
+			// Backwards compatibility
+			bool enable = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_ELEMENT) ?? false;
+
+			WeekendEnableWake = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_WAKE_ELEMENT) ?? enable;
+			WeekendEnableSleep = XmlUtils.TryReadChildElementContentAsBoolean(xml, ENABLE_SLEEP_ELEMENT) ?? enable;
 		}
 
 		/// <summary>
@@ -444,7 +477,8 @@ namespace ICD.Connect.Partitioning.Commercial
 				{
 					writer.WriteElementString(WAKE_ELEMENT, IcdXmlConvert.ToString(WeekdayWakeTime));
 					writer.WriteElementString(SLEEP_ELEMENT, IcdXmlConvert.ToString(WeekdaySleepTime));
-					writer.WriteElementString(ENABLE_ELEMENT, IcdXmlConvert.ToString(WeekdayEnable));
+					writer.WriteElementString(ENABLE_WAKE_ELEMENT, IcdXmlConvert.ToString(WeekdayEnableWake)); 
+					writer.WriteElementString(ENABLE_SLEEP_ELEMENT, IcdXmlConvert.ToString(WeekdayEnableSleep));
 				}
 				writer.WriteEndElement();
 
@@ -452,7 +486,8 @@ namespace ICD.Connect.Partitioning.Commercial
 				{
 					writer.WriteElementString(WAKE_ELEMENT, IcdXmlConvert.ToString(WeekendWakeTime));
 					writer.WriteElementString(SLEEP_ELEMENT, IcdXmlConvert.ToString(WeekendSleepTime));
-					writer.WriteElementString(ENABLE_ELEMENT, IcdXmlConvert.ToString(WeekendEnable));
+					writer.WriteElementString(ENABLE_WAKE_ELEMENT, IcdXmlConvert.ToString(WeekendEnableWake));
+					writer.WriteElementString(ENABLE_SLEEP_ELEMENT, IcdXmlConvert.ToString(WeekendEnableSleep));
 				}
 				writer.WriteEndElement();
 			}
