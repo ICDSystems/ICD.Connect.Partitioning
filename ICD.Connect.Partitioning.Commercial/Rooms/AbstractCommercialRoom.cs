@@ -273,60 +273,84 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Subscribe to the schedule events.
 		/// </summary>
 		/// <param name="schedule"></param>
-		protected virtual void Subscribe(WakeSchedule schedule)
+		private void Subscribe(WakeSchedule schedule)
 		{
 			if (schedule == null)
 				return;
 
-			schedule.OnWakeActionRequested += ScheduleOnWakeActionRequested;
-			schedule.OnSleepActionRequested += ScheduleOnSleepActionRequested;
+			schedule.WakeActionRequested = ScheduleOnWakeActionRequested;
+			schedule.SleepActionRequested = ScheduleOnSleepActionRequested;
 		}
 
 		/// <summary>
 		/// Unsubscribe from the schedule events.
 		/// </summary>
 		/// <param name="schedule"></param>
-		protected virtual void Unsubscribe(WakeSchedule schedule)
+		private void Unsubscribe(WakeSchedule schedule)
 		{
 			if (schedule == null)
 				return;
 
-			schedule.OnWakeActionRequested -= ScheduleOnWakeActionRequested;
-			schedule.OnSleepActionRequested -= ScheduleOnSleepActionRequested;
+			schedule.WakeActionRequested = null;
+			schedule.SleepActionRequested = null;
 		}
 
 		/// <summary>
 		/// Called when a sleep action is scheduled.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="eventArgs"></param>
-		private void ScheduleOnSleepActionRequested(object sender, EventArgs eventArgs)
+		private TimeSpan? ScheduleOnSleepActionRequested()
 		{
 			if (CombineState)
-				return;
+				return null;
 
 			if (GetIsInActiveMeeting())
-				return;
+				return null;
+
+			// Defer if there is an upcoming booking today
+			DateTime now = IcdEnvironment.GetUtcTime();
+			DateTime endOfDay = IcdEnvironment.GetLocalTime().EndOfDay().ToUniversalTime();
+            DateTime endTime;
+
+			bool hasBookings = Originators.GetInstancesRecursive<ICalendarPoint>()
+			                              .Select(p => p.Control)
+			                              .Where(c => c != null)
+			                              .SelectMany(c => c.GetBookings())
+			                              .Select(b => b.EndTime)
+			                              .Where(d => d > now && d < endOfDay)
+			                              .Order()
+			                              .TryLast(out endTime);
+
+			if (hasBookings)
+			{
+				TimeSpan deferredTime = endTime - now;
+
+				string message = string.Format("Sleep time has been deferred {0}, due to a meeting", deferredTime);
+				Logger.Log(eSeverity.Informational, message);
+
+				return deferredTime;
+			}
 
 			Logger.Log(eSeverity.Informational, "Performing scheduled Sleep");
 			Sleep();
+
+			return null;
 		}
 
 		/// <summary>
 		/// Called when a wake action is scheduled.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="eventArgs"></param>
-		private void ScheduleOnWakeActionRequested(object sender, EventArgs eventArgs)
+		private TimeSpan? ScheduleOnWakeActionRequested()
 		{
 			if (CombineState)
-				return;
+				return null;
 
 			if (GetIsInActiveMeeting())
-				return;
+				return null;
 
 			Logger.Log(eSeverity.Informational, "Performing scheduled Wake");
 			Wake();
+
+			return null;
 		}
 
 		#endregion

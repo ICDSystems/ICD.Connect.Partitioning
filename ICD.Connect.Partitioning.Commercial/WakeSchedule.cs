@@ -10,14 +10,10 @@ namespace ICD.Connect.Partitioning.Commercial
 	public sealed class WakeSchedule : AbstractScheduledAction
 	{
 		/// <summary>
-		/// Raised when the wake action occurs.
+		/// Returns null if the action was performed without defferral, otherwise a period of time to wait before trying again.
 		/// </summary>
-		public event EventHandler OnWakeActionRequested;
-
-		/// <summary>
-		/// Raised when the sleep action occurs.
-		/// </summary>
-		public event EventHandler OnSleepActionRequested;
+		/// <returns></returns>
+		public delegate TimeSpan? DeferRuntime();
 
 		private const string WEEKDAY_ELEMENT = "Weekday";
 		private const string WEEKEND_ELEMENT = "Weekend";
@@ -41,6 +37,16 @@ namespace ICD.Connect.Partitioning.Commercial
 		private bool m_WeekendEnableSleep;
 
 		#region Properties
+
+		/// <summary>
+		/// Gets/sets the wake action callback.
+		/// </summary>
+		public DeferRuntime WakeActionRequested { get; set; }
+
+		/// <summary>
+		/// Gets/sets the sleep action callback.
+		/// </summary>
+		public DeferRuntime SleepActionRequested { get; set; }
 
 		/// <summary>
 		/// Gets/sets the Weekday Wake Time.
@@ -209,18 +215,24 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Runs when the action has hit its scheduled time
 		/// </summary>
-		public override void RunFinal()
+		protected override DateTime? RunFinal()
 		{
+			TimeSpan? deferral = null;
+
 			if (IsSleepTime)
-				OnSleepActionRequested.Raise(this);
+				deferral = SleepActionRequested();
 			else if (IsWakeTime)
-				OnWakeActionRequested.Raise(this);
+				deferral = WakeActionRequested();
+
+			return deferral.HasValue
+				? IcdEnvironment.GetUtcTime() + deferral.Value
+				: GetNextRunTimeUtc();
 		}
 
 		/// <summary>
 		/// Runs after RunFinal in order to determine the next run time of this action
 		/// </summary>
-		public override DateTime? GetNextRunTimeUtc()
+		protected override DateTime? GetNextRunTimeUtc()
 		{
 			DateTime now = IcdEnvironment.GetUtcTime();
 
