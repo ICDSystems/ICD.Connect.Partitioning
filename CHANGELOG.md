@@ -6,9 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.0.0] - 2020-06-19
+### Added
+ - Added SeatCount to commercial rooms
+ - Added telemetry for pushing a list of the originators contained in a room
+ - Added telemetry for commercial room privacy mute, volume, active conference device, call-in information
+ - Added telemetry for room bookings
+ - Moved occupancy features from ICD.Connect.Misc
+ - Commercial rooms have occupancy points
+ - Commercial rooms have an occupancy state
+
 ### Changed
  - MockPartitionDevice now implements IMockDevice
  - Using new logging context
+ - Fixed a bug where conference points were not always being registered with the conference manager
 
 ## [14.3.0] - 2020-03-20
 ### Added
