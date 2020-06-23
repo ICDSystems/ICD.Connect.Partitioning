@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Partitioning.Rooms;
+using ICD.Connect.Routing.Endpoints.Sources;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Partitioning.Commercial.Rooms
@@ -20,8 +21,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private const string SEAT_COUNT_ELEMENT = "SeatCount";
 		private const string WAKE_SCHEDULE_ELEMENT = "WakeSchedule";
 		private const string DIALING_PLAN_ELEMENT = "DialingPlan";
+		private const string TOUCH_FREE_ELEMENT = "TouchFree";
 
 		private readonly WakeSchedule m_WakeScheduleSettings;
+		private readonly TouchFreeSettings m_TouchFreeSettings;
 		private readonly Dictionary<int, eCombineMode> m_ConferencePoints;
 		private readonly Dictionary<int, eCombineMode> m_CalendarPoints;
 		private readonly Dictionary<int, eCombineMode> m_OccupancyPoints;
@@ -33,6 +36,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public Dictionary<int, eCombineMode> OccupancyPoints {get { return m_OccupancyPoints; }}
 		[HiddenSettingsProperty]
 		public WakeSchedule WakeSchedule { get { return m_WakeScheduleSettings; } }
+		[HiddenSettingsProperty]
+		public TouchFreeSettings TouchFree { get { return m_TouchFreeSettings; } }
 
 		[UsedImplicitly]
 		public bool WeekdayEnableWake
@@ -90,6 +95,28 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			set { m_WakeScheduleSettings.WeekendSleepTime = value; }
 		}
 
+		[UsedImplicitly]
+		public int TouchFreeCountdown
+		{
+			get { return m_TouchFreeSettings.CountdownSeconds; } 
+			set { m_TouchFreeSettings.CountdownSeconds = value; }
+		}
+
+		[UsedImplicitly]
+		public bool TouchFreeEnable
+		{
+			get { return m_TouchFreeSettings.Enabled; }
+			set { m_TouchFreeSettings.Enabled = value;}
+		}
+
+		[UsedImplicitly]
+		[OriginatorIdSettingsProperty(typeof(ISource))]
+		public int? TouchFreeSource
+		{
+			get { return m_TouchFreeSettings.SourceId; }
+			set { m_TouchFreeSettings.SourceId = value; }
+		}
+
 		[PathSettingsProperty("DialingPlans", ".xml")]
 		public string DialingPlan { get; set; }
 
@@ -104,6 +131,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		protected AbstractCommercialRoomSettings()
 		{
 			m_WakeScheduleSettings = new WakeSchedule();
+			m_TouchFreeSettings = new TouchFreeSettings();
+
 			m_ConferencePoints = new Dictionary<int, eCombineMode>();
 			m_CalendarPoints = new Dictionary<int, eCombineMode>();
 			m_OccupancyPoints = new Dictionary<int, eCombineMode>();
@@ -125,6 +154,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			writer.WriteElementString(DIALING_PLAN_ELEMENT, DialingPlan);
 
 			m_WakeScheduleSettings.WriteElements(writer, WAKE_SCHEDULE_ELEMENT);
+			m_TouchFreeSettings.WriteElements(writer, TOUCH_FREE_ELEMENT);
 		}
 
 		/// <summary>
@@ -138,6 +168,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			string wakeScheduleXml;
 			if (XmlUtils.TryGetChildElementAsString(xml, WAKE_SCHEDULE_ELEMENT, out wakeScheduleXml))
 				m_WakeScheduleSettings.ParseXml(wakeScheduleXml);
+
+			string touchFreeXml;
+			if (XmlUtils.TryGetChildElementAsString(xml, TOUCH_FREE_ELEMENT, out touchFreeXml))
+				m_TouchFreeSettings.ParseXml(touchFreeXml);
 
 			DialingPlan = XmlUtils.TryReadChildElementContentAsString(xml, DIALING_PLAN_ELEMENT);
 			SeatCount = XmlUtils.TryReadChildElementContentAsInt(xml, SEAT_COUNT_ELEMENT) ?? 0;

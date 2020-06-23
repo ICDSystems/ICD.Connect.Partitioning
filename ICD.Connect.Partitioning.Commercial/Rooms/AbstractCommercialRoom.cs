@@ -44,6 +44,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
 		/// <summary>
+		/// Raised when the wake schedule changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
+
+		/// <summary>
 		/// Raised when the room wakes or goes to sleep.
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
@@ -58,6 +63,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
+		[CanBeNull] private TouchFree m_TouchFree;
 		private eOccupancyState m_OccupancyState;
 
 		private bool m_IsAwake;
@@ -100,6 +106,24 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 					SchedulerService.Add(m_WakeSchedule);
 
 				OnWakeScheduleChanged.Raise(this, new GenericEventArgs<WakeSchedule>(m_WakeSchedule));
+			}
+		}
+
+		/// <summary>
+		/// Gets the Touch Free Settings.
+		/// </summary>
+		[CanBeNull]
+		public TouchFree TouchFree
+		{
+			get { return m_TouchFree; }
+			protected set
+			{
+				if (value == m_TouchFree)
+					return;
+
+				m_TouchFree = value;
+
+				OnTouchFreeChanged.Raise(this, new GenericEventArgs<TouchFree>(m_TouchFree));
 			}
 		}
 
@@ -187,6 +211,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			OnConferenceManagerChanged = null;
 			OnWakeScheduleChanged = null;
+			OnTouchFreeChanged = null;
 			OnIsAwakeStateChanged = null;
 			OnOccupiedChanged = null;
 
@@ -482,6 +507,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (m_WakeSchedule != null)
 				m_WakeSchedule.Copy(settings.WakeSchedule);
 
+			// Touch Free
+			if (m_TouchFree != null)
+				m_TouchFree.ApplySettings(settings.TouchFree, factory);
+
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 			AddOriginatorsSkipExceptions<ICalendarPoint>(settings.CalendarPoints, factory);
 			AddOriginatorsSkipExceptions<IOccupancyPoint>(settings.OccupancyPoints, factory);
@@ -506,6 +535,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (m_WakeSchedule != null)
 				m_WakeSchedule.Clear();
 
+			if (m_TouchFree != null)
+				m_TouchFree.ClearSettings();
+
 			if (m_ConferenceManager != null)
 				m_ConferenceManager.Clear();
 		}
@@ -522,6 +554,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			if (m_WakeSchedule != null)
 				settings.WakeSchedule.Copy(m_WakeSchedule);
+
+			if (m_TouchFree != null)
+				m_TouchFree.CopySettings(settings.TouchFree);
 
 			settings.DialingPlan = DialingPlan;
 

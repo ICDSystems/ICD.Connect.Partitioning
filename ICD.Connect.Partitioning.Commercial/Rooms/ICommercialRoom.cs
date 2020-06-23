@@ -26,6 +26,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
 		/// <summary>
+		/// Raised when the Touch Free changes.
+		/// </summary>
+		 event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
+
+		/// <summary>
 		/// Raised when the room wakes or goes to sleep.
 		/// </summary>
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
@@ -49,6 +54,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		WakeSchedule WakeSchedule { get; }
+
+		/// <summary>
+		/// Gets the Touch Free.
+		/// </summary>
+		[CanBeNull]
+		TouchFree TouchFree { get; }
 
 		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(

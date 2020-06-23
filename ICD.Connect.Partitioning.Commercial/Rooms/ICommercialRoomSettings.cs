@@ -26,6 +26,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		WakeSchedule WakeSchedule { get; }
 
 		/// <summary>
+		/// Gets the Touch Free settings.
+		/// </summary>
+		TouchFreeSettings TouchFree{ get; }
+
+		/// <summary>
 		/// Gets/sets the dialing plan path.
 		/// </summary>
 		string DialingPlan { get; set; }
