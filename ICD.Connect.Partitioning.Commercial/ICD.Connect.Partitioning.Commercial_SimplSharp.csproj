@@ -91,6 +91,8 @@
     <Compile Include="Rooms\ICommercialRoom.cs" />
     <Compile Include="Rooms\ICommercialRoomSettings.cs" />
     <Compile Include="Rooms\CommercialRoomConsole.cs" />
+    <Compile Include="TouchFree.cs" />
+    <Compile Include="TouchFreeSettings.cs" />
     <Compile Include="WakeSchedule.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
@@ -122,6 +124,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing\ICD.Connect.Routing_SimplSharp.csproj">
+      <Project>{B0C0CA1C-FA55-4BEA-8A8B-EDB2141C523E}</Project>
+      <Name>ICD.Connect.Routing_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
