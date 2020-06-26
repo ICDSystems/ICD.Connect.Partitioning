@@ -44,7 +44,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<GenericEventArgs<WakeSchedule>> OnWakeScheduleChanged;
 
 		/// <summary>
-		/// Raised when the wake schedule changes.
+		/// Raised when Touch Free settings changes.
 		/// </summary>
 		public event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
 
@@ -349,7 +349,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			{
 				TimeSpan deferredTime = endTime - now;
 
-				string message = string.Format("Sleep time has been deferred {0}, due to a meeting", deferredTime);
+				string message = string.Format("Sleep time has been deferred {0}, due to a meeting", deferredTime.ToReadableString());
 				Logger.Log(eSeverity.Informational, message);
 
 				return deferredTime;
