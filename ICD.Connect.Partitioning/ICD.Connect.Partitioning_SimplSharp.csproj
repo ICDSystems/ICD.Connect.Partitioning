@@ -116,7 +116,7 @@
     <Compile Include="Partitions\IPartitionSettings.cs" />
     <Compile Include="Rooms\IRoom.cs" />
     <Compile Include="Rooms\IRoomSettings.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Partitions\Partition.cs" />
     <Compile Include="Partitions\PartitionSettings.cs" />
