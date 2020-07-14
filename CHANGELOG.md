@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.1.0] - 2020-07-14
+### Added
+ - Added activity for commercial room call state
+
+### Removed
+ - Removed commercial room Awake activity
+
 ## [15.0.0] - 2020-06-19
 ### Added
  - Added SeatCount to commercial rooms

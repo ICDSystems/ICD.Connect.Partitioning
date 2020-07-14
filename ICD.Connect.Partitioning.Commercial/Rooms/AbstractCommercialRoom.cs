@@ -20,7 +20,6 @@ using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
-using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Conferencing.Participants;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
@@ -121,6 +120,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				Subscribe(m_ConferenceManager);
 
 				UpdateVolumeContext();
+				UpdateInCall();
 
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
 			}
@@ -140,9 +140,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_IsAwake = value;
 
 				Logger.LogSetTo(eSeverity.Informational, "IsAwake", m_IsAwake);
-				Activities.LogActivity(m_IsAwake
-					                   ? new Activity(Activity.ePriority.Low, "Is Awake", "Awake", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Lowest, "Is Awake", "Asleep", eSeverity.Informational));
 
 				OnIsAwakeStateChanged.Raise(this, new BoolEventArgs(m_IsAwake));
 			}
@@ -368,6 +365,16 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
 		{
 			UpdateVolumeContext();
+			UpdateInCall();
+		}
+
+		/// <summary>
+		/// Updates the in call activity.
+		/// </summary>
+		private void UpdateInCall()
+		{
+			eInCall inCall = ConferenceManager == null ? eInCall.None : ConferenceManager.Dialers.IsInCall;
+			Activities.LogActivity(CommercialRoomActivities.GetCallActivity(inCall));
 		}
 
 		#endregion
