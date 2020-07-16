@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
@@ -62,24 +63,16 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			base.ParseXml(xml);
 
 			IEnumerable<ISettings> cells = PluginFactory.GetSettingsFromXml(xml, CELLS_ELEMENT);
-
-			foreach (ISettings item in cells)
-			{
-				if (CellSettings.Add(item))
-					continue;
-
-				Logger.AddEntry(eSeverity.Error, "{0} failed to add duplicate {1}", GetType().Name, item);
-			}
-
 			IEnumerable<ISettings> partitions = PluginFactory.GetSettingsFromXml(xml, PARTITIONS_ELEMENT);
 
-			foreach (ISettings item in partitions)
-			{
-				if (PartitionSettings.Add(item))
-					continue;
+			AddSettingsLogDuplicates(CellSettings, cells);
+			AddSettingsLogDuplicates(PartitionSettings, partitions);
+		}
 
+		private void AddSettingsLogDuplicates(SettingsCollection collection, IEnumerable<ISettings> settings)
+		{
+			foreach (ISettings item in settings.Where(item => !collection.Add(item)))
 				Logger.AddEntry(eSeverity.Error, "{0} failed to add duplicate {1}", GetType().Name, item);
-			}
 		}
 
 		#endregion
