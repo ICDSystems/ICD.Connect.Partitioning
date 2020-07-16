@@ -86,18 +86,34 @@ namespace ICD.Connect.Partitioning.Commercial.Tests
 		
 		[TestCase(true, true)]
 		[TestCase(false, false)]
-		public void WeekdayEnableTest(bool value, bool expected)
+		public void WeekdayEnableWakeTest(bool value, bool expected)
 		{
-			WakeSchedule schedule = new WakeSchedule { WeekdayEnable = value };
-			Assert.AreEqual(expected, schedule.WeekdayEnable);
+			WakeSchedule schedule = new WakeSchedule { WeekdayEnableWake = value };
+			Assert.AreEqual(expected, schedule.WeekdayEnableWake);
 		}
 
 		[TestCase(true, true)]
 		[TestCase(false, false)]
-		public void WeekendEnableTest(bool value, bool expected)
+		public void WeekdayEnableSleepTest(bool value, bool expected)
 		{
-			WakeSchedule schedule = new WakeSchedule { WeekendEnable = value };
-			Assert.AreEqual(expected, schedule.WeekendEnable);
+			WakeSchedule schedule = new WakeSchedule { WeekdayEnableSleep = value };
+			Assert.AreEqual(expected, schedule.WeekdayEnableSleep);
+		}
+
+		[TestCase(true, true)]
+		[TestCase(false, false)]
+		public void WeekendEnableWakeTest(bool value, bool expected)
+		{
+			WakeSchedule schedule = new WakeSchedule { WeekendEnableWake = value };
+			Assert.AreEqual(expected, schedule.WeekendEnableWake);
+		}
+
+		[TestCase(true, true)]
+		[TestCase(false, false)]
+		public void WeekendEnableSleepTest(bool value, bool expected)
+		{
+			WakeSchedule schedule = new WakeSchedule { WeekendEnableSleep = value };
+			Assert.AreEqual(expected, schedule.WeekendEnableSleep);
 		}
 
 		[Test]
@@ -137,8 +153,10 @@ namespace ICD.Connect.Partitioning.Commercial.Tests
 				WeekdaySleepTime = new TimeSpan(1, 1, 1),
 				WeekendWakeTime = new TimeSpan(1, 1, 1),
 				WeekendSleepTime = new TimeSpan(1, 1, 1),
-				WeekdayEnable = true,
-				WeekendEnable = true
+				WeekdayEnableWake = true,
+				WeekdayEnableSleep = true,
+				WeekendEnableWake = true,
+				WeekendEnableSleep = true
 			};
 
 			schedule.Clear();
@@ -147,8 +165,10 @@ namespace ICD.Connect.Partitioning.Commercial.Tests
 			Assert.AreEqual(null, schedule.WeekdaySleepTime);
 			Assert.AreEqual(null, schedule.WeekendWakeTime);
 			Assert.AreEqual(null, schedule.WeekendSleepTime);
-			Assert.AreEqual(false, schedule.WeekdayEnable);
-			Assert.AreEqual(false, schedule.WeekendEnable);
+			Assert.AreEqual(false, schedule.WeekdayEnableWake);
+			Assert.AreEqual(false, schedule.WeekdayEnableSleep);
+			Assert.AreEqual(false, schedule.WeekendEnableWake);
+			Assert.AreEqual(false, schedule.WeekendEnableSleep);
 		}
 
 		[Test]
