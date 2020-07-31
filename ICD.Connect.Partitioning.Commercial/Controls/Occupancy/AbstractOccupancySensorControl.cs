@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -41,6 +43,9 @@ namespace ICD.Connect.Partitioning.Commercial.Controls.Occupancy
 					return;
 
 				m_OccupancyState = value;
+
+				Logger.LogSetTo(eSeverity.Informational, "OccupancyState", m_OccupancyState);
+				Activities.LogActivity(OccupancySensorControlActivities.GetOccupancyStateActivity(m_OccupancyState));
 
 				OnOccupancyStateChanged.Raise(this, new GenericEventArgs<eOccupancyState>(value));
 			}
