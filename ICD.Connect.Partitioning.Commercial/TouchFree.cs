@@ -13,7 +13,7 @@ namespace ICD.Connect.Partitioning.Commercial
 {
 	public sealed class TouchFree
 	{
-		public event EventHandler<IntEventArgs> OnCountDownTimerChanged;
+		public event EventHandler<IntEventArgs> OnCountDownSecondsChanged;
 		public event EventHandler<BoolEventArgs> OnEnabledChanged;
 		public event EventHandler<SourceEventArgs> OnDefaultSourceChanged; 
 
@@ -33,7 +33,7 @@ namespace ICD.Connect.Partitioning.Commercial
 
 				m_CountDownSeconds = value;
 
-				OnCountDownTimerChanged.Raise(this, new IntEventArgs(m_CountDownSeconds));
+				OnCountDownSecondsChanged.Raise(this, new IntEventArgs(m_CountDownSeconds));
 			}
 		}
 

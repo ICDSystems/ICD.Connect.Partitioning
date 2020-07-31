@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 
 namespace ICD.Connect.Partitioning.Commercial
 {
@@ -9,32 +8,11 @@ namespace ICD.Connect.Partitioning.Commercial
 		private const string ENABLED_ELEMENT = "Enabled";
 		private const string SOURCE_ELEMENT = "Source";
 
-
 		public int CountdownSeconds { get; set; }
 
 		public bool Enabled { get; set; }
 
 		public int? SourceId { get; set; }
-
-		/// <summary>
-		/// Copies the properties from the other instance.
-		/// </summary>
-		/// <param name="other"></param>
-		public void Copy(TouchFreeSettings other)
-		{
-			if (other == null)
-				throw new ArgumentNullException("other");
-
-			CountdownSeconds = other.CountdownSeconds;
-			Enabled = other.Enabled;
-			SourceId = other.SourceId;
-		}
-
-		public void Clear()
-		{
-			CountdownSeconds = 0;
-			Enabled = false;
-		}
 
 		/// <summary>
 		/// Updates the settings from xml.
@@ -57,10 +35,8 @@ namespace ICD.Connect.Partitioning.Commercial
 			writer.WriteStartElement(element);
 			{
 				writer.WriteElementString(COUNTDOWN_SECONDS_ELEMENT, IcdXmlConvert.ToString(CountdownSeconds));
-
-				writer.WriteElementString(ENABLED_ELEMENT, IcdXmlConvert.ToString(ENABLED_ELEMENT));
-
-				writer.WriteElementString(SOURCE_ELEMENT, IcdXmlConvert.ToString(SOURCE_ELEMENT));
+				writer.WriteElementString(ENABLED_ELEMENT, IcdXmlConvert.ToString(Enabled));
+				writer.WriteElementString(SOURCE_ELEMENT, IcdXmlConvert.ToString(SourceId));
 			}
 			writer.WriteEndElement();
 		}

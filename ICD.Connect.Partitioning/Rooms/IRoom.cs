@@ -33,7 +33,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Raised when the current volume context changes.
 		/// </summary>
-		event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged; 
+		event EventHandler<GenericEventArgs<eVolumePointContext>> OnVolumeContextChanged;
 
 		#region Properties
 

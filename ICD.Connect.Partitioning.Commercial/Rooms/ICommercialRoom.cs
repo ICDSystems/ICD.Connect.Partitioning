@@ -28,7 +28,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the Touch Free changes.
 		/// </summary>
-		 event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
+		event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
+
+		 /// <summary>
+		 /// Raised when Touch Free becomes enabled/disabled.
+		 /// </summary>
+		event EventHandler<BoolEventArgs> OnTouchFreeEnabledChanged;
 
 		/// <summary>
 		/// Raised when the room wakes or goes to sleep.
@@ -60,6 +65,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		TouchFree TouchFree { get; }
+
+		/// <summary>
+		/// Returns true if TouchFree is not null and enabled.
+		/// </summary>
+		bool TouchFreeEnabled { get; }
 
 		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
@@ -114,9 +124,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				throw new ArgumentNullException("commercialRoom");
 
 			return commercialRoom.Originators
-			                     .GetInstancesRecursive<ICalendarPoint>()
-			                     .Select(p => p.Control)
-			                     .Where(c => c != null);
+								 .GetInstancesRecursive<ICalendarPoint>()
+								 .Select(p => p.Control)
+								 .Where(c => c != null);
 		}
 	}
 }

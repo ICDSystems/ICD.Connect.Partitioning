@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ICD.Common.Logging.Activities;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -49,6 +48,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
 
 		/// <summary>
+		/// Raised when Touch Free becomes enabled/disabled.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnTouchFreeEnabledChanged;
+
+		/// <summary>
 		/// Raised when the room wakes or goes to sleep.
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
@@ -56,17 +60,17 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the room becomed occupied or vacated.
 		/// </summary>
-		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
+		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged; 
 
 		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
 		private readonly SafeCriticalSection m_OccupancyControlsSection;
-
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
 		[CanBeNull] private TouchFree m_TouchFree;
-		private eOccupancyState m_OccupancyState;
 
+		private eOccupancyState m_OccupancyState;
 		private bool m_IsAwake;
+		private bool m_TouchFreeEnabled;
 
 		#region Properties
 
@@ -121,9 +125,30 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				if (value == m_TouchFree)
 					return;
 
+				Unsubscribe(m_TouchFree);
 				m_TouchFree = value;
+				Subscribe(m_TouchFree);
+
+				UpdateTouchFreeEnabled();
 
 				OnTouchFreeChanged.Raise(this, new GenericEventArgs<TouchFree>(m_TouchFree));
+			}
+		}
+
+		/// <summary>
+		/// Returns true if TouchFree is not null and enabled.
+		/// </summary>
+		public bool TouchFreeEnabled
+		{
+			get { return m_TouchFreeEnabled; }
+			private set
+			{
+				if (value == m_TouchFreeEnabled)
+					return;
+
+				m_TouchFreeEnabled = value;
+
+				OnTouchFreeEnabledChanged.Raise(this, new BoolEventArgs(m_TouchFreeEnabled));
 			}
 		}
 
@@ -187,18 +212,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 				m_OccupancyState = value;
 
+				Logger.LogSetTo(eSeverity.Informational, "Occupied", m_OccupancyState);
+
 				HandleOccupiedChanged(m_OccupancyState);
 
 				OnOccupiedChanged.Raise(this, new GenericEventArgs<eOccupancyState>(m_OccupancyState));
 			}
-		}
-
-		/// <summary>
-		/// Override to handle the room becoming occupied or vacated.
-		/// </summary>
-		/// <param name="occupancyState"></param>
-		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
-		{
 		}
 
 		#endregion
@@ -230,11 +249,44 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public abstract void Wake();
 
+		#endregion
+
+		#region Private Methods
+
+		/// <summary>
+		/// Called when an originator is added to/removed from the room.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void OriginatorsOnChildrenChanged(object sender, EventArgs args)
+		{
+			base.OriginatorsOnChildrenChanged(sender, args);
+
+			SubscribeOccupancyControls();
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractCommercialRoom()
+		{
+			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
+			m_OccupancyControlsSection = new SafeCriticalSection();
+		}
+
 		/// <summary>
 		/// Returns true if a source is actively routed to a display or we are in a conference.
 		/// </summary>
 		/// <returns></returns>
 		protected abstract bool GetIsInActiveMeeting();
+
+		/// <summary>
+		/// Override to handle the room becoming occupied or vacated.
+		/// </summary>
+		/// <param name="occupancyState"></param>
+		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
+		{
+		}
 
 		/// <summary>
 		/// Updates the current volume context.
@@ -263,31 +315,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				VolumeContext |= eVolumePointContext.Vtc;
 			else
 				VolumeContext &= eVolumePointContext.Vtc;
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		/// <summary>
-		/// Called when an originator is added to/removed from the room.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void OriginatorsOnChildrenChanged(object sender, EventArgs args)
-		{
-			base.OriginatorsOnChildrenChanged(sender, args);
-
-			SubscribeOccupancyControls();
-		}
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractCommercialRoom()
-		{
-			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
-			m_OccupancyControlsSection = new SafeCriticalSection();
 		}
 
 		#endregion
@@ -376,6 +403,52 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			Wake();
 
 			return null;
+		}
+
+		#endregion
+
+		#region TouchFree Callbacks
+
+		/// <summary>
+		/// Subscribe to the TouchFree events.
+		/// </summary>
+		/// <param name="touchFree"></param>
+		private void Subscribe(TouchFree touchFree)
+		{
+			if (touchFree == null)
+				return;
+
+			touchFree.OnEnabledChanged += TouchFreeOnEnabledChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the TouchFree events.
+		/// </summary>
+		/// <param name="touchFree"></param>
+		private void Unsubscribe(TouchFree touchFree)
+		{
+			if (touchFree == null)
+				return;
+
+			touchFree.OnEnabledChanged -= TouchFreeOnEnabledChanged;
+		}
+
+		/// <summary>
+		/// Called when the TouchFree becomes enabled/disabled.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="boolEventArgs"></param>
+		protected virtual void TouchFreeOnEnabledChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			UpdateTouchFreeEnabled();
+		}
+
+		/// <summary>
+		/// Updates the TouchFreeEnabled property.
+		/// </summary>
+		private void UpdateTouchFreeEnabled()
+		{
+			TouchFreeEnabled = TouchFree != null && TouchFree.Enabled;
 		}
 
 		#endregion
