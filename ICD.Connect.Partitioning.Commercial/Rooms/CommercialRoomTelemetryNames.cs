@@ -2,6 +2,12 @@
 {
 	public static class CommercialRoomTelemetryNames
 	{
+		// Awake
+		public const string IS_AWAKE = "IsAwake";
+		public const string IS_AWAKE_CHANGED = "IsAwakeChanged";
+		public const string SLEEP_COMMAND = "SleepCommand";
+
+		// Seat Count
 		public const string SEAT_COUNT = "SeatCount";
 
 		// Occupied
