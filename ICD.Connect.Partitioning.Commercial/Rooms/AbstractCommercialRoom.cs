@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ICD.Common.Logging.Activities;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -232,12 +231,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (inAudioCall)
 				VolumeContext |= eVolumePointContext.Atc;
 			else
-				VolumeContext &= eVolumePointContext.Atc;
+				VolumeContext &= ~eVolumePointContext.Atc;
 
 			if (inVideoCall)
 				VolumeContext |= eVolumePointContext.Vtc;
 			else
-				VolumeContext &= eVolumePointContext.Vtc;
+				VolumeContext &= ~eVolumePointContext.Vtc;
 		}
 
 		#endregion
