@@ -309,12 +309,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (inAudioCall)
 				VolumeContext |= eVolumePointContext.Atc;
 			else
-				VolumeContext &= eVolumePointContext.Atc;
+				VolumeContext &= ~eVolumePointContext.Atc;
 
 			if (inVideoCall)
 				VolumeContext |= eVolumePointContext.Vtc;
 			else
-				VolumeContext &= eVolumePointContext.Vtc;
+				VolumeContext &= ~eVolumePointContext.Vtc;
 		}
 
 		#endregion
