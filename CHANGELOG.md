@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.1.1] - 2020-08-11
 ### Changed
  - Fixed a bug where Volume control would disable when in a conference call and hide after meeting was ended. 
 
