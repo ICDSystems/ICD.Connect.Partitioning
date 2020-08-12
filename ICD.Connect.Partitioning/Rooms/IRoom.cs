@@ -179,7 +179,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out IDeviceControl control)
+		public static bool TryGetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
+		                                 out IDeviceControl control)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -309,9 +310,9 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("extends");
 
 			return extends.GetRoomsRecursive()
-						  .Where(room => room.ContainsControl(controlInfo))
-						  .Select(r => r.GetControl(controlInfo))
-						  .TryFirst(out control);
+			              .Where(room => room.ContainsControl(controlInfo))
+			              .Select(r => r.GetControl(controlInfo))
+			              .TryFirst(out control);
 		}
 
 		/// <summary>
@@ -320,7 +321,8 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		[PublicAPI]
-		public static bool TryGetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out T control)
+		public static bool TryGetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
+		                                             out T control)
 			where T : IDeviceControl
 		{
 			if (extends == null)
@@ -519,5 +521,26 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		#endregion
+
+		#region CriicalDevices
+
+		public static IEnumerable<IDevice> GetOfflineCriticalDevicesRecursive([NotNull] this IRoom extends)
+		{
+			return GetCriticalDevicesRecursive(extends).Where(device => !device.IsOnline);
+		}
+
+		[NotNull]
+		public static IEnumerable<IDevice> GetCriticalDevicesRecursive([NotNull] this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.Originators
+				.GetInstancesRecursive<IDevice>()
+				.Where(device => device.RoomCritical);
+		}
+
+		#endregion CriticalDevices
+
 	}
 }
