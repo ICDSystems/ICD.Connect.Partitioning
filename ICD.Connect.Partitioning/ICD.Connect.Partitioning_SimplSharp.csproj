@@ -127,6 +127,7 @@
     <Compile Include="Rooms\RoomOriginatorIdCollection.cs" />
     <Compile Include="Rooms\Room.cs" />
     <Compile Include="Rooms\RoomSettings.cs" />
+    <Compile Include="Rooms\RoomTelemetryNames.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

@@ -16,26 +16,31 @@ namespace ICD.Connect.Partitioning.Rooms
 	public sealed class RoomExternalTelemetryProvider : AbstractExternalTelemetryProvider<IRoom>
 	{
 		[PublicAPI("DAV-PRO")]
-		[EventTelemetry("OnOriginatorIdsChanged")]
+		[EventTelemetry(RoomTelemetryNames.ORIGINATOR_IDS_CHANGED)]
 		public event EventHandler OnOriginatorIdsChanged;
 
 		[PublicAPI("DAV-PRO")]
-		[EventTelemetry("VolumePercentChanged")]
+		[EventTelemetry(RoomTelemetryNames.VOLUME_PERCENT_CHANGED)]
 		public event EventHandler<FloatEventArgs> OnVolumePercentChanged;
+
+		[EventTelemetry(RoomTelemetryNames.MUTED_CHANGED)]
+		public event EventHandler<BoolEventArgs> OnMutedChanged; 
 
 		private readonly IcdHashSet<Guid> m_OriginatorIds;
 		private readonly SafeCriticalSection m_OriginatorIdsSection;
 		private readonly VolumePointHelper m_VolumePointHelper;
+
 		private float m_VolumePercent;
+		private bool m_Muted;
 
 		#region Properties
 
 		[PublicAPI("DAV-PRO")]
-		[PropertyTelemetry("OriginatorIds", null, "OnOriginatorIdsChanged")]
+		[PropertyTelemetry(RoomTelemetryNames.ORIGINATOR_IDS, null, RoomTelemetryNames.ORIGINATOR_IDS_CHANGED)]
 		public IEnumerable<Guid> OriginatorIds { get { return m_OriginatorIdsSection.Execute(() => m_OriginatorIds.ToArray()); } }
 
 		[PublicAPI("DAV-PRO")]
-		[PropertyTelemetry("VolumePercent", null, "VolumePercentChanged")]
+		[PropertyTelemetry(RoomTelemetryNames.VOLUME_PERCENT, null, RoomTelemetryNames.VOLUME_PERCENT_CHANGED)]
 		public float VolumePercent
 		{
 			get { return m_VolumePercent; }
@@ -47,6 +52,21 @@ namespace ICD.Connect.Partitioning.Rooms
 				m_VolumePercent = value;
 
 				OnVolumePercentChanged.Raise(this, new FloatEventArgs(m_VolumePercent));
+			}
+		}
+
+		[PropertyTelemetry(RoomTelemetryNames.MUTED, null, RoomTelemetryNames.MUTED_CHANGED)]
+		public bool Muted
+		{
+			get { return m_Muted; }
+			private set
+			{
+				if (value == m_Muted)
+					return;
+
+				m_Muted = value;
+
+				OnMutedChanged.Raise(this, new BoolEventArgs(m_Muted));
 			}
 		}
 
@@ -62,6 +82,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_VolumePointHelper = new VolumePointHelper();
 
 			m_VolumePointHelper.OnVolumeControlVolumeChanged += VolumePointHelperOnVolumeControlVolumeChanged;
+			m_VolumePointHelper.OnVolumeControlIsMutedChanged += VolumePointHelperOnVolumeControlIsMutedChanged;
 		}
 
 		#region Methods
@@ -120,6 +141,16 @@ namespace ICD.Connect.Partitioning.Rooms
 		private void VolumePointHelperOnVolumeControlVolumeChanged(object sender, FloatEventArgs floatEventArgs)
 		{
 			VolumePercent = m_VolumePointHelper.GetVolumePercent();
+		}
+
+		/// <summary>
+		/// Called when the current room mute state changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="boolEventArgs"></param>
+		private void VolumePointHelperOnVolumeControlIsMutedChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			Muted = m_VolumePointHelper.IsMuted;
 		}
 
 		/// <summary>

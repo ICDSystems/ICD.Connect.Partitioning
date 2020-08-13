@@ -38,6 +38,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the room wakes or goes to sleep.
 		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.IS_AWAKE_CHANGED)]
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
@@ -85,6 +86,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the awake state.
 		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.IS_AWAKE, null, CommercialRoomTelemetryNames.IS_AWAKE_CHANGED)]
 		bool IsAwake { get; }
 
 		/// <summary>
@@ -100,6 +102,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Shuts down the room.
 		/// </summary>
+		[MethodTelemetry(CommercialRoomTelemetryNames.SLEEP_COMMAND)]
 		void Sleep();
 
 		/// <summary>
