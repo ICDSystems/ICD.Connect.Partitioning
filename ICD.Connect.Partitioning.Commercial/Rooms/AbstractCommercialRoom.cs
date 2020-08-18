@@ -542,11 +542,21 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			// Add the dialing endpoints to the conference manager
 			foreach (IConferencePoint conferencePoint in Originators.GetInstancesRecursive<IConferencePoint>())
-				m_ConferenceManager.Dialers.RegisterDialingProvider(conferencePoint);
+			{
+				if (conferencePoint.Control == null)
+					Logger.Log(eSeverity.Error, "Failed to register conference point with no control - {0}", conferencePoint);
+				else
+					m_ConferenceManager.Dialers.RegisterDialingProvider(conferencePoint);
+			}
 
 			// Add the volume points to the conference manager
 			foreach (IVolumePoint volumePoint in Originators.GetInstancesRecursive<IVolumePoint>())
-				m_ConferenceManager.VolumePoints.RegisterVolumePoint(volumePoint);
+			{
+				if (volumePoint.Control == null)
+					Logger.Log(eSeverity.Error, "Failed to register volume point with no control - {0}", volumePoint);
+				else
+					m_ConferenceManager.VolumePoints.RegisterVolumePoint(volumePoint);
+			}
 		}
 
 		/// <summary>

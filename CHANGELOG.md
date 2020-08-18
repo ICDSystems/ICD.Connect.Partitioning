@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Logging when a room is unable to register conference and volume points with the conference manager
+
 ## [15.2.0] - 2020-08-13
 ### Added
  - Added telemetry for room IsAwake features
