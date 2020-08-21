@@ -15,6 +15,7 @@ using ICD.Common.Utils.Services.Scheduler;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
+using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
@@ -36,6 +37,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Raised when the conference manager changes.
 		/// </summary>
 		public event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
+
+		/// <summary>
+		/// Raised when the calendar manager changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<ICalendarManager>> OnCalendarManagerChanged;
 
 		/// <summary>
 		/// Raised when the wake schedule changes.
@@ -65,6 +71,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
 		private readonly SafeCriticalSection m_OccupancyControlsSection;
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
+		[CanBeNull] private ICalendarManager m_CalendarManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
 		[CanBeNull] private TouchFree m_TouchFree;
 
@@ -172,6 +179,24 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				UpdateInCall();
 
 				OnConferenceManagerChanged.Raise(this, new GenericEventArgs<IConferenceManager>(m_ConferenceManager));
+			}
+		}
+
+		/// <summary>
+		/// Gets the calendar manager
+		/// </summary>
+		[CanBeNull]
+		public ICalendarManager CalendarManager
+		{
+			get { return m_CalendarManager; }
+			protected set
+			{
+				if (value == m_CalendarManager)
+					return;
+
+				m_CalendarManager = value;
+
+				OnCalendarManagerChanged.Raise(this, new GenericEventArgs<ICalendarManager>(m_CalendarManager));
 			}
 		}
 
@@ -591,6 +616,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			// Dialing plan
 			SetDialingPlan(settings.DialingPlan);
 
+			// Calendars
+			RegisterCalendarPoints();
+
 			// Generate occupancy points
 			GenerateOccupancyPoints(factory);
 		}
@@ -613,6 +641,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			if (m_ConferenceManager != null)
 				m_ConferenceManager.Clear();
+
+			if (m_CalendarManager != null)
+				m_CalendarManager.Clear();
 		}
 
 		/// <summary>
@@ -640,6 +671,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			settings.ConferencePoints.AddRange(GetSerializableChildren<IConferencePoint>());
 			settings.CalendarPoints.AddRange(GetSerializableChildren<ICalendarPoint>());
 			settings.OccupancyPoints.AddRange(GetSerializableChildren<IOccupancyPoint>());
+		}
+
+		/// <summary>
+		/// Registers the calendar points with the calendar manager.
+		/// </summary>
+		private void RegisterCalendarPoints()
+		{
+			if (m_CalendarManager == null)
+				throw new InvalidOperationException("Room has no calendar manager");
+
+			// Add the calendar endpoints to the calendar manager
+			foreach (ICalendarPoint calendarPoint in Originators.GetInstancesRecursive<ICalendarPoint>())
+				m_CalendarManager.RegisterCalendarProvider(calendarPoint);
 		}
 
 		/// <summary>

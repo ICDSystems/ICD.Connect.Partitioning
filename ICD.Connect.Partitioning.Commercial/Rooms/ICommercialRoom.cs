@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
@@ -19,6 +20,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Raised when the conference manager changes.
 		/// </summary>
 		event EventHandler<GenericEventArgs<IConferenceManager>> OnConferenceManagerChanged;
+
+		/// <summary>
+		/// Raised when the calendar manager changes.
+		/// </summary>
+		event EventHandler<GenericEventArgs<ICalendarManager>> OnCalendarManagerChanged;
 
 		/// <summary>
 		/// Raised when the wake schedule changes.
@@ -82,6 +88,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		IConferenceManager ConferenceManager { get; }
+
+		/// <summary>
+		/// Gets the calendar manager
+		/// </summary>
+		[CanBeNull]
+		ICalendarManager CalendarManager { get; }
 
 		/// <summary>
 		/// Gets the awake state.
