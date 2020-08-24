@@ -1,5 +1,5 @@
 ﻿using ICD.Common.Properties;
-using ICD.Connect.Devices.SPlusShims;
+using ICD.Connect.Devices.CrestronSPlus.SPlusShims;
 using ICD.Connect.Partitioning.CrestronSPlus.Devices;
 
 namespace ICD.Connect.Partitioning.CrestronSPlus.Shims

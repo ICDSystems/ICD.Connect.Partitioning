@@ -2,14 +2,14 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
-using ICD.Connect.Devices.Simpl;
+using ICD.Connect.Devices.CrestronSPlus.Devices.SPlus;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Devices;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Partitioning.CrestronSPlus.Devices
 {
-	public sealed class SPlusPartitionSensorDevice : AbstractSimplDevice<SPlusPartitionSensorDeviceSettings>, IPartitionDevice
+	public sealed class SPlusPartitionSensorDevice : AbstractSPlusDevice<SPlusPartitionSensorDeviceSettings>, IPartitionDevice
 	{
 		public event EventHandler<BoolEventArgs> OnOpenStatusChanged;
 
