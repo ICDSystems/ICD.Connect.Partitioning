@@ -64,8 +64,8 @@ namespace ICD.Connect.Partitioning.Rooms
 
 				Logger.LogSetTo(eSeverity.Informational, "CombineState", m_CombineState);
 				Activities.LogActivity(m_CombineState
-					                   ? new Activity(Activity.ePriority.High, "Combined", "Combined", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Low, "Combined", "Uncombined", eSeverity.Informational));
+					                   ? new Activity(Activity.ePriority.Medium, "Combined", "Combined", eSeverity.Informational)
+					                   : new Activity(Activity.ePriority.Lowest, "Combined", "Uncombined", eSeverity.Informational));
 
 				HandleCombineState();
 
