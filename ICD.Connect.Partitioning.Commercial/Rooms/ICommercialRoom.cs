@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Calendaring.CalendarManagers;
-using ICD.Connect.Calendaring.CalendarPoints;
-using ICD.Connect.Calendaring.Controls;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Partitioning.Rooms;
@@ -123,25 +119,5 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		void Wake();
 
 		#endregion
-	}
-
-	public static class CommercialRoomExtensions
-	{
-		/// <summary>
-		/// Gets the calendar controls from the calendar points.
-		/// </summary>
-		/// <param name="commercialRoom"></param>
-		/// <returns></returns>
-		[NotNull]
-		public static IEnumerable<ICalendarControl> GetCalendarControls([NotNull] this ICommercialRoom commercialRoom)
-		{
-			if (commercialRoom == null)
-				throw new ArgumentNullException("commercialRoom");
-
-			return commercialRoom.Originators
-								 .GetInstancesRecursive<ICalendarPoint>()
-								 .Select(p => p.Control)
-								 .Where(c => c != null);
-		}
 	}
 }

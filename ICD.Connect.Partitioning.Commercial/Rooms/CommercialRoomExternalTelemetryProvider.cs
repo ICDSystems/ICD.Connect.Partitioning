@@ -5,7 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
-using ICD.Connect.Calendaring.Controls;
+using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.DialContexts;
@@ -45,9 +45,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[EventTelemetry(CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
 		public event EventHandler OnBookingsChanged;
 
-
 		private readonly List<Booking> m_Bookings;
-		private readonly List<ICalendarControl> m_CalendarControls;
+		private ICalendarManager m_CalendarManager;
 
 		private IConferenceManager m_ConferenceManager;
 		private Guid m_ActiveConferenceDevice;
@@ -181,17 +180,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
-		/// Gets/sets the wrapped calendar controls.
+		/// Gets/sets the wrapped calendar manager.
 		/// </summary>
-		public IEnumerable<ICalendarControl> CalendarControls
+		public ICalendarManager CalendarManager
 		{
-			get { return m_CalendarControls.ToArray(); }
+			get { return m_CalendarManager; }
 			private set
 			{
-				UnsubscribeCalendarControls(m_CalendarControls);
-				m_CalendarControls.Clear();
-				m_CalendarControls.AddRange(value);
-				SubscribeCalendarControls(m_CalendarControls);
+				if (value == m_CalendarManager)
+					return;
+
+				Unsubscribe(m_CalendarManager);
+				m_CalendarManager = value;
+				Subscribe(m_CalendarManager);
 
 				UpdateBookings();
 			}
@@ -205,7 +206,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public CommercialRoomExternalTelemetryProvider()
 		{
 			m_Bookings = new List<Booking>();
-			m_CalendarControls = new List<ICalendarControl>();
 		}
 
 		#region Methods
@@ -219,7 +219,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.SetParent(parent);
 
 			UpdateConferenceManager();
-			UpdateCalendarControls();
+			UpdateCalendarManager();
 		}
 
 		/// <summary>
@@ -238,22 +238,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#region Private Methods
 
 		/// <summary>
-		/// Updates the wrapped calendar controls.
-		/// </summary>
-		private void UpdateCalendarControls()
-		{
-			CalendarControls =
-				Parent == null
-					? Enumerable.Empty<ICalendarControl>()
-					: Parent.GetCalendarControls();
-		}
-
-		/// <summary>
 		/// Updates the wrapped conference manager.
 		/// </summary>
 		private void UpdateConferenceManager()
 		{
 			ConferenceManager = Parent == null ? null : Parent.ConferenceManager;
+		}
+
+		/// <summary>
+		/// Updates the wrapped calendar manager.
+		/// </summary>
+		private void UpdateCalendarManager()
+		{
+			CalendarManager = Parent == null ? null : Parent.CalendarManager;
 		}
 
 		/// <summary>
@@ -282,7 +279,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		private void UpdateBookings()
 		{
-			Bookings = m_CalendarControls.SelectMany(c => c.GetBookings()).Select(b => Booking.Copy(b));
+			Bookings =
+				m_CalendarManager == null
+					? Enumerable.Empty<Booking>()
+					: m_CalendarManager.GetBookings().Select(b => Booking.Copy(b));
 		}
 
 		/// <summary>
@@ -310,6 +310,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			parent.OnConferenceManagerChanged += ParentOnConferenceManagerChanged;
+			parent.OnCalendarManagerChanged += ParentOnCalendarManagerChanged;
 		}
 
 		/// <summary>
@@ -324,6 +325,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			parent.OnConferenceManagerChanged -= ParentOnConferenceManagerChanged;
+			parent.OnCalendarManagerChanged -= ParentOnCalendarManagerChanged;
 		}
 
 		/// <summary>
@@ -334,6 +336,16 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void ParentOnConferenceManagerChanged(object sender, GenericEventArgs<IConferenceManager> genericEventArgs)
 		{
 			UpdateConferenceManager();
+		}
+
+		/// <summary>
+		/// Called when the calendar manager changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="genericEventArgs"></param>
+		private void ParentOnCalendarManagerChanged(object sender, GenericEventArgs<ICalendarManager> genericEventArgs)
+		{
+			UpdateCalendarManager();
 		}
 
 		#endregion
@@ -388,52 +400,38 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#endregion
 
-		#region Calendar Control Callbacks
+		#region Calendar Manager Callbacks
 
 		/// <summary>
-		/// Subscribe to the calendar control events.
+		/// Subscribe to the calendar manager events.
 		/// </summary>
-		/// <param name="calendarControls"></param>
-		private void SubscribeCalendarControls(IEnumerable<ICalendarControl> calendarControls)
+		/// <param name="calendarManager"></param>
+		private void Subscribe(ICalendarManager calendarManager)
 		{
-			foreach (ICalendarControl control in calendarControls)
-				Subscribe(control);
+			if (calendarManager == null)
+				return;
+
+			calendarManager.OnBookingsChanged += CalendarManagerOnBookingsChanged;
 		}
 
 		/// <summary>
-		/// Unsubscribe from the calendar control events.
+		/// Unsubscribe from the calendar manager events.
 		/// </summary>
-		/// <param name="calendarControls"></param>
-		private void UnsubscribeCalendarControls(IEnumerable<ICalendarControl> calendarControls)
+		/// <param name="calendarManager"></param>
+		private void Unsubscribe(ICalendarManager calendarManager)
 		{
-			foreach (ICalendarControl control in calendarControls)
-				Unsubscribe(control);
+			if (calendarManager == null)
+				return;
+
+			calendarManager.OnBookingsChanged -= CalendarManagerOnBookingsChanged;
 		}
 
 		/// <summary>
-		/// Subscribe to the calendar control events.
-		/// </summary>
-		/// <param name="calendarControl"></param>
-		private void Subscribe(ICalendarControl calendarControl)
-		{
-			calendarControl.OnBookingsChanged += CalendarControlOnBookingsChanged;
-		}
-
-		/// <summary>
-		/// Unsubscribe from the calendar control events.
-		/// </summary>
-		/// <param name="calendarControl"></param>
-		private void Unsubscribe(ICalendarControl calendarControl)
-		{
-			calendarControl.OnBookingsChanged -= CalendarControlOnBookingsChanged;
-		}
-
-		/// <summary>
-		/// Called when the control bookings change.
+		/// Called when the calendar bookings change.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		private void CalendarControlOnBookingsChanged(object sender, EventArgs e)
+		private void CalendarManagerOnBookingsChanged(object sender, EventArgs e)
 		{
 			UpdateBookings();
 		}
