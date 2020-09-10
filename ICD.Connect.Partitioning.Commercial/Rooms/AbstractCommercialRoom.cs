@@ -194,7 +194,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				if (value == m_CalendarManager)
 					return;
 
+				Unsubscribe(m_CalendarManager);
 				m_CalendarManager = value;
+				Subscribe(m_CalendarManager);
 
 				OnCalendarManagerChanged.Raise(this, new GenericEventArgs<ICalendarManager>(m_CalendarManager));
 			}
@@ -522,6 +524,43 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			eInCall inCall = ConferenceManager == null ? eInCall.None : ConferenceManager.Dialers.IsInCall;
 			Activities.LogActivity(CommercialRoomActivities.GetCallActivity(inCall));
+		}
+
+		#endregion
+
+		#region CalendarManager Callbacks
+
+		/// <summary>
+		/// Subscribe to the calendar manager events.
+		/// </summary>
+		/// <param name="calendarManager"></param>
+		protected virtual void Subscribe(ICalendarManager calendarManager)
+		{
+			if (calendarManager == null)
+				return;
+
+			calendarManager.OnBookingsChanged += CalendarManagerOnBookingsChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the calendar manager events.
+		/// </summary>
+		/// <param name="calendarManager"></param>
+		protected virtual void Unsubscribe(ICalendarManager calendarManager)
+		{
+			if (calendarManager == null)
+				return;
+
+			calendarManager.OnBookingsChanged -= CalendarManagerOnBookingsChanged;
+		}
+
+		/// <summary>
+		/// Called when the calendar bookings change.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		protected virtual void CalendarManagerOnBookingsChanged(object sender, EventArgs eventArgs)
+		{
 		}
 
 		#endregion

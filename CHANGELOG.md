@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added CrestronSPlus Project
  - Added SPlusPartitionSensorDevice
  - Added CalendarManager property to ICommercialRoom
+ - Added CalendarManager Callbacks to AbstractCommercialRoom.
 
 ## [15.2.1] - 2020-08-24
 ### Changed
