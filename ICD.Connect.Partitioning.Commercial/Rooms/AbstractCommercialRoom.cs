@@ -168,15 +168,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
-		/// <summary>
-		/// Override to handle the room becoming occupied or vacated.
-		/// </summary>
-		/// <param name="occupancyState"></param>
-		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
-		{
-		}
-
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractCommercialRoom()
+		{
+			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
+			m_OccupancyControlsSection = new SafeCriticalSection();
+
+			// Initialize activities
+			UpdateInCall();
+		}
 
 		/// <summary>
 		/// Release resources.
@@ -203,6 +207,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Wakes up the room.
 		/// </summary>
 		public abstract void Wake();
+
+		#endregion
+
+		#region Private Methods
 
 		/// <summary>
 		/// Returns true if a source is actively routed to a display or we are in a conference.
@@ -239,10 +247,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				VolumeContext &= ~eVolumePointContext.Vtc;
 		}
 
-		#endregion
-
-		#region Private Methods
-
 		/// <summary>
 		/// Called when an originator is added to/removed from the room.
 		/// </summary>
@@ -256,12 +260,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
-		/// Constructor.
+		/// Override to handle the room becoming occupied or vacated.
 		/// </summary>
-		protected AbstractCommercialRoom()
+		/// <param name="occupancyState"></param>
+		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
 		{
-			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
-			m_OccupancyControlsSection = new SafeCriticalSection();
 		}
 
 		#endregion

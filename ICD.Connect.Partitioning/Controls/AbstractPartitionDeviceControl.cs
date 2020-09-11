@@ -39,17 +39,23 @@ namespace ICD.Connect.Partitioning.Controls
 			get { return m_IsOpen; }
 			protected set
 			{
-				if (value == m_IsOpen)
-					return;
+				try
+				{
+					if (value == m_IsOpen)
+						return;
 
-				m_IsOpen = value;
+					m_IsOpen = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "IsOpen", m_IsOpen);
-				Activities.LogActivity(m_IsOpen
-					                   ? new Activity(Activity.ePriority.Medium, "Is Open", "Open", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Medium, "Is Open", "Closed", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "IsOpen", m_IsOpen);
 
-				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
+					OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
+				}
+				finally
+				{
+					Activities.LogActivity(m_IsOpen
+						                       ? new Activity(Activity.ePriority.Medium, "Is Open", "Open", eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Medium, "Is Open", "Closed", eSeverity.Informational));
+				}
 			}
 		}
 
@@ -63,6 +69,8 @@ namespace ICD.Connect.Partitioning.Controls
 		protected AbstractPartitionDeviceControl(TParent parent, int id)
 			: base(parent, id)
 		{
+			// Initialize activities
+			IsOpen = false;
 		}
 
 		/// <summary>
@@ -74,6 +82,8 @@ namespace ICD.Connect.Partitioning.Controls
 		protected AbstractPartitionDeviceControl(TParent parent, int id, Guid uuid)
 			: base(parent, id, uuid)
 		{
+			// Initialize activities
+			IsOpen = false;
 		}
 
 		/// <summary>

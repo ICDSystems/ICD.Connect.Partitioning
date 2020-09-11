@@ -57,19 +57,25 @@ namespace ICD.Connect.Partitioning.Rooms
 			get { return m_CombineState; }
 			private set
 			{
-				if (value == m_CombineState)
-					return;
+				try
+				{
+					if (value == m_CombineState)
+						return;
 
-				m_CombineState = value;
+					m_CombineState = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "CombineState", m_CombineState);
-				Activities.LogActivity(m_CombineState
-					                   ? new Activity(Activity.ePriority.Medium, "Combined", "Combined", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Lowest, "Combined", "Uncombined", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "CombineState", m_CombineState);
 
-				HandleCombineState();
+					HandleCombineState();
 
-				OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
+					OnCombineStateChanged.Raise(this, new BoolEventArgs(m_CombineState));
+				}
+				finally
+				{
+					Activities.LogActivity(m_CombineState
+						                       ? new Activity(Activity.ePriority.Medium, "Combined", "Combined", eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Lowest, "Combined", "Uncombined", eSeverity.Informational));
+				}
 			}
 		}
 
@@ -111,6 +117,9 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
 			m_OriginatorIds.OnChildrenChanged += OriginatorsOnChildrenChanged;
+
+			// Initialize activities
+			CombineState = false;
 		}
 
 		/// <summary>
