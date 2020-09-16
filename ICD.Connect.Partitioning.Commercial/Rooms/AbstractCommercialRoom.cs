@@ -234,10 +234,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			get { return m_OccupancyState; }
 			private set
 			{
-				if(value == m_OccupancyState)
+				if (value == m_OccupancyState)
 					return;
 
 				m_OccupancyState = value;
+				OccupiedTime = IcdEnvironment.GetUtcTime();
 
 				Logger.LogSetTo(eSeverity.Informational, "Occupied", m_OccupancyState);
 
@@ -246,6 +247,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				OnOccupiedChanged.Raise(this, new GenericEventArgs<eOccupancyState>(m_OccupancyState));
 			}
 		}
+
+		/// <summary>
+		/// Gets the time, in UTC, that the occupancy state last changed.
+		/// </summary>
+		public DateTime OccupiedTime { get; private set; }
 
 		#endregion
 
