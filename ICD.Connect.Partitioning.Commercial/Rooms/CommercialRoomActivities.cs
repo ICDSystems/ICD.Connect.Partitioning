@@ -17,11 +17,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			switch (inCall)
 			{
 				case eInCall.None:
-					return new Activity(Activity.ePriority.Lowest, "In Call", "Not In Call", eSeverity.Informational);
+					return new Activity(Activity.ePriority.Lowest - 1, "In Call", "Not In Call", eSeverity.Informational);
 				case eInCall.Audio:
-					return new Activity(Activity.ePriority.Medium, "In Call", "Audio Call", eSeverity.Informational);
+					return new Activity(Activity.ePriority.High, "In Call", "Audio Call", eSeverity.Informational);
 				case eInCall.Video:
-					return new Activity(Activity.ePriority.Medium, "In Call", "Video Call", eSeverity.Informational);
+					return new Activity(Activity.ePriority.High, "In Call", "Video Call", eSeverity.Informational);
 				default:
 					throw new ArgumentOutOfRangeException("inCall");
 			}

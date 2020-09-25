@@ -248,12 +248,24 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
+		#endregion
+
 		/// <summary>
 		/// Gets the time, in UTC, that the occupancy state last changed.
 		/// </summary>
 		public DateTime OccupiedTime { get; private set; }
 
-		#endregion
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractCommercialRoom()
+		{
+			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
+			m_OccupancyControlsSection = new SafeCriticalSection();
+
+			// Initialize activities
+			UpdateInCall();
+		}
 
 		/// <summary>
 		/// Release resources.
@@ -296,15 +308,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.OriginatorsOnChildrenChanged(sender, args);
 
 			SubscribeOccupancyControls();
-		}
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractCommercialRoom()
-		{
-			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
-			m_OccupancyControlsSection = new SafeCriticalSection();
 		}
 
 		/// <summary>

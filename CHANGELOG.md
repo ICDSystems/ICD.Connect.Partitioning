@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added CalendarManager property to ICommercialRoom
  - Added CalendarManager Callbacks to AbstractCommercialRoom.
 
+## [15.2.2] - 2020-09-24
+### Changed
+ - Fixed room activity priorities
+ - Fixed a bug where default room activities were not being initialized
+
 ## [15.2.1] - 2020-08-24
 ### Changed
  - Logging when a room is unable to register conference and volume points with the conference manager

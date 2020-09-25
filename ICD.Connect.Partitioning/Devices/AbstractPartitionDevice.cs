@@ -41,21 +41,36 @@ namespace ICD.Connect.Partitioning.Devices
 			get { return m_IsOpen; }
 			protected set
 			{
-				if (value == m_IsOpen)
-					return;
+				try
+				{
+					if (value == m_IsOpen)
+						return;
 
-				m_IsOpen = value;
+					m_IsOpen = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "IsOpen", m_IsOpen);
-				Activities.LogActivity(m_IsOpen
-					                   ? new Activity(Activity.ePriority.Medium, "Is Open", "Open", eSeverity.Informational)
-					                   : new Activity(Activity.ePriority.Medium, "Is Open", "Closed", eSeverity.Informational));
+					Logger.LogSetTo(eSeverity.Informational, "IsOpen", m_IsOpen);
 
-				OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
+					OnOpenStatusChanged.Raise(this, new BoolEventArgs(m_IsOpen));
+				}
+				finally
+				{
+					Activities.LogActivity(m_IsOpen
+										   ? new Activity(Activity.ePriority.Medium, "Is Open", "Open", eSeverity.Informational)
+										   : new Activity(Activity.ePriority.Medium, "Is Open", "Closed", eSeverity.Informational));
+				}
 			}
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractPartitionDevice()
+		{
+			// Initialize activities
+			IsOpen = false;
+		}
 
 		/// <summary>
 		/// Release resources.
