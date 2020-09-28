@@ -133,14 +133,21 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			get { return m_IsAwake; }
 			protected set
 			{
-				if (value == m_IsAwake)
-					return;
+				try
+				{
+					if (value == m_IsAwake)
+						return;
 
-				m_IsAwake = value;
+					m_IsAwake = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "IsAwake", m_IsAwake);
+					Logger.LogSetTo(eSeverity.Informational, "IsAwake", m_IsAwake);
 
-				OnIsAwakeStateChanged.Raise(this, new BoolEventArgs(m_IsAwake));
+					OnIsAwakeStateChanged.Raise(this, new BoolEventArgs(m_IsAwake));
+				}
+				finally
+				{
+					Activities.LogActivity(CommercialRoomActivities.GetAwakeActivity(m_IsAwake));
+				}
 			}
 		}
 
@@ -179,6 +186,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			m_OccupancyControlsSection = new SafeCriticalSection();
 
 			// Initialize activities
+			IsAwake = false;
 			UpdateInCall();
 		}
 

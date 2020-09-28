@@ -17,7 +17,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			switch (inCall)
 			{
 				case eInCall.None:
-					return new Activity(Activity.ePriority.Lowest - 1, "In Call", "Not In Call", eSeverity.Informational);
+					return new Activity(Activity.ePriority.Lowest, "In Call", "Not In Call", eSeverity.Informational);
 				case eInCall.Audio:
 					return new Activity(Activity.ePriority.High, "In Call", "Audio Call", eSeverity.Informational);
 				case eInCall.Video:
@@ -25,6 +25,18 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				default:
 					throw new ArgumentOutOfRangeException("inCall");
 			}
+		}
+
+		/// <summary>
+		/// Gets the room IsAwake activity for the given awake state.
+		/// </summary>
+		/// <param name="isAwake"></param>
+		/// <returns></returns>
+		public static Activity GetAwakeActivity(bool isAwake)
+		{
+			return isAwake
+				       ? new Activity(Activity.ePriority.Lowest - 1, "Is Awake", "Idle", eSeverity.Informational)
+				       : new Activity(Activity.ePriority.Medium, "Is Awake", "Standby", eSeverity.Informational);
 		}
 	}
 }
