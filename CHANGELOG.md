@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added CalendarManager property to ICommercialRoom
  - Added CalendarManager Callbacks to AbstractCommercialRoom.
 
+## [15.3.0] - 2020-09-28
+### Added
+ - Added room activity for awake/idle state
+
 ## [15.2.2] - 2020-09-24
 ### Changed
  - Fixed room activity priorities
