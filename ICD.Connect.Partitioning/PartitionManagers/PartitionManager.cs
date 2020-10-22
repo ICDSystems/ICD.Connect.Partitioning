@@ -632,7 +632,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="eventArgs"></param>
-		private void PartitionsOnChildrenChanged(object sender, EventArgs eventArgs)
+		private void PartitionsOnCollectionChanged(object sender, EventArgs eventArgs)
 		{
 			SubscribePartitions();
 		}
@@ -723,7 +723,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 		protected override void ApplySettingsFinal(PartitionManagerSettings settings, IDeviceFactory factory)
 		{
-			m_Partitions.OnChildrenChanged -= PartitionsOnChildrenChanged;
+			m_Partitions.OnCollectionChanged -= PartitionsOnCollectionChanged;
 
 			base.ApplySettingsFinal(settings, factory);
 
@@ -736,7 +736,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			SubscribePartitions();
 
-			m_Partitions.OnChildrenChanged += PartitionsOnChildrenChanged;
+			m_Partitions.OnCollectionChanged += PartitionsOnCollectionChanged;
 		}
 
 		private IEnumerable<ICell> GetCells(PartitionManagerSettings settings, IDeviceFactory factory)

@@ -116,7 +116,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		protected AbstractRoom()
 		{
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
-			m_OriginatorIds.OnChildrenChanged += OriginatorsOnChildrenChanged;
+			m_OriginatorIds.OnCollectionChanged += OriginatorsOnCollectionChanged;
 
 			// Initialize activities
 			CombineState = false;
@@ -171,7 +171,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		protected virtual void OriginatorsOnChildrenChanged(object sender, EventArgs args)
+		protected virtual void OriginatorsOnCollectionChanged(object sender, EventArgs args)
 		{
 		}
 

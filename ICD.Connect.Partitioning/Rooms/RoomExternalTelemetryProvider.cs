@@ -179,7 +179,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (parent == null)
 				return;
 
-			parent.Originators.OnChildrenChanged += OriginatorsOnChildrenChanged;
+			parent.Originators.OnCollectionChanged += OriginatorsOnCollectionChanged;
 			parent.OnVolumeContextChanged += ParentOnVolumeContextChanged;
 		}
 
@@ -194,7 +194,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (parent == null)
 				return;
 
-			parent.Originators.OnChildrenChanged -= OriginatorsOnChildrenChanged;
+			parent.Originators.OnCollectionChanged -= OriginatorsOnCollectionChanged;
 			parent.OnVolumeContextChanged -= ParentOnVolumeContextChanged;
 		}
 
@@ -203,7 +203,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void OriginatorsOnChildrenChanged(object sender, EventArgs args)
+		private void OriginatorsOnCollectionChanged(object sender, EventArgs args)
 		{
 			UpdateOriginatorIds();
 		}

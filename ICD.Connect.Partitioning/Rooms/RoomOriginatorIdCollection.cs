@@ -10,12 +10,12 @@ using ICD.Connect.Settings.Originators;
 
 namespace ICD.Connect.Partitioning.Rooms
 {
-	public sealed class RoomOriginatorIdCollection
+	public sealed class RoomOriginatorIdCollection : INotifyCollectionChanged
 	{
 		/// <summary>
-		/// Raised when items are added/removed to/from the collection.
+		/// Raised when the contents of the collection change, or the order changes.
 		/// </summary>
-		public event EventHandler OnChildrenChanged;
+		public event EventHandler OnCollectionChanged;
 
 		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
 		private readonly Dictionary<Type, List<IOriginator>> m_TypeToChildrenCache;
@@ -109,7 +109,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 
 			if (change)
-				OnChildrenChanged.Raise(this);
+				OnCollectionChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -122,7 +122,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			bool output = AddInternal(id, combine);
 			if (output)
-				OnChildrenChanged.Raise(this);
+				OnCollectionChanged.Raise(this);
 
 			return output;
 		}
@@ -151,7 +151,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 			
 			if (change)
-				OnChildrenChanged.Raise(this);
+				OnCollectionChanged.Raise(this);
 		}
 
 		/// <summary>
@@ -197,7 +197,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		{
 			bool output = RemoveInternal(id);
 			if (output)
-				OnChildrenChanged.Raise(this);
+				OnCollectionChanged.Raise(this);
 
 			return output;
 		}
@@ -226,7 +226,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			}
 
 			if (output)
-				OnChildrenChanged.Raise(this);
+				OnCollectionChanged.Raise(this);
 		}
 
 		/// <summary>
