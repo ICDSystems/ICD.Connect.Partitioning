@@ -30,5 +30,9 @@
 		// Bookings
 		public const string BOOKINGS = "Bookings";
 		public const string BOOKINGS_CHANGED = "BookingsChanged";
+
+		// RoomType
+		public const string ROOM_TYPE = "RoomType";
+		public const string ROOM_TYPE_CHANGED = "RoomTypeChanged";
 	}
 }

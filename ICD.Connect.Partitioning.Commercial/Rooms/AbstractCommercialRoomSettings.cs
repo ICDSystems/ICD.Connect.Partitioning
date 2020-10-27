@@ -22,9 +22,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private const string WAKE_SCHEDULE_ELEMENT = "WakeSchedule";
 		private const string DIALING_PLAN_ELEMENT = "DialingPlan";
 		private const string TOUCH_FREE_ELEMENT = "TouchFree";
+		private const string OPERATIONAL_HOURS_ELEMENT = "OperationalHours";
+		private const string ROOM_TYPE_ELEMENT = "RoomType";
 
 		private readonly WakeSchedule m_WakeScheduleSettings;
 		private readonly TouchFreeSettings m_TouchFreeSettings;
+		private readonly OperationalHoursSettings m_OperationalHoursSettings;
 		private readonly Dictionary<int, eCombineMode> m_ConferencePoints;
 		private readonly Dictionary<int, eCombineMode> m_CalendarPoints;
 		private readonly Dictionary<int, eCombineMode> m_OccupancyPoints;
@@ -38,6 +41,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public WakeSchedule WakeSchedule { get { return m_WakeScheduleSettings; } }
 		[HiddenSettingsProperty]
 		public TouchFreeSettings TouchFree { get { return m_TouchFreeSettings; } }
+		[HiddenSettingsProperty]
+		public OperationalHoursSettings OperationalHours {get { return m_OperationalHoursSettings; }}
 
 		[UsedImplicitly]
 		public bool WeekdayEnableWake
@@ -123,6 +128,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[HiddenSettingsProperty]
 		public int SeatCount { get; set; }
 
+		/// <summary>
+		/// Gets/sets the room type.
+		/// </summary>
+		public string RoomType { get; set; }
+
 		#endregion
 
 		/// <summary>
@@ -132,6 +142,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			m_WakeScheduleSettings = new WakeSchedule();
 			m_TouchFreeSettings = new TouchFreeSettings();
+			m_OperationalHoursSettings = new OperationalHoursSettings();
 
 			m_ConferencePoints = new Dictionary<int, eCombineMode>();
 			m_CalendarPoints = new Dictionary<int, eCombineMode>();
@@ -151,10 +162,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			WriteChildrenToXml(writer, m_OccupancyPoints, OCCUPANCY_POINTS_ELEMENT, OCCUPANCY_POINT_ELEMENT);
 
 			writer.WriteElementString(SEAT_COUNT_ELEMENT, IcdXmlConvert.ToString(SeatCount));
+			writer.WriteElementString(ROOM_TYPE_ELEMENT, RoomType);
 			writer.WriteElementString(DIALING_PLAN_ELEMENT, DialingPlan);
 
 			m_WakeScheduleSettings.WriteElements(writer, WAKE_SCHEDULE_ELEMENT);
 			m_TouchFreeSettings.WriteElements(writer, TOUCH_FREE_ELEMENT);
+			m_OperationalHoursSettings.WriteElements(writer, OPERATIONAL_HOURS_ELEMENT);
 		}
 
 		/// <summary>
@@ -173,8 +186,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (XmlUtils.TryGetChildElementAsString(xml, TOUCH_FREE_ELEMENT, out touchFreeXml))
 				m_TouchFreeSettings.ParseXml(touchFreeXml);
 
+			string operationalHoursXml;
+			if (XmlUtils.TryGetChildElementAsString(xml, OPERATIONAL_HOURS_ELEMENT, out operationalHoursXml))
+				m_OperationalHoursSettings.ParseXml(operationalHoursXml);
+
 			DialingPlan = XmlUtils.TryReadChildElementContentAsString(xml, DIALING_PLAN_ELEMENT);
 			SeatCount = XmlUtils.TryReadChildElementContentAsInt(xml, SEAT_COUNT_ELEMENT) ?? 0;
+			RoomType = XmlUtils.TryReadChildElementContentAsString(xml, ROOM_TYPE_ELEMENT);
 
 			IEnumerable<KeyValuePair<int, eCombineMode>> conferencePoints = ReadListFromXml(xml, CONFERENCE_POINTS_ELEMENT, CONFERENCE_POINT_ELEMENT);
 			IEnumerable<KeyValuePair<int, eCombineMode>> calendarPoints = ReadListFromXml(xml, CALENDAR_POINTS_ELEMENT, CALENDAR_POINT_ELEMENT);

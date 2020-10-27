@@ -66,7 +66,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the room becomed occupied or vacated.
 		/// </summary>
-		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged; 
+		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
+
+		public event EventHandler<StringEventArgs> OnRoomTypeChanged;
 
 		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
 		private readonly SafeCriticalSection m_OccupancyControlsSection;
@@ -78,6 +80,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private eOccupancyState m_OccupancyState;
 		private bool m_IsAwake;
 		private bool m_TouchFreeEnabled;
+		private string m_RoomType;
+		private readonly OperationalHours m_OperationalHours;
 
 		#region Properties
 
@@ -90,6 +94,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
+		/// Gets the Operational Hours of the Room
+		/// </summary>
+		public OperationalHours OperationalHours { get { return m_OperationalHours; } }
+
+		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
 		/// </summary>
 		public virtual string DialingPlan { get; private set; }
@@ -97,7 +106,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
-		[CanBeNull]
 		public WakeSchedule WakeSchedule
 		{
 			get { return m_WakeSchedule; }
@@ -123,7 +131,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the Touch Free Settings.
 		/// </summary>
-		[CanBeNull]
 		public TouchFree TouchFree
 		{
 			get { return m_TouchFree; }
@@ -162,7 +169,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the conference manager.
 		/// </summary>
-		[CanBeNull]
 		public IConferenceManager ConferenceManager
 		{
 			get { return m_ConferenceManager; }
@@ -185,7 +191,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the calendar manager
 		/// </summary>
-		[CanBeNull]
 		public ICalendarManager CalendarManager
 		{
 			get { return m_CalendarManager; }
@@ -234,6 +239,24 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public int SeatCount { get; private set; }
 
 		/// <summary>
+		/// Gets the type of room (eg: Huddle, Presentation, etc)
+		/// This can be varying values for different implementations/customers
+		/// </summary>
+		public string RoomType
+		{
+			get { return m_RoomType; }
+			protected set
+			{
+				if (value == m_RoomType)
+					return;
+
+				m_RoomType = value;
+
+				OnRoomTypeChanged.Raise(this, m_RoomType);
+			}
+		}
+
+		/// <summary>
 		/// Gets the current occupancy state for the room.
 		/// </summary>
 		public eOccupancyState Occupied
@@ -269,6 +292,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
 			m_OccupancyControlsSection = new SafeCriticalSection();
+			m_OperationalHours = new OperationalHours();
 
 			// Initialize activities
 			IsAwake = false;
@@ -665,6 +689,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			if (m_TouchFree != null)
 				m_TouchFree.ApplySettings(settings.TouchFree, factory);
 
+			OperationalHours.ApplySettings(settings.OperationalHours);
+
 			AddOriginatorsSkipExceptions<IConferencePoint>(settings.ConferencePoints, factory);
 			AddOriginatorsSkipExceptions<ICalendarPoint>(settings.CalendarPoints, factory);
 			AddOriginatorsSkipExceptions<IOccupancyPoint>(settings.OccupancyPoints, factory);
@@ -689,6 +715,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			SeatCount = 0;
 			DialingPlan = null;
 
+			OperationalHours.ClearSettings();
+
 			if (m_WakeSchedule != null)
 				m_WakeSchedule.Clear();
 
@@ -711,6 +739,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.CopySettingsFinal(settings);
 
 			settings.SeatCount = SeatCount;
+
+			OperationalHours.CopySettings(settings.OperationalHours);
 
 			if (m_WakeSchedule != null)
 				settings.WakeSchedule.Copy(m_WakeSchedule);

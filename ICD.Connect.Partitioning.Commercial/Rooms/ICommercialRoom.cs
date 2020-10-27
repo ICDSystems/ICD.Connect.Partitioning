@@ -49,6 +49,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[EventTelemetry(CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
 		event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
 
+		/// <summary>
+		/// Raised when the room type changes.
+		/// </summary>
+		event EventHandler<StringEventArgs> OnRoomTypeChanged;
+
 		#region Properties
 
 		/// <summary>
@@ -73,6 +78,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Returns true if TouchFree is not null and enabled.
 		/// </summary>
 		bool TouchFreeEnabled { get; }
+
+		/// <summary>
+		/// Gets the Operational Hours of the Room
+		/// </summary>
+		[NotNull]
+		[NodeTelemetry("OperationalHours")]
+		OperationalHours OperationalHours { get; }
 
 		/// <summary>
 		/// Gets the path to the loaded dialing plan xml file. Used by fusion :(
@@ -102,6 +114,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[PropertyTelemetry(CommercialRoomTelemetryNames.SEAT_COUNT, null, null)]
 		int SeatCount { get; }
+
+		/// <summary>
+		/// Gets the type of room (eg: Huddle, Presentation, etc)
+		/// This can be varying values for different implementations/customers
+		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.ROOM_TYPE, null, CommercialRoomTelemetryNames.ROOM_TYPE_CHANGED)]
+		string RoomType { get; }
 
 		#endregion
 

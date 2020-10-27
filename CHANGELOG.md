@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added SPlusPartitionSensorDevice
  - Added CalendarManager property to ICommercialRoom
  - Added CalendarManager Callbacks to AbstractCommercialRoom.
+ - Added RoomType property to ICommercialRoom and AbstractCommercialRoom
+ - Added OperationalHours to ICommercialRoom and AbstractCommercialRoom
 
 ## [15.3.0] - 2020-09-28
 ### Added

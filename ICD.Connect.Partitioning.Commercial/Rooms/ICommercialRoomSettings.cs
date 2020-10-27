@@ -31,6 +31,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		TouchFreeSettings TouchFree{ get; }
 
 		/// <summary>
+		/// Gets the operational hours settings.
+		/// </summary>
+		OperationalHoursSettings OperationalHours { get; }
+
+		/// <summary>
 		/// Gets/sets the dialing plan path.
 		/// </summary>
 		string DialingPlan { get; set; }
@@ -39,5 +44,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Gets/sets the seat count.
 		/// </summary>
 		int SeatCount { get; set; }
+
+		/// <summary>
+		/// Gets/sets the room type.
+		/// </summary>
+		string RoomType { get; set; }
 	}
 }
