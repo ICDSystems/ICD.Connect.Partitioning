@@ -147,7 +147,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="row"></param>
 		/// <param name="direction"></param>
 		/// <returns></returns>
-		public static IPartition GetPartition(this IPartitionManager extends, int column, int row, eCellDirection direction)
+		public static IPartition GetPartition([NotNull] this IPartitionManager extends, int column, int row, eCellDirection direction)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -165,7 +165,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			return extends.Partitions.FirstOrDefault(p => p.CellA == cell && p.CellB == neighborCell || p.CellA == neighborCell && p.CellB == cell);
 		}
 
-		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartition partition, bool open)
+		public static void SetPartition<TRoom>([NotNull] this IPartitionManager extends, [NotNull] IPartition partition, bool open)
 			where TRoom : IRoom, new()
 		{
 			if (extends == null)
@@ -180,7 +180,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				extends.UncombineRooms(partition, () => ReflectionUtils.CreateInstance<TRoom>());
 		}
 
-		public static void SetPartition<TRoom>(this IPartitionManager extends, IPartitionDeviceControl partitionControl, bool open)
+		public static void SetPartition<TRoom>([NotNull] this IPartitionManager extends, [NotNull] IPartitionDeviceControl partitionControl, bool open)
 			where TRoom : IRoom, new()
 		{
 			if (extends == null)
