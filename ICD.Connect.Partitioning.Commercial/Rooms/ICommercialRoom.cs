@@ -52,6 +52,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Raised when the room type changes.
 		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.ROOM_TYPE_CHANGED)]
 		event EventHandler<StringEventArgs> OnRoomTypeChanged;
 
 		#region Properties
