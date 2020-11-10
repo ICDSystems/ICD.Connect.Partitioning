@@ -70,7 +70,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			{
 				int id = partition.Id;
 				string controls = StringUtils.ArrayFormat(partition.GetPartitionControlInfos().Order());
-				string rooms = StringUtils.ArrayFormat(partition.GetRooms().Order());
+				string rooms = StringUtils.ArrayFormat(partition.GetRooms().OrderBy(r => r.Id));
 
 				builder.AddRow(id, partition, controls, rooms);
 			}
