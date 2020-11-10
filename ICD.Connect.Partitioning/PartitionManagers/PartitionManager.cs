@@ -175,17 +175,12 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <returns></returns>
 		public override IEnumerable<IRoom> GetTopLevelRooms()
 		{
-			IRoom[] rooms = GetRooms().OrderByDescending(r => r.Originators.GetInstances<IPartition>().Count()).ToArray();
+			IEnumerable<IRoom> rooms = GetRooms().OrderByDescending(r => r.IsCombineRoom());
 			IcdHashSet<IRoom> visited = new IcdHashSet<IRoom>();
 
-			foreach (IRoom room in rooms)
+			foreach (IRoom room in rooms.Where(room => !visited.Contains(room)))
 			{
-				if (visited.Contains(room))
-					continue;
-
-				visited.Add(room);
 				visited.AddRange(room.GetRoomsRecursive());
-
 				yield return room;
 			}
 		}
@@ -348,7 +343,8 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 		/// <param name="closedPartitions"></param>
 		/// <param name="constructor"></param>
 		/// <param name="update"></param>
-		private void CombineRooms<TRoom>(IEnumerable<IPartition> openPartitions, IEnumerable<IPartition> closedPartitions, Func<TRoom> constructor, bool update)
+		private void CombineRooms<TRoom>(IEnumerable<IPartition> openPartitions, IEnumerable<IPartition> closedPartitions,
+										 Func<TRoom> constructor, bool update)
 			where TRoom : IRoom
 		{
 			if (openPartitions == null)
@@ -374,12 +370,11 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				foreach (IRoom room in GetAdjacentCombineRooms(partition))
 					openPartitionsUpdateSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>().Except(closedPartitionsUpdateSet));
 			}
+
 			// Add the partitions from any existing combine rooms that have a partition closing
 			foreach (IRoom room in GetCombineRooms(closedPartitionsUpdateSet))
-			{
-					openPartitionsUpdateSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>().Except(closedPartitionsUpdateSet));
-			}
-			
+				openPartitionsUpdateSet.AddRange(room.Originators.GetInstancesRecursive<IPartition>().Except(closedPartitionsUpdateSet));
+
 			// Destroy all current combine rooms that exist with the accumulated sets of partitions
 			IEnumerable<IRoom> combineRooms = GetCombineRooms(closedPartitionsUpdateSet.Concat(openPartitionsUpdateSet));
 			DestroyCombineRooms(combineRooms);
