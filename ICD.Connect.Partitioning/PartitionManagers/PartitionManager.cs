@@ -385,7 +385,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 			DestroyCombineRooms(combineRooms);
 
 			// Find the sequence of contiguous partitions in the open set and (re)build combine rooms
-			IEnumerable<IEnumerable<IPartition>> groups = GetContiguous(openPartitionsUpdateSet).Select(g => g.ToArray()).ToArray();
+			IEnumerable<IcdHashSet<IPartition>> groups = GetContiguous(openPartitionsUpdateSet).Select(g => g.ToIcdHashSet()).ToArray();
 			CreateCombineRooms(groups, constructor);
 
 			if (!update)
@@ -464,7 +464,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				room.Dispose();
 		}
 
-		private void CreateCombineRooms<TRoom>(IEnumerable<IEnumerable<IPartition>> groups, Func<TRoom> constructor)
+		private void CreateCombineRooms<TRoom>(IEnumerable<IcdHashSet<IPartition>> groups, Func<TRoom> constructor)
 			where TRoom : IRoom
 		{
 			if (groups == null)
@@ -475,10 +475,9 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 
 			List<IRoom> rooms = new List<IRoom>();
 
-			foreach (IEnumerable<IPartition> group in groups)
+			foreach (IcdHashSet<IPartition> group in groups)
 			{
-				IcdHashSet<IPartition> partitionsSet = group.ToIcdHashSet();
-				if (partitionsSet.Count == 0)
+				if (group.Count == 0)
 					continue;
 
 				// Build the room.
