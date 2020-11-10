@@ -20,7 +20,7 @@ namespace ICD.Connect.Partitioning.CrestronSPlus.Devices
 		/// I.e. if we can set the open state of the partition, and if the partition
 		/// gives us feedback for the current open state.
 		/// </summary>
-		public ePartitionFeedback SupportsFeedback { get { return ePartitionFeedback.Get; } }
+		public ePartitionFeedback SupportsFeedback { get { return ePartitionFeedback.GetSet; } }
 
 		/// <summary>
 		/// Returns the current open state of the partition.
@@ -43,7 +43,7 @@ namespace ICD.Connect.Partitioning.CrestronSPlus.Devices
 		/// </summary>
 		public void Open()
 		{
-			throw new NotSupportedException();
+			IsOpen = true;
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace ICD.Connect.Partitioning.CrestronSPlus.Devices
 		/// </summary>
 		public void Close()
 		{
-			throw new NotSupportedException();
+			IsOpen = false;
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace ICD.Connect.Partitioning.CrestronSPlus.Devices
 		/// </summary>
 		public void Toggle()
 		{
-			throw new NotSupportedException();
+			IsOpen = !IsOpen;
 		}
 
 		/// <summary>
