@@ -137,11 +137,11 @@ namespace ICD.Connect.Partitioning.Partitions
 			try
 			{
 				// Get the two rooms either side of the partition
-				IcdHashSet<int> adjacentRooms = partition.GetRooms().ToIcdHashSet();
+				IcdHashSet<IRoom> adjacentRooms = partition.GetRooms().ToIcdHashSet();
 
 				// Get all of the two rooms partitions that only divide the two rooms
-				return adjacentRooms.SelectMany(r => m_RoomAdjacentPartitions[r])
-				                    .Where(p => p.GetRooms().All(r => adjacentRooms.Contains(r)));
+				return adjacentRooms.SelectMany(r => m_RoomAdjacentPartitions[r.Id])
+				                    .Where(p => p.GetRooms().All(adjacentRooms.Contains));
 			}
 			finally
 			{
@@ -184,11 +184,11 @@ namespace ICD.Connect.Partitioning.Partitions
 				foreach (IPartition child in children)
 				{
 					// Build room adjacency lookup
-					foreach (int room in child.GetRooms())
+					foreach (IRoom room in child.GetRooms())
 					{
-						if (!m_RoomAdjacentPartitions.ContainsKey(room))
-							m_RoomAdjacentPartitions.Add(room, new IcdHashSet<IPartition>());
-						m_RoomAdjacentPartitions[room].Add(child);
+						if (!m_RoomAdjacentPartitions.ContainsKey(room.Id))
+							m_RoomAdjacentPartitions.Add(room.Id, new IcdHashSet<IPartition>());
+						m_RoomAdjacentPartitions[room.Id].Add(child);
 					}
 
 					// Build control to partition lookup

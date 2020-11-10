@@ -457,12 +457,10 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (!extends.IsCombineRoom())
 				return Enumerable.Empty<IRoom>();
 
-			IEnumerable<int> ids = extends.Originators
-			                              .GetInstances<IPartition>()
-			                              .SelectMany(p => p.GetRooms())
-			                              .Distinct();
-
-			return extends.Core.Originators.GetChildren<IRoom>(ids);
+			return extends.Originators
+			              .GetInstances<IPartition>()
+			              .SelectMany(p => p.GetRooms())
+			              .Distinct();
 		}
 
 		/// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Connect.Partitioning.Cells;
 using ICD.Connect.Partitioning.Controls;
 using ICD.Connect.Partitioning.Rooms;
@@ -42,7 +43,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Returns the rooms that are added as adjacent to this partition.
 		/// </summary>
 		/// <returns></returns>
-		public static IEnumerable<int> GetRooms(this IPartition extends)
+		public static IEnumerable<IRoom> GetRooms([NotNull] this IPartition extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -51,10 +52,22 @@ namespace ICD.Connect.Partitioning.Partitions
 			IRoom roomB = extends.CellB == null ? null : extends.CellB.Room;
 
 			if (roomA != null)
-				yield return roomA.Id;
+				yield return roomA;
 
 			if (roomB != null)
-				yield return roomB.Id;
+				yield return roomB;
+		}
+
+		/// <summary>
+		/// Returns the room ids that are added as adjacent to this partition.
+		/// </summary>
+		/// <returns></returns>
+		public static IEnumerable<int> GetRoomIds([NotNull] this IPartition extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetRooms().Select(r => r.Id);
 		}
 
 		/// <summary>
@@ -63,7 +76,7 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// <param name="extends"></param>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public static bool IsAdjacent(this IPartition extends, IPartition other)
+		public static bool IsAdjacent([NotNull] this IPartition extends, [NotNull] IPartition other)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
@@ -78,6 +91,23 @@ namespace ICD.Connect.Partitioning.Partitions
 		/// Returns true if the given room has been added as adjacent to this partition.
 		/// </summary>
 		/// <param name="extends"></param>
+		/// <param name="room"></param>
+		/// <returns></returns>
+		public static bool ContainsRoom([NotNull] this IPartition extends, [NotNull] IRoom room)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (room == null)
+				throw new ArgumentNullException("room");
+
+			return extends.GetRooms().Contains(room);
+		}
+
+		/// <summary>
+		/// Returns true if the given room has been added as adjacent to this partition.
+		/// </summary>
+		/// <param name="extends"></param>
 		/// <param name="roomId"></param>
 		/// <returns></returns>
 		public static bool ContainsRoom(this IPartition extends, int roomId)
@@ -85,7 +115,7 @@ namespace ICD.Connect.Partitioning.Partitions
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.GetRooms().Contains(roomId);
+			return extends.GetRoomIds().Contains(roomId);
 		}
 	}
 }
