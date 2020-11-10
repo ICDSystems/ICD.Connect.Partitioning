@@ -8,12 +8,9 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
-using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Partitioning.Extensions;
 using ICD.Connect.Partitioning.PartitionManagers;
 using ICD.Connect.Partitioning.Partitions;
-using ICD.Connect.Routing.Connections;
-using ICD.Connect.Routing.Endpoints.Destinations;
 using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.Attributes;
 
@@ -45,7 +42,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// <summary>
 		/// Returns the priority order for combining rooms. Lower is better.
 		/// </summary>
-		int CombinePriority { get; set; }
+		int CombinePriority { get; }
 
 		/// <summary>
 		/// Gets the originators that are contained within this room.
@@ -84,26 +81,11 @@ namespace ICD.Connect.Partitioning.Rooms
 		#region Controls
 
 		/// <summary>
-		/// Returns true if the room contains the given control.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="controlInfo"></param>
-		/// <returns></returns>
-		public static bool ContainsControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.Originators.Contains(controlInfo.DeviceId);
-		}
-
-		/// <summary>
 		/// Returns the first available control of the given type.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		[CanBeNull]
-		[PublicAPI]
 		public static T GetControl<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
@@ -114,54 +96,10 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
-		/// Gets the control matching the given control info.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="controlInfo"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		[NotNull]
-		public static IDeviceControl GetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			IDeviceControl output;
-			if (extends.TryGetControl(controlInfo, out output))
-				return output;
-
-			string message = string.Format("{0} does not contain an {1} with id {2}", extends, typeof(IDeviceBase),
-			                               controlInfo.DeviceId);
-			throw new KeyNotFoundException(message);
-		}
-
-		/// <summary>
-		/// Gets the control matching the given control info.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="controlInfo"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		[NotNull]
-		public static T GetControl<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
-			where T : IDeviceControl
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			IDeviceControl control = extends.GetControl(controlInfo);
-			if (control is T)
-				return (T)control;
-
-			throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
-		}
-
-		/// <summary>
 		/// Returns the controls of the given type.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		[PublicAPI]
 		public static IEnumerable<T> GetControls<T>([NotNull] this IRoom extends)
 			where T : class, IDeviceControl
 		{
@@ -169,117 +107,6 @@ namespace ICD.Connect.Partitioning.Rooms
 				throw new ArgumentNullException("extends");
 
 			return extends.Originators.GetInstances<IDevice>().SelectMany(o => o.Controls.GetControls<T>());
-		}
-
-		/// <summary>
-		/// Gets the control matching the given control info.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="controlInfo"></param>
-		/// <param name="control"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static bool TryGetControl([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
-		                                 out IDeviceControl control)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			control = null;
-			if (!extends.ContainsControl(controlInfo))
-				return false;
-
-			control = extends.Core.GetControl(controlInfo);
-			return true;
-		}
-
-		/// <summary>
-		/// Gets the control matching the given control info.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="controlInfo"></param>
-		/// <param name="control"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static bool TryGetControl<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo, out T control)
-			where T : class, IDeviceControl
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			control = null;
-
-			IDeviceControl output;
-			bool found = extends.TryGetControl(controlInfo, out output);
-			if (!found)
-				return false;
-
-			control = output as T;
-			if (control == null)
-				throw new InvalidOperationException(string.Format("{0} is not of type {1}", output, typeof(T).Name));
-
-			return true;
-		}
-
-		#endregion
-
-		#region Control Recursion
-
-		/// <summary>
-		/// Returns the first available control of the given type.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[CanBeNull]
-		[PublicAPI]
-		public static T GetControlRecursive<T>([NotNull] this IRoom extends)
-			where T : class, IDeviceControl
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.GetControlsRecursive<T>().FirstOrDefault();
-		}
-
-		/// <summary>
-		/// Returns the control matching the given type and control info recursively, as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
-		[PublicAPI]
-		[NotNull]
-		public static IDeviceControl GetControlRecursive([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			IDeviceControl output;
-			if (extends.TryGetControlRecursive(controlInfo, out output))
-				return output;
-
-			string message = string.Format("{0} does not recursively contain an {1} with id {2}", extends, typeof(IDeviceBase),
-			                               controlInfo.DeviceId);
-			throw new KeyNotFoundException(message);
-		}
-
-		/// <summary>
-		/// Returns the control matching the given type and control info recursively, as defined by partitions.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[PublicAPI]
-		[NotNull]
-		public static T GetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo)
-			where T : class, IDeviceControl
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			IDeviceControl control = extends.GetControlRecursive(controlInfo);
-			T cast = control as T;
-			if (cast != null)
-				return cast;
-
-			throw new InvalidOperationException(string.Format("{0} is not of type {1}", control, typeof(T).Name));
 		}
 
 		/// <summary>
@@ -296,50 +123,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.GetRoomsRecursive()
 			              .SelectMany(r => r.GetControls<T>())
 			              .Distinct();
-		}
-
-		/// <summary>
-		/// Returns the control matching the given type and control info recursively, as defined by partitions.
-		/// </summary>
-		/// <returns></returns>
-		[PublicAPI]
-		public static bool TryGetControlRecursive([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
-		                                          out IDeviceControl control)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.GetRoomsRecursive()
-			              .Where(room => room.ContainsControl(controlInfo))
-			              .Select(r => r.GetControl(controlInfo))
-			              .TryFirst(out control);
-		}
-
-		/// <summary>
-		/// Returns the control matching the given type and control info recursively, as defined by partitions.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[PublicAPI]
-		public static bool TryGetControlRecursive<T>([NotNull] this IRoom extends, DeviceControlInfo controlInfo,
-		                                             out T control)
-			where T : IDeviceControl
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			control = default(T);
-
-			IDeviceControl output;
-			bool found = extends.TryGetControlRecursive(controlInfo, out output);
-			if (!found)
-				return false;
-
-			if (!(output is T))
-				throw new InvalidOperationException(string.Format("{0} is not of type {1}", output, typeof(T).Name));
-
-			control = (T)output;
-			return true;
 		}
 
 		#endregion
@@ -414,19 +197,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
-		/// Returns all child rooms except the master room.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		public static IEnumerable<IRoom> GetSlaveRooms([NotNull] this IRoom extends)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.GetMasterAndSlaveRooms().Skip(1);
-		}
-
-		/// <summary>
 		/// Returns all distinct child rooms recursively, prepended by the master room.
 		/// </summary>
 		/// <param name="extends"></param>
@@ -436,11 +206,7 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return extends.GetRoomsRecursive()
-			              .Except(extends)
-			              .Distinct()
-			              .OrderBy(r => r.CombinePriority)
-			              .ThenBy(r => r.Id);
+			return extends.GetRoomsRecursive().Except(extends);
 		}
 
 		/// <summary>
@@ -448,7 +214,6 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		[PublicAPI]
 		public static IEnumerable<IRoom> GetRooms([NotNull] this IRoom extends)
 		{
 			if (extends == null)
@@ -460,7 +225,9 @@ namespace ICD.Connect.Partitioning.Rooms
 			return extends.Originators
 			              .GetInstances<IPartition>()
 			              .SelectMany(p => p.GetRooms())
-			              .Distinct();
+			              .Distinct()
+						  .OrderBy(r => r.CombinePriority)
+						  .ThenBy(r => r.Id);
 		}
 
 		/// <summary>
@@ -468,33 +235,14 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		[PublicAPI]
 		public static IEnumerable<IRoom> GetRoomsRecursive([NotNull] this IRoom extends)
 		{
 			if (extends == null)
 				throw new ArgumentNullException("extends");
 
-			return RecursionUtils.BreadthFirstSearch(extends, r => r.GetRooms());
-		}
-
-		#endregion
-
-		#region Destinations
-
-		/// <summary>
-		/// Returns true if the room has a destination with the given connection type.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="type"></param>
-		/// <returns></returns>
-		public static bool HasDestinationOfType([NotNull] this IRoom extends, eConnectionType type)
-		{
-			if (extends == null)
-				throw new ArgumentNullException("extends");
-
-			return extends.Originators
-			              .GetInstancesRecursive<IDestination>()
-			              .Any(d => d.ConnectionType.HasFlags(type));
+			return RecursionUtils.BreadthFirstSearch(extends, r => r.GetRooms())
+			                     .OrderBy(r => r.CombinePriority)
+			                     .ThenBy(r => r.Id);
 		}
 
 		#endregion
