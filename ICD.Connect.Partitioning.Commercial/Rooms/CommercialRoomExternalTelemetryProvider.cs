@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
@@ -45,7 +46,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[EventTelemetry(CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
 		public event EventHandler OnBookingsChanged;
 
-		private readonly List<Booking> m_Bookings;
+		private BookingRange m_Bookings;
 		private ICalendarManager m_CalendarManager;
 
 		private IConferenceManager m_ConferenceManager;
@@ -147,13 +148,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[PublicAPI("DAV-PRO - Room Bookings")]
 		[PropertyTelemetry(CommercialRoomTelemetryNames.BOOKINGS, null, CommercialRoomTelemetryNames.BOOKINGS_CHANGED)]
-		public IEnumerable<Booking> Bookings
+		public BookingRange Bookings
 		{
-			get { return m_Bookings.ToArray(); }
+			get { return m_Bookings; }
 			private set
 			{
-				m_Bookings.Clear();
-				m_Bookings.AddRange(value);
+				if (value == m_Bookings)
+					return;
+
+				m_Bookings = value;
 
 				OnBookingsChanged.Raise(this);
 			}
@@ -199,14 +202,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public CommercialRoomExternalTelemetryProvider()
-		{
-			m_Bookings = new List<Booking>();
-		}
 
 		#region Methods
 
@@ -279,10 +274,23 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		private void UpdateBookings()
 		{
-			Bookings =
+			DateTime now = IcdEnvironment.GetLocalTime();
+			DateTime from = now.StartOfDay().ToUniversalTime();
+			DateTime to = now.EndOfDay().ToUniversalTime();
+
+			IEnumerable<Booking> bookings =
 				m_CalendarManager == null
 					? Enumerable.Empty<Booking>()
-					: m_CalendarManager.GetBookings().Select(b => Booking.Copy(b));
+					: m_CalendarManager.GetBookings()
+					                   .Where(b => b.StartTime >= from && b.EndTime <= to)
+					                   .Select(b => Booking.Copy(b));
+			
+			Bookings = new BookingRange
+			{
+				From = from,
+				To = to,
+				Bookings = bookings
+			};
 		}
 
 		/// <summary>
