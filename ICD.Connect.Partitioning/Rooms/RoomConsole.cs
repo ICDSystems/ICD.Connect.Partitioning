@@ -62,14 +62,6 @@ namespace ICD.Connect.Partitioning.Rooms
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-#if DEBUG
-			yield return
-				new GenericConsoleCommand<int>("SetCombinePriority", "SetCombinePriority <PRIORITY>",
-				                               i => instance.CombinePriority = i);
-#else
-			yield break;
-#endif
-
 			yield return new ConsoleCommand("ListChildRooms", "Lists the child rooms, and whether they are a slave or master room.", ()=> ListChildRooms(instance));
 		}
 
