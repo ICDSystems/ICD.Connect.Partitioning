@@ -197,6 +197,19 @@ namespace ICD.Connect.Partitioning.Rooms
 		}
 
 		/// <summary>
+		/// Returns all child rooms except the master room.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <returns></returns>
+		public static IEnumerable<IRoom> GetSlaveRooms([NotNull] this IRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			return extends.GetMasterAndSlaveRooms().Skip(1);
+		}
+
+		/// <summary>
 		/// Returns all distinct child rooms recursively, prepended by the master room.
 		/// </summary>
 		/// <param name="extends"></param>
