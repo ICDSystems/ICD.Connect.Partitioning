@@ -9,6 +9,7 @@ using ICD.Connect.Telemetry.Providers;
 
 namespace ICD.Connect.Partitioning.Commercial
 {
+	[ExternalTelemetry("Operational Hours Telemetry", typeof(OperationalHoursExternalTelemetryProvider))]
 	public sealed class OperationalHours : ITelemetryProvider, IConsoleNode
 	{
 		#region Events
@@ -16,14 +17,12 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Raised when the start time changes
 		/// </summary>
-		[EventTelemetry(OperationalHoursTelemetryNames.START_TIME_CHANGED)]
-		public event EventHandler<GenericEventArgs<TimeSpan?>> OnStartTimeChanged;
+		public event EventHandler<GenericEventArgs<TimeSpan>> OnStartTimeChanged;
 
 		/// <summary>
 		/// Raised when the end time changes
 		/// </summary>
-		[EventTelemetry(OperationalHoursTelemetryNames.END_TIME_CHANGED)]
-		public event EventHandler<GenericEventArgs<TimeSpan?>> OnEndTimeChanged;
+		public event EventHandler<GenericEventArgs<TimeSpan>> OnEndTimeChanged;
 
 		/// <summary>
 		/// Raised when the days changes
@@ -46,7 +45,6 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// Start time for the operational hours of the room
 		/// </summary>
-		[PropertyTelemetry(OperationalHoursTelemetryNames.START_TIME, null, OperationalHoursTelemetryNames.START_TIME_CHANGED)]
 		public TimeSpan StartTime
 		{
 			get { return m_StartTime; }
@@ -64,7 +62,6 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <summary>
 		/// End time for the operational hours of the room
 		/// </summary>
-		[PropertyTelemetry(OperationalHoursTelemetryNames.END_TIME, null, OperationalHoursTelemetryNames.END_TIME_CHANGED)]
 		public TimeSpan EndTime
 		{
 			get { return m_EndTime; }

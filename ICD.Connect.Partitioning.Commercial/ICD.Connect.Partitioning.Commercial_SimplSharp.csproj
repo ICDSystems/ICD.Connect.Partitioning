@@ -86,6 +86,7 @@
     <Compile Include="OccupancyPoints\OccupancyPoint.cs" />
     <Compile Include="OccupancyPoints\OccupancyPointSettings.cs" />
     <Compile Include="OperationalHours.cs" />
+    <Compile Include="OperationalHoursExternalTelemetryProvider.cs" />
     <Compile Include="OperationalHoursSettings.cs" />
     <Compile Include="OperationalHoursTelemetryNames.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
