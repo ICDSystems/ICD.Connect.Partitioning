@@ -110,6 +110,9 @@ namespace ICD.Connect.Partitioning.Commercial
 		{
 			base.Subscribe(parent);
 
+			if (parent == null)
+				return;
+
 			parent.OnStartTimeChanged += ParentOnStartTimeChanged;
 			parent.OnEndTimeChanged += ParentOnEndTimeChanged;
 		}
@@ -121,6 +124,9 @@ namespace ICD.Connect.Partitioning.Commercial
 		protected override void Unsubscribe(OperationalHours parent)
 		{
 			base.Unsubscribe(parent);
+
+			if (parent == null)
+				return;
 
 			parent.OnStartTimeChanged -= ParentOnStartTimeChanged;
 			parent.OnEndTimeChanged -= ParentOnEndTimeChanged;

@@ -22,6 +22,7 @@ using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Conferencing.Participants;
+using ICD.Connect.Partitioning.Commercial.CallRatings;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Partitioning.Commercial.OccupancyPoints;
 using ICD.Connect.Partitioning.Rooms;
@@ -54,6 +55,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
 
 		/// <summary>
+		/// Raised when the room Call Rating Manager changes.
+		/// </summary>
+		public event EventHandler<GenericEventArgs<CallRatingManager>> OnCallRatingManagerChanged;
+
+		/// <summary>
 		/// Raised when Touch Free becomes enabled/disabled.
 		/// </summary>
 		public event EventHandler<BoolEventArgs> OnTouchFreeEnabledChanged;
@@ -64,10 +70,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
-		/// Raised when the room becomed occupied or vacated.
+		/// Raised when the room becomes occupied or vacated.
 		/// </summary>
 		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
 
+		/// <summary>
+		/// Raised when the room's type changes.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnRoomTypeChanged;
 
 		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
@@ -76,6 +85,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		[CanBeNull] private ICalendarManager m_CalendarManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
 		[CanBeNull] private TouchFree m_TouchFree;
+		[CanBeNull] private CallRatingManager m_CallRatingManager;
 
 		private eOccupancyState m_OccupancyState;
 		private bool m_IsAwake;
@@ -146,6 +156,23 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				UpdateTouchFreeEnabled();
 
 				OnTouchFreeChanged.Raise(this, new GenericEventArgs<TouchFree>(m_TouchFree));
+			}
+		}
+
+		/// <summary>
+		/// Gets the Call Rating Manager.
+		/// </summary>
+		public CallRatingManager CallRatingManager
+		{
+			get { return m_CallRatingManager; }
+			protected set
+			{
+				if (value == m_CallRatingManager)
+					return;
+
+				m_CallRatingManager = value;
+
+				OnCallRatingManagerChanged.Raise(this, m_CallRatingManager);
 			}
 		}
 

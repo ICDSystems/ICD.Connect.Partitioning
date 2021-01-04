@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Conferencing.ConferenceManagers;
+using ICD.Connect.Partitioning.Commercial.CallRatings;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Attributes;
@@ -32,9 +33,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		event EventHandler<GenericEventArgs<TouchFree>> OnTouchFreeChanged;
 
-		 /// <summary>
-		 /// Raised when Touch Free becomes enabled/disabled.
-		 /// </summary>
+		/// <summary>
+		/// Raised when the room Call Rating Manager changes.
+		/// </summary>
+		event EventHandler<GenericEventArgs<CallRatingManager>> OnCallRatingManagerChanged;
+
+		/// <summary>
+		/// Raised when Touch Free becomes enabled/disabled.
+		/// </summary>
 		event EventHandler<BoolEventArgs> OnTouchFreeEnabledChanged;
 
 		/// <summary>
@@ -44,7 +50,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
-		/// Raised when the room becomed occupied or vacated.
+		/// Raised when the room becomes occupied or vacated.
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
 		event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
@@ -74,6 +80,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		TouchFree TouchFree { get; }
+
+		/// <summary>
+		/// Gets the Call Rating Manager.
+		/// </summary>
+		[NotNull]
+		[NodeTelemetry("CallRatingManager")]
+		CallRatingManager CallRatingManager { get; }
 
 		/// <summary>
 		/// Returns true if TouchFree is not null and enabled.
