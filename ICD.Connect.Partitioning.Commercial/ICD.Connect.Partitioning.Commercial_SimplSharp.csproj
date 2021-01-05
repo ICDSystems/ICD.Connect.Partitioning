@@ -78,6 +78,8 @@
     <Compile Include="CallRatings\eCallRating.cs" />
     <Compile Include="CallRatings\ICallRatingCauseOptions.cs" />
     <Compile Include="CallRatings\XmlCallRatingCauseOptions.cs" />
+    <Compile Include="Comparers\CallRatingComparer.cs" />
+    <Compile Include="Comparers\CallRatingParticipantComparer.cs" />
     <Compile Include="Controls\Occupancy\OccupancySensorControl.cs" />
     <Compile Include="Controls\Occupancy\OccupancySensorControlActivities.cs" />
     <Compile Include="Devices\Occupancy\IOccupancySensorDevice.cs" />

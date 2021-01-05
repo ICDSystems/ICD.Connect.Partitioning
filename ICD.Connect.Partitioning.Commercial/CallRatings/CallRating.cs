@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Settings.ORM;
 
 namespace ICD.Connect.Partitioning.Commercial.CallRatings
@@ -64,6 +63,26 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 		#endregion
 
 		#region Helpers
+
+		public static IEnumerable<CallRating> GetCallRatingsInDateRange(int roomId, DateTime from, DateTime to)
+		{
+			string tableName = TypeModel.Get(typeof(CallRating)).TableName;
+
+			string sql =
+				string.Format(@"SELECT
+									* FROM {0}
+								WHERE
+									Date >= '{1:yyyy-MM-dd HH:mm:ss.FFFFFF}'
+								AND
+									Date <= '{2:YYYY-MM-dd HH:mm:ss.FFFFFF}'
+								AND
+									Rating > 0",
+				              tableName, from.ToUniversalTime(), to.ToUniversalTime());
+
+			return Persistent.Db(eDb.RoomData, roomId.ToString())
+			                 .Query<CallRating>(sql)
+			                 .ToArray();
+		}
 
 		/// <summary>
 		/// Adds the rating to the database.

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Partitioning.Commercial.Comparers;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Providers.External;
 
@@ -8,18 +11,44 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 {
 	public sealed class CallRatingManagerExternalTelemetryProvider : AbstractExternalTelemetryProvider<CallRatingManager>
 	{
+		#region Events
+
 		[EventTelemetry(CallRatingTelemetryNames.CALL_RATING_AVERAGE_CHANGED)]
-		public event EventHandler<StringEventArgs> OnCallRatingAverageChanged; 
+		public event EventHandler<FloatEventArgs> OnCallRatingAverageChanged;
 
-		private string m_CallRatingAverage;
+		[EventTelemetry(CallRatingTelemetryNames.RECENT_CALL_RATINGS_CHANGED)]
+		public event EventHandler<GenericEventArgs<IEnumerable<CallRating>>> OnRecentCallRatingsChanged;
 
-		[PropertyTelemetry(CallRatingTelemetryNames.CALL_RATING_AVERAGE, null, CallRatingTelemetryNames.CALL_RATING_AVERAGE_CHANGED)]
-		public string CallRatingAverage
+		#endregion
+
+		private float m_CallRatingAverage;
+
+		private List<CallRating> m_RecentCallRatings;
+
+		#region Properties
+
+		[PropertyTelemetry(CallRatingTelemetryNames.RECENT_CALL_RATINGS, null,
+		                   CallRatingTelemetryNames.RECENT_CALL_RATINGS_CHANGED)]
+		public IEnumerable<CallRating> RecentCallRatings
 		{
-			get { return m_CallRatingAverage; }
+			get { return m_RecentCallRatings; }
 			private set
 			{
-				if (value == m_CallRatingAverage)
+				if (value.SequenceEqual(m_RecentCallRatings, CallRatingComparer.Instance))
+					return;
+
+				m_RecentCallRatings = value.ToList();
+
+				OnRecentCallRatingsChanged.Raise(this, m_RecentCallRatings);
+			}
+		}
+
+		private float CallRatingAverage
+		{
+			get { return m_CallRatingAverage; }
+			set
+			{
+				if (Math.Abs(value - m_CallRatingAverage) < 0.01f)
 					return;
 
 				m_CallRatingAverage = value;
@@ -28,12 +57,24 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 			}
 		}
 
+		[PropertyTelemetry(CallRatingTelemetryNames.CALL_RATING_AVERAGE_STRING, null,
+		                   CallRatingTelemetryNames.CALL_RATING_AVERAGE_CHANGED)]
+		public string CallRatingAverageString { get { return CallRatingAverage.ToString("0.00"); } }
+
+		#endregion
+
+		public CallRatingManagerExternalTelemetryProvider()
+		{
+			m_RecentCallRatings = new List<CallRating>();
+		}
+
 		#region Methods
 
 		protected override void SetParent(CallRatingManager parent)
 		{
 			base.SetParent(parent);
 
+			UpdateRecentCallRatings();
 			UpdateCallRatingAverage();
 		}
 
@@ -41,11 +82,20 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 		{
 			CallRatingAverage =
 				Parent == null
-					? null
+					? 0
 					: CallRating.AverageRating(Parent.Room.Id, 
 					                           IcdEnvironment.GetUtcTime() - TimeSpan.FromDays(14), 
-					                           IcdEnvironment.GetUtcTime())
-					            .ToString("0.00");
+					                           IcdEnvironment.GetUtcTime());
+		}
+
+		private void UpdateRecentCallRatings()
+		{
+			RecentCallRatings =
+				Parent == null
+					? Enumerable.Empty<CallRating>()
+					: CallRating.GetCallRatingsInDateRange(Parent.Room.Id,
+					                                IcdEnvironment.GetUtcTime() - TimeSpan.FromHours(24),
+					                                IcdEnvironment.GetUtcTime()).ToList();
 		}
 
 		#endregion
@@ -74,6 +124,7 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 
 		private void ParentOnCallRating(object sender, GenericEventArgs<eCallRating> e)
 		{
+			UpdateRecentCallRatings();
 			UpdateCallRatingAverage();
 		}
 
