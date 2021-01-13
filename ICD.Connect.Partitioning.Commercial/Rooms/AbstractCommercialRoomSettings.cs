@@ -80,7 +80,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		[UsedImplicitly]
-		public bool WeekendEnable
+		public bool WeekendEnableSleep
 		{
 			get { return m_WakeScheduleSettings.WeekendEnableSleep; }
 			set { m_WakeScheduleSettings.WeekendEnableSleep = value; }
