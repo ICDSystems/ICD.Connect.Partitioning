@@ -478,6 +478,7 @@ namespace ICD.Connect.Partitioning.PartitionManagers
 				// Build the room.
 				TRoom room = constructor();
 				room.Id = IdUtils.GetNewRoomId(Core.Originators.GetChildrenIds().Concat(rooms.Select(r => r.Id)));
+				room.Uuid = GuidUtils.Combine(group.SelectMany(p => p.GetRooms().Select(r => r.Uuid).Order()));
 				room.Originators.AddRange(group.Select(p => new KeyValuePair<int, eCombineMode>(p.Id, eCombineMode.Always)));
 
 				Logger.Log(eSeverity.Informational, "Created new combine room {0}", room);
