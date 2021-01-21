@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.4.1] - 2021-01-14
 ### Changed
  - Combine rooms now generate a deterministic uuid from their child rooms on creation.
 
