@@ -2,6 +2,7 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Debounce;
 
 namespace ICD.Connect.Partitioning.Commercial.Controls.Occupancy
 {
@@ -12,7 +13,10 @@ namespace ICD.Connect.Partitioning.Commercial.Controls.Occupancy
 		/// True = occupied
 		/// False = unoccupied/vacant
 		/// </summary>
-		[EventTelemetry(OccupancyTelemetryNames.OCCUPANCY_STATE_CHANGED)]
+		[EventTelemetry(OccupancyTelemetryNames.OCCUPANCY_STATE_CHANGED,
+			DebounceMode = eDebounceMode.RisingEdge,
+			DebounceInterval = 10 * 1000,
+			DebounceLowValue = eOccupancyState.Unoccupied)]
 		event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupancyStateChanged;
 
 		/// <summary>
