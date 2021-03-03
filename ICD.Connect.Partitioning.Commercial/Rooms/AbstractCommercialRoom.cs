@@ -706,6 +706,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ApplySettingsFinal(settings, factory);
 
+			RoomType = settings.RoomType;
 			SeatCount = settings.SeatCount;
 
 			// Wake Schedule
@@ -739,6 +740,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.ClearSettingsFinal();
 
+			RoomType = null;
 			SeatCount = 0;
 			DialingPlan = null;
 
@@ -765,6 +767,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		{
 			base.CopySettingsFinal(settings);
 
+			settings.RoomType = RoomType;
 			settings.SeatCount = SeatCount;
 
 			OperationalHours.CopySettings(settings.OperationalHours);
