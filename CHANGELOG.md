@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.4.3] - 2021-03-03
 ### Changed
  - Fixed bug where RoomType was not correctly being applied to commercial rooms
  
