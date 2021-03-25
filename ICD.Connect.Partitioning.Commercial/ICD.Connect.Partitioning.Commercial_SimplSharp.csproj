@@ -135,6 +135,10 @@
       <Project>{3C084F11-8810-4B87-970C-F97E2905ACEB}</Project>
       <Name>ICD.Connect.Calendaring_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Cameras\ICD.Connect.Cameras\ICD.Connect.Cameras_SimplSharp.csproj">
+      <Project>{B13D593D-8BBF-4E20-ABD8-47C6095E7D3E}</Project>
+      <Name>ICD.Connect.Cameras_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Conferencing\ICD.Connect.Conferencing\ICD.Connect.Conferencing_SimplSharp.csproj">
       <Project>{1CCA89DA-1F1C-4997-A94F-ABCE878BD6DE}</Project>
       <Name>ICD.Connect.Conferencing_SimplSharp</Name>

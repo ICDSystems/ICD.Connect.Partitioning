@@ -17,6 +17,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
 using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Calendaring.CalendarPoints;
+using ICD.Connect.Cameras.Devices;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
@@ -850,6 +851,10 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				else
 					m_ConferenceManager.VolumePoints.RegisterVolumePoint(volumePoint);
 			}
+
+			// Add the cameras to the conference manager
+			foreach (ICameraDevice camera in Originators.GetInstancesRecursive<ICameraDevice>())
+				m_ConferenceManager.Cameras.RegisterCamera(camera);
 		}
 
 		/// <summary>
