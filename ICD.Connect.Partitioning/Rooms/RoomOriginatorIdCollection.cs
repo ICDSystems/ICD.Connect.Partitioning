@@ -17,7 +17,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public event EventHandler OnCollectionChanged;
 
-		private readonly IcdOrderedDictionary<int, eCombineMode> m_Ids;
+		private readonly IcdSortedDictionary<int, eCombineMode> m_Ids;
 		private readonly Dictionary<Type, List<IOriginator>> m_TypeToChildrenCache;
 		private readonly PredicateComparer<IOriginator, int> m_ChildIdComparer;
 		private readonly SafeCriticalSection m_Section;
@@ -34,7 +34,7 @@ namespace ICD.Connect.Partitioning.Rooms
 		/// </summary>
 		public RoomOriginatorIdCollection(IRoom room)
 		{
-			m_Ids = new IcdOrderedDictionary<int, eCombineMode>();
+			m_Ids = new IcdSortedDictionary<int, eCombineMode>();
 			m_TypeToChildrenCache = new Dictionary<Type, List<IOriginator>>();
 			m_ChildIdComparer = new PredicateComparer<IOriginator, int>(c => c.Id);
 
