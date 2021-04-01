@@ -7,6 +7,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
 using ICD.Connect.Calendaring.CalendarManagers;
+using ICD.Connect.Calendaring.Utils;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.DialContexts;
@@ -282,7 +283,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				m_CalendarManager == null
 					? Enumerable.Empty<Booking>()
 					: m_CalendarManager.GetBookings()
-					                   .Where(b => b.StartTime >= from && b.EndTime <= to)
+					                   .Where(b => CalendarUtils.IsInRange(b, from, to))
 					                   .Select(b => Booking.Copy(b));
 			
 			Bookings = new BookingRange
