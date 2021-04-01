@@ -119,7 +119,7 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 			int[] ratings =
 				Persistent.Db(eDb.RoomData, roomId.ToString())
 				          .Query<CallRating>(sql)
-				          .Select(r => (int)r.Rating)
+				          .Select(r => r.Rating)
 				          .ToArray();
 
 			return ratings.Length == 0 ? 0 : (float)ratings.Average();

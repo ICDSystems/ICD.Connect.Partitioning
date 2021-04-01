@@ -143,7 +143,7 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 
 					writer.AppendValue(callRating.RoomName);
 				    writer.AppendValue(callRating.RoomId);
-				    writer.AppendValue((int)callRating.Rating);
+				    writer.AppendValue(callRating.Rating);
 				    writer.AppendValue(GetCallRatingDateTimeString(startTime));
 				    writer.AppendValue(GetCallRatingDateTimeString(endTime));
 
