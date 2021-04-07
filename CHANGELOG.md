@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Added IsInMeeting property & event handling to ICommercialRoom and AbstractCommercailRoom
 
 ## [15.4.3] - 2021-03-03
 ### Changed

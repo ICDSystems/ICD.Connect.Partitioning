@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ICD.Common.Logging.Activities;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -15,6 +16,7 @@ using ICD.Common.Utils.Services.Scheduler;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.VolumePoints;
+using ICD.Connect.Calendaring.Bookings;
 using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Calendaring.CalendarPoints;
 using ICD.Connect.Cameras.Devices;
@@ -35,6 +37,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 	public abstract class AbstractCommercialRoom<TSettings> : AbstractRoom<TSettings>, ICommercialRoom
 		where TSettings : ICommercialRoomSettings, new()
 	{
+		#region Events
+
 		/// <summary>
 		/// Raised when the conference manager changes.
 		/// </summary>
@@ -80,6 +84,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		public event EventHandler<StringEventArgs> OnRoomTypeChanged;
 
+		/// <summary>
+		/// Raised when the room starts/stops a meeting.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnIsInMeetingChanged;
+
+		#endregion
+
+		#region Fields
+
 		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
 		private readonly SafeCriticalSection m_OccupancyControlsSection;
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
@@ -91,8 +104,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private eOccupancyState m_OccupancyState;
 		private bool m_IsAwake;
 		private bool m_TouchFreeEnabled;
+		private bool m_IsInMeeting;
 		private string m_RoomType;
 		private readonly OperationalHours m_OperationalHours;
+
+		#endregion
 
 		#region Properties
 
@@ -306,6 +322,36 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
+		/// <summary>
+		/// Gets/sets the current meeting status.
+		/// </summary>
+		public bool IsInMeeting
+		{
+			get { return m_IsInMeeting; }
+			protected set
+			{
+				try
+				{
+					if (value == m_IsInMeeting)
+						return;
+
+					m_IsInMeeting = value;
+
+					Logger.LogSetTo(eSeverity.Informational, "IsInMeeting", m_IsInMeeting);
+
+					HandleIsInMeetingChanged(m_IsInMeeting);
+
+					OnIsInMeetingChanged.Raise(this, new BoolEventArgs(m_IsInMeeting));
+				}
+				finally
+				{
+					Activities.LogActivity(m_IsInMeeting
+						                       ? new Activity(Activity.ePriority.Medium, "In Meeting", "In Meeting", eSeverity.Informational)
+						                       : new Activity(Activity.ePriority.Lowest, "In Meeting", "Not In Meeting", eSeverity.Informational));
+				}
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -338,6 +384,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			OnTouchFreeChanged = null;
 			OnIsAwakeStateChanged = null;
 			OnOccupiedChanged = null;
+			OnIsInMeetingChanged = null;
 
 			base.DisposeFinal(disposing);
 		}
@@ -381,6 +428,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		/// <param name="occupancyState"></param>
 		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
+		{
+		}
+
+		/// <summary>
+		/// Called when the meeting state is changed
+		/// </summary>
+		/// <param name="isInMeeting"></param>
+		protected virtual void HandleIsInMeetingChanged(bool isInMeeting)
 		{
 		}
 
@@ -609,6 +664,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			calendarManager.OnBookingsChanged += CalendarManagerOnBookingsChanged;
+			calendarManager.OnCurrentBookingChanged += CalendarManagerOnCurrentBookingChanged;
 		}
 
 		/// <summary>
@@ -629,6 +685,15 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <param name="sender"></param>
 		/// <param name="eventArgs"></param>
 		protected virtual void CalendarManagerOnBookingsChanged(object sender, EventArgs eventArgs)
+		{
+		}
+
+		/// <summary>
+		/// Called when the calendar's current booking changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		protected virtual void CalendarManagerOnCurrentBookingChanged(object sender, GenericEventArgs<IBooking> args)
 		{
 		}
 

@@ -34,5 +34,9 @@
 		// RoomType
 		public const string ROOM_TYPE = "RoomType";
 		public const string ROOM_TYPE_CHANGED = "RoomTypeChanged";
+
+		// IsInMeeting
+		public const string IS_IN_MEETING = "IsInMeeting";
+		public const string IS_IN_MEETING_CHANGED = "IsInMeetingChanged";
 	}
 }

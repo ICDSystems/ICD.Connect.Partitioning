@@ -13,6 +13,8 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 	[ExternalTelemetry("Commercial Room Telemetry", typeof(CommercialRoomExternalTelemetryProvider))]
 	public interface ICommercialRoom : IRoom
 	{
+		#region Events
+
 		/// <summary>
 		/// Raised when the conference manager changes.
 		/// </summary>
@@ -60,6 +62,14 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.ROOM_TYPE_CHANGED)]
 		event EventHandler<StringEventArgs> OnRoomTypeChanged;
+
+		/// <summary>
+		/// Raised when the room starts/stops a meeting.
+		/// </summary>
+		[EventTelemetry(CommercialRoomTelemetryNames.IS_IN_MEETING_CHANGED)]
+		event EventHandler<BoolEventArgs> OnIsInMeetingChanged;
+
+		#endregion
 
 		#region Properties
 
@@ -135,6 +145,12 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[PropertyTelemetry(CommercialRoomTelemetryNames.ROOM_TYPE, null, CommercialRoomTelemetryNames.ROOM_TYPE_CHANGED)]
 		string RoomType { get; }
+
+		/// <summary>
+		/// Gets/sets the current meeting status.
+		/// </summary>
+		[PropertyTelemetry(CommercialRoomTelemetryNames.IS_IN_MEETING, null, CommercialRoomTelemetryNames.IS_IN_MEETING_CHANGED)]
+		bool IsInMeeting { get; }
 
 		#endregion
 
