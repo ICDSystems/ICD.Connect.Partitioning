@@ -267,6 +267,14 @@ namespace ICD.Connect.Partitioning.Commercial
 		/// <returns></returns>
 		private static TimeSpan? Wrap24Hours(TimeSpan? value)
 		{
+			value = value == null
+				? (TimeSpan?)null
+				: new TimeSpan(0,
+				               value.Value.Hours,
+				               value.Value.Minutes,
+				               value.Value.Seconds,
+				               value.Value.Milliseconds);
+
 			return value == null ? (TimeSpan?)null : value.Value.AddHoursAndWrap(0);
 		}
 
