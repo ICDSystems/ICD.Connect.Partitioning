@@ -1,6 +1,6 @@
 ﻿using System;
 using ICD.Connect.Conferencing.EventArguments;
-using ICD.Connect.Conferencing.Participants;
+using ICD.Connect.Conferencing.Participants.Enums;
 using ICD.Connect.Settings.ORM;
 
 namespace ICD.Connect.Partitioning.Commercial.CallRatings
