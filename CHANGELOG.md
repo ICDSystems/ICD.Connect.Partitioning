@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added IsInMeeting property & event handling to ICommercialRoom and AbstractCommercailRoom
+ 
+### Changed
+ - IOccupancyPoint implements IPoint<T>
 
 ## [15.4.3] - 2021-03-03
 ### Changed

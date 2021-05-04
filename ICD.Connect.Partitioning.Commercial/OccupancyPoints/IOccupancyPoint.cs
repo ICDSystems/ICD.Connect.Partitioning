@@ -4,12 +4,7 @@ using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 
 namespace ICD.Connect.Partitioning.Commercial.OccupancyPoints
 {
-	public interface IOccupancyPoint : IPoint
+	public interface IOccupancyPoint : IPoint<IOccupancySensorControl>
 	{
-		/// <summary>
-		/// Gets the control for this point.
-		/// </summary>
-		[CanBeNull]
-		new IOccupancySensorControl Control { get; }
 	}
 }
