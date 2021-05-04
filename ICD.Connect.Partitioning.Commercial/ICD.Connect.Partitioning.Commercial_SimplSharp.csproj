@@ -69,6 +69,15 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalendarOccupancyManagers\BookingPeopleCounter.cs" />
+    <Compile Include="CalendarOccupancyManagers\CalendarOccupancyManager.cs" />
+    <Compile Include="CalendarOccupancyManagers\History\BookingHistoryManager.cs" />
+    <Compile Include="CalendarOccupancyManagers\History\BookingRange.cs" />
+    <Compile Include="CalendarOccupancyManagers\History\HistoricalBooking.cs" />
+    <Compile Include="CalendarOccupancyManagers\History\IBookingHistoryManager.cs" />
+    <Compile Include="CalendarOccupancyManagers\History\IHistoricalBooking.cs" />
+    <Compile Include="CalendarOccupancyManagers\ICalendarOccupancyManager.cs" />
+    <Compile Include="CalendarOccupancyManagers\PeopleCountTimeSpan.cs" />
     <Compile Include="CallRatings\CallRating.cs" />
     <Compile Include="CallRatings\CallRatingCauseOption.cs" />
     <Compile Include="CallRatings\CallRatingManager.cs" />
@@ -80,6 +89,7 @@
     <Compile Include="CallRatings\XmlCallRatingCauseOptions.cs" />
     <Compile Include="Comparers\CallRatingComparer.cs" />
     <Compile Include="Comparers\CallRatingParticipantComparer.cs" />
+    <Compile Include="Controls\Occupancy\eOccupancyFeatures.cs" />
     <Compile Include="Controls\Occupancy\OccupancySensorControl.cs" />
     <Compile Include="Controls\Occupancy\OccupancySensorControlActivities.cs" />
     <Compile Include="Devices\Occupancy\IOccupancySensorDevice.cs" />
@@ -90,6 +100,8 @@
     <Compile Include="Controls\Occupancy\OccupancySensorControlConsole.cs" />
     <Compile Include="Controls\Occupancy\OccupancyTelemetryNames.cs" />
     <Compile Include="KrangPlugin.cs" />
+    <Compile Include="OccupancyManagers\IOccupancyManager.cs" />
+    <Compile Include="OccupancyManagers\OccupancyManager.cs" />
     <Compile Include="OccupancyPoints\AbstractOccupancyPoint.cs" />
     <Compile Include="OccupancyPoints\AbstractOccupancyPointSettings.cs" />
     <Compile Include="OccupancyPoints\IOccupancyPoint.cs" />

@@ -3,8 +3,9 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Conferencing.ConferenceManagers;
+using ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers;
 using ICD.Connect.Partitioning.Commercial.CallRatings;
-using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
+using ICD.Connect.Partitioning.Commercial.OccupancyManagers;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Attributes;
 
@@ -24,6 +25,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Raised when the calendar manager changes.
 		/// </summary>
 		event EventHandler<GenericEventArgs<ICalendarManager>> OnCalendarManagerChanged;
+
+		/// <summary>
+		/// Raised when the occupancy manager changes
+		/// </summary>
+		event EventHandler<GenericEventArgs<IOccupancyManager>> OnOccupancyManagerChanged;
 
 		/// <summary>
 		/// Raised when the wake schedule changes.
@@ -52,12 +58,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
-		/// Raised when the room becomes occupied or vacated.
-		/// </summary>
-		[EventTelemetry(CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
-		event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
-
-		/// <summary>
 		/// Raised when the room type changes.
 		/// </summary>
 		[EventTelemetry(CommercialRoomTelemetryNames.ROOM_TYPE_CHANGED)]
@@ -74,12 +74,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#region Properties
 
 		/// <summary>
-		/// Gets the Occupancy state.
-		/// </summary>
-		[PropertyTelemetry(CommercialRoomTelemetryNames.OCCUPIED, null, CommercialRoomTelemetryNames.OCCUPIED_CHANGED)]
-		eOccupancyState Occupied { get; }
-
-		/// <summary>
 		/// Gets the wake/sleep schedule.
 		/// </summary>
 		[CanBeNull]
@@ -94,7 +88,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// <summary>
 		/// Gets the Call Rating Manager.
 		/// </summary>
-		[NotNull]
+		[CanBeNull]
 		[NodeTelemetry("CallRatingManager")]
 		CallRatingManager CallRatingManager { get; }
 
@@ -126,6 +120,18 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// </summary>
 		[CanBeNull]
 		ICalendarManager CalendarManager { get; }
+
+		/// <summary>
+		/// Gets the occupancy manager
+		/// </summary>
+		[CanBeNull]
+		IOccupancyManager OccupancyManager { get; }
+
+		/// <summary>
+		/// Gets the calendar occupancy manager
+		/// </summary>
+		[NotNull]
+		ICalendarOccupancyManager CalendarOccupancyManager { get; }
 
 		/// <summary>
 		/// Gets the awake state.

@@ -30,7 +30,9 @@ namespace ICD.Connect.Partitioning.Commercial.Controls.Occupancy
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
+			addRow("Supported Features", instance.SupportedFeatures);
 			addRow("Occupancy State", instance.OccupancyState);
+			addRow("People Count", instance.PeopleCount);
 		}
 
 		/// <summary>

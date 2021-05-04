@@ -5,13 +5,12 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Calendaring.Bookings;
-using ICD.Connect.Calendaring.CalendarManagers;
 using ICD.Connect.Calendaring.Utils;
 using ICD.Connect.Conferencing.ConferenceManagers;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Conferencing.DialContexts;
 using ICD.Connect.Conferencing.EventArguments;
+using ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers.History;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Providers.External;
 
@@ -48,7 +47,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler OnBookingsChanged;
 
 		private BookingRange m_Bookings;
-		private ICalendarManager m_CalendarManager;
 
 		private IConferenceManager m_ConferenceManager;
 		private Guid m_ActiveConferenceDevice;
@@ -183,25 +181,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			}
 		}
 
-		/// <summary>
-		/// Gets/sets the wrapped calendar manager.
-		/// </summary>
-		public ICalendarManager CalendarManager
-		{
-			get { return m_CalendarManager; }
-			private set
-			{
-				if (value == m_CalendarManager)
-					return;
-
-				Unsubscribe(m_CalendarManager);
-				m_CalendarManager = value;
-				Subscribe(m_CalendarManager);
-
-				UpdateBookings();
-			}
-		}
-
 		#endregion
 
 		#region Methods
@@ -215,7 +194,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			base.SetParent(parent);
 
 			UpdateConferenceManager();
-			UpdateCalendarManager();
 		}
 
 		/// <summary>
@@ -239,14 +217,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void UpdateConferenceManager()
 		{
 			ConferenceManager = Parent == null ? null : Parent.ConferenceManager;
-		}
-
-		/// <summary>
-		/// Updates the wrapped calendar manager.
-		/// </summary>
-		private void UpdateCalendarManager()
-		{
-			CalendarManager = Parent == null ? null : Parent.CalendarManager;
 		}
 
 		/// <summary>
@@ -279,13 +249,13 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			DateTime from = now.StartOfDay().ToUniversalTime();
 			DateTime to = now.EndOfDay().ToUniversalTime();
 
-			IEnumerable<Booking> bookings =
-				m_CalendarManager == null
-					? Enumerable.Empty<Booking>()
-					: m_CalendarManager.GetBookings()
-					                   .Where(b => CalendarUtils.IsInRange(b, from, to))
-					                   .Select(b => Booking.Copy(b));
-			
+			IEnumerable<HistoricalBooking> bookings =
+				Parent == null
+					? Enumerable.Empty<HistoricalBooking>()
+					: Parent.CalendarOccupancyManager.BookingHistory.GetBookings()
+					        .Where(b => CalendarUtils.IsInRange(b, from, to))
+					        .Select(b => HistoricalBooking.Copy(b));
+
 			Bookings = new BookingRange
 			{
 				From = from,
@@ -319,7 +289,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			parent.OnConferenceManagerChanged += ParentOnConferenceManagerChanged;
-			parent.OnCalendarManagerChanged += ParentOnCalendarManagerChanged;
+			parent.CalendarOccupancyManager.BookingHistory.OnBookingsUpdated += BookingHistoryOnBookingsUpdated;
 		}
 
 		/// <summary>
@@ -334,7 +304,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				return;
 
 			parent.OnConferenceManagerChanged -= ParentOnConferenceManagerChanged;
-			parent.OnCalendarManagerChanged -= ParentOnCalendarManagerChanged;
+			parent.CalendarOccupancyManager.BookingHistory.OnBookingsUpdated -= BookingHistoryOnBookingsUpdated;
 		}
 
 		/// <summary>
@@ -347,14 +317,9 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			UpdateConferenceManager();
 		}
 
-		/// <summary>
-		/// Called when the calendar manager changes.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="genericEventArgs"></param>
-		private void ParentOnCalendarManagerChanged(object sender, GenericEventArgs<ICalendarManager> genericEventArgs)
+		private void BookingHistoryOnBookingsUpdated(object sender, EventArgs e)
 		{
-			UpdateCalendarManager();
+			UpdateBookings();
 		}
 
 		#endregion
@@ -405,44 +370,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		private void DialersOnInCallChanged(object sender, InCallEventArgs inCallEventArgs)
 		{
 			UpdateActiveConferenceDevice();
-		}
-
-		#endregion
-
-		#region Calendar Manager Callbacks
-
-		/// <summary>
-		/// Subscribe to the calendar manager events.
-		/// </summary>
-		/// <param name="calendarManager"></param>
-		private void Subscribe(ICalendarManager calendarManager)
-		{
-			if (calendarManager == null)
-				return;
-
-			calendarManager.OnBookingsChanged += CalendarManagerOnBookingsChanged;
-		}
-
-		/// <summary>
-		/// Unsubscribe from the calendar manager events.
-		/// </summary>
-		/// <param name="calendarManager"></param>
-		private void Unsubscribe(ICalendarManager calendarManager)
-		{
-			if (calendarManager == null)
-				return;
-
-			calendarManager.OnBookingsChanged -= CalendarManagerOnBookingsChanged;
-		}
-
-		/// <summary>
-		/// Called when the calendar bookings change.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void CalendarManagerOnBookingsChanged(object sender, EventArgs e)
-		{
-			UpdateBookings();
 		}
 
 		#endregion

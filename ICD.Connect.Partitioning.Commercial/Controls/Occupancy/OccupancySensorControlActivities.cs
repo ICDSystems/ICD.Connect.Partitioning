@@ -18,5 +18,10 @@ namespace ICD.Connect.Partitioning.Commercial.Controls.Occupancy
 		{
 			return s_OccupancytateActivities[occupancyState];
 		}
+
+		public static Activity GetPeopleCountActivity(int peopleCount)
+		{
+			return new Activity(Activity.ePriority.Low, "PeopleCount", string.Format("People Count Set to {0}", peopleCount), eSeverity.Informational);
+		}
 	}
 }
