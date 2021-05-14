@@ -5,11 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.5.0] - 2021-05-14
 ### Added
  - Added IsInMeeting property & event handling to ICommercialRoom and AbstractCommercailRoom
+ - Commercial rooms register their cameras against the conference manager for privacy mute
  
 ### Changed
  - IOccupancyPoint implements IPoint<T>
+ - Fixed a bug where bookings that do not start AND end in the current day would not be pushed to telemetry
+ - Fixed a bug where the wake schedule would not properly wrap times greater than 24 hours
 
 ## [15.4.3] - 2021-03-03
 ### Changed
