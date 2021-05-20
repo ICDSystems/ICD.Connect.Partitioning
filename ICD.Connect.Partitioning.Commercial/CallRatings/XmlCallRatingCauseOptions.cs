@@ -6,7 +6,7 @@ using ICD.Common.Utils.Xml;
 
 namespace ICD.Connect.Partitioning.Commercial.CallRatings
 {
-	public class XmlCallRatingCauseOptions : ICallRatingCauseOptions
+	public sealed class XmlCallRatingCauseOptions : ICallRatingCauseOptions
 	{
 		private readonly List<CallRatingCauseOption> m_Options;
 		private readonly SafeCriticalSection m_OptionsSection;

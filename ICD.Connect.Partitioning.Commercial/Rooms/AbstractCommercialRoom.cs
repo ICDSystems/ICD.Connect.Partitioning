@@ -692,7 +692,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Called when the calendar's current booking changes.
 		/// </summary>
 		/// <param name="sender"></param>
-		/// <param name="e"></param>
+		/// <param name="args"></param>
 		protected virtual void CalendarManagerOnCurrentBookingChanged(object sender, GenericEventArgs<IBooking> args)
 		{
 		}
