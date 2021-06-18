@@ -905,7 +905,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 				if (conferencePoint.Control == null)
 					Logger.Log(eSeverity.Error, "Failed to register conference point with no control - {0}", conferencePoint);
 				else
-					m_ConferenceManager.Dialers.RegisterDialingProvider(conferencePoint);
+					m_ConferenceManager.Dialers.RegisterConferencePoint(conferencePoint);
 			}
 
 			// Add the volume points to the conference manager
