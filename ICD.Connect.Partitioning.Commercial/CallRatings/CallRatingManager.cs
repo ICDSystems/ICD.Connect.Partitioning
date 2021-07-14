@@ -33,7 +33,7 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 
 	    #region Properties
 
-	    private static string CallRatingLogPath { get { return PathUtils.GetProgramDataPath(CSV_FILE_LOCAL_PATH); } }
+	    private string CallRatingLogPath { get { return PathUtils.GetRoomDataPath(m_Room.Id, CSV_FILE_LOCAL_PATH); } }
 
 		/// <summary>
 	    /// Gets the room.
@@ -94,7 +94,7 @@ namespace ICD.Connect.Partitioning.Commercial.CallRatings
 
 	    #region Private Methods
 
-	    private static void WriteCsvRating(CallRating callRating)
+	    private void WriteCsvRating(CallRating callRating)
 	    {
 		    bool isNew = !IcdFile.Exists(CallRatingLogPath);
 
