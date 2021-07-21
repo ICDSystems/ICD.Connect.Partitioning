@@ -118,6 +118,8 @@ namespace ICD.Connect.Partitioning.Rooms
 			m_OriginatorIds = new RoomOriginatorIdCollection(this);
 			m_OriginatorIds.OnCollectionChanged += OriginatorsOnCollectionChanged;
 
+			VolumeContext = eVolumePointContext.Room;
+
 			// Initialize activities
 			CombineState = false;
 		}
