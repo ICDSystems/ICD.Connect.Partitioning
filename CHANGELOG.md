@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Chagned
  - Call Rating log path changed from ProgramXXData to ProgramXXData\RoomXXXXData
+ - Added CalendarManager to AbstractCommercailRoom console
 
 ## [15.5.0] - 2021-05-14
 ### Added

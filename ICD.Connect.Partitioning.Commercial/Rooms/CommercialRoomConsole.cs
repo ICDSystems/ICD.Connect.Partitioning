@@ -24,6 +24,7 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 			yield return ConsoleNodeGroup.KeyNodeMap("ConferencePoints", instance.Originators.GetInstancesRecursive<IConferencePoint>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("CalendarPoints", instance.Originators.GetInstancesRecursive<ICalendarPoint>(), p => (uint)p.Id);
 			yield return ConsoleNodeGroup.KeyNodeMap("OccupancyPoints", instance.Originators.GetInstancesRecursive<IOccupancyPoint>(), p => (uint)p.Id);
+			yield return instance.CalendarManager;
 		}
 
 		/// <summary>
