@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.7.0] - 2021-10-04
+### Added
+ - Commercial Rooms - Booking History and CalendarOccupancyManager to track occupancy and people count for bookings and push to telemetry
+
 ## [15.6.0] - 2021-08-17
 ### Chagned
  - Call Rating log path changed from ProgramXXData to ProgramXXData\RoomXXXXData

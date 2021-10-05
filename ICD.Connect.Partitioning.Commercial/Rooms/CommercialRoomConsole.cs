@@ -39,7 +39,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 			addRow("IsAwake", instance.IsAwake);
 			addRow("Seat Count", instance.SeatCount);
-			addRow("Occupied", instance.Occupied);
 			addRow("IsInMeeting", instance.IsInMeeting);
 		}
 

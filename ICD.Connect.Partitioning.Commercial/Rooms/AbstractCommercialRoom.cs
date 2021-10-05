@@ -6,7 +6,6 @@ using ICD.Common.Logging.Activities;
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
@@ -25,8 +24,10 @@ using ICD.Connect.Conferencing.ConferencePoints;
 using ICD.Connect.Conferencing.Conferences;
 using ICD.Connect.Conferencing.EventArguments;
 using ICD.Connect.Conferencing.Participants;
+using ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers;
 using ICD.Connect.Partitioning.Commercial.CallRatings;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
+using ICD.Connect.Partitioning.Commercial.OccupancyManagers;
 using ICD.Connect.Partitioning.Commercial.OccupancyPoints;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Settings;
@@ -48,6 +49,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		/// Raised when the calendar manager changes.
 		/// </summary>
 		public event EventHandler<GenericEventArgs<ICalendarManager>> OnCalendarManagerChanged;
+
+		/// <summary>
+		/// Raised when the occupancy manager changes
+		/// </summary>
+		public event EventHandler<GenericEventArgs<IOccupancyManager>> OnOccupancyManagerChanged;
 
 		/// <summary>
 		/// Raised when the wake schedule changes.
@@ -75,11 +81,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		public event EventHandler<BoolEventArgs> OnIsAwakeStateChanged;
 
 		/// <summary>
-		/// Raised when the room becomes occupied or vacated.
-		/// </summary>
-		public event EventHandler<GenericEventArgs<eOccupancyState>> OnOccupiedChanged;
-
-		/// <summary>
 		/// Raised when the room's type changes.
 		/// </summary>
 		public event EventHandler<StringEventArgs> OnRoomTypeChanged;
@@ -93,20 +94,19 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#region Fields
 
-		private readonly IcdHashSet<IOccupancySensorControl> m_OccupancyControls;
-		private readonly SafeCriticalSection m_OccupancyControlsSection;
 		[CanBeNull] private IConferenceManager m_ConferenceManager;
 		[CanBeNull] private ICalendarManager m_CalendarManager;
+		[CanBeNull] private IOccupancyManager m_OccupancyManager;
 		[CanBeNull] private WakeSchedule m_WakeSchedule;
 		[CanBeNull] private TouchFree m_TouchFree;
 		[CanBeNull] private CallRatingManager m_CallRatingManager;
 
-		private eOccupancyState m_OccupancyState;
 		private bool m_IsAwake;
 		private bool m_TouchFreeEnabled;
 		private bool m_IsInMeeting;
 		private string m_RoomType;
 		private readonly OperationalHours m_OperationalHours;
+		private readonly CalendarOccupancyManager m_CalendarOccupancyManager;
 
 		#endregion
 
@@ -252,6 +252,30 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
+		/// Gets the occupancy manager
+		/// </summary>
+		public IOccupancyManager OccupancyManager
+		{
+			get { return m_OccupancyManager; } 
+			protected set
+			{
+				if (m_OccupancyManager == value)
+					return;
+
+				Unsubscribe(m_OccupancyManager);
+				m_OccupancyManager = value;
+				Subscribe(m_OccupancyManager);
+
+				OnOccupancyManagerChanged.Raise(this, m_OccupancyManager);
+			}
+		}
+
+		/// <summary>
+		/// Gets the calendar occupancy manager
+		/// </summary>
+		public ICalendarOccupancyManager CalendarOccupancyManager { get { return m_CalendarOccupancyManager; } }
+
+		/// <summary>
 		/// Gets the awake state.
 		/// </summary>
 		public bool IsAwake
@@ -301,28 +325,6 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		}
 
 		/// <summary>
-		/// Gets the current occupancy state for the room.
-		/// </summary>
-		public eOccupancyState Occupied
-		{
-			get { return m_OccupancyState; }
-			private set
-			{
-				if (value == m_OccupancyState)
-					return;
-
-				m_OccupancyState = value;
-				OccupiedTime = IcdEnvironment.GetUtcTime();
-
-				Logger.LogSetTo(eSeverity.Informational, "Occupied", m_OccupancyState);
-
-				HandleOccupiedChanged(m_OccupancyState);
-
-				OnOccupiedChanged.Raise(this, new GenericEventArgs<eOccupancyState>(m_OccupancyState));
-			}
-		}
-
-		/// <summary>
 		/// Gets/sets the current meeting status.
 		/// </summary>
 		public bool IsInMeeting
@@ -355,17 +357,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#endregion
 
 		/// <summary>
-		/// Gets the time, in UTC, that the occupancy state last changed.
-		/// </summary>
-		public DateTime OccupiedTime { get; private set; }
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		protected AbstractCommercialRoom()
 		{
-			m_OccupancyControls = new IcdHashSet<IOccupancySensorControl>();
-			m_OccupancyControlsSection = new SafeCriticalSection();
+			m_CalendarOccupancyManager = new CalendarOccupancyManager(this);
 			m_OperationalHours = new OperationalHours();
 
 			// Initialize activities
@@ -380,10 +376,11 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnConferenceManagerChanged = null;
+			OnCalendarManagerChanged = null;
+			OnOccupancyManagerChanged = null;
 			OnWakeScheduleChanged = null;
 			OnTouchFreeChanged = null;
 			OnIsAwakeStateChanged = null;
-			OnOccupiedChanged = null;
 			OnIsInMeetingChanged = null;
 
 			base.DisposeFinal(disposing);
@@ -406,36 +403,20 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 		#region Private Methods
 
 		/// <summary>
-		/// Called when an originator is added to/removed from the room.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void OriginatorsOnCollectionChanged(object sender, EventArgs args)
-		{
-			base.OriginatorsOnCollectionChanged(sender, args);
-
-			SubscribeOccupancyControls();
-		}
-
-		/// <summary>
 		/// Returns true if a source is actively routed to a display or we are in a conference.
 		/// </summary>
 		/// <returns></returns>
 		protected abstract bool GetIsInActiveMeeting();
 
 		/// <summary>
-		/// Override to handle the room becoming occupied or vacated.
-		/// </summary>
-		/// <param name="occupancyState"></param>
-		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
-		{
-		}
-
-		/// <summary>
 		/// Called when the meeting state is changed
 		/// </summary>
 		/// <param name="isInMeeting"></param>
 		protected virtual void HandleIsInMeetingChanged(bool isInMeeting)
+		{
+		}
+
+		protected virtual void HandleOccupiedChanged(eOccupancyState occupancyState)
 		{
 		}
 
@@ -699,67 +680,32 @@ namespace ICD.Connect.Partitioning.Commercial.Rooms
 
 		#endregion
 
-		#region Occupancy Control Callbacks
+		#region Occupancy Manager Callbacks
 
-		private void SubscribeOccupancyControls()
+		private void Subscribe(IOccupancyManager occupancyManager)
 		{
-			m_OccupancyControlsSection.Enter();
-
-			try
-			{
-				foreach (IOccupancySensorControl control in m_OccupancyControls)
-					Unsubscribe(control);
-
-				IEnumerable<IOccupancySensorControl> controls =
-					Originators.GetInstancesRecursive<IOccupancyPoint>()
-					           .Select(p => p.Control)
-					           .Where(c => c != null);
-
-				m_OccupancyControls.Clear();
-				m_OccupancyControls.AddRange(controls);
-
-				foreach (IOccupancySensorControl control in m_OccupancyControls)
-					Subscribe(control);
-			}
-			finally
-			{
-				m_OccupancyControlsSection.Leave();
-			}
-
-			UpdateOccupancy();
-		}
-
-		private void Subscribe(IOccupancySensorControl control)
-		{
-			if (control == null)
+			if (occupancyManager == null)
 				return;
 
-			control.OnOccupancyStateChanged += ControlOnOccupancyStateChanged;
+			occupancyManager.OnOccupancyStateChanged += OccupancyManagerOnOnOccupancyStateChanged;
 		}
 
-		private void Unsubscribe(IOccupancySensorControl control)
+		private void Unsubscribe(IOccupancyManager occupancyManager)
 		{
-			if (control == null)
+			if (occupancyManager == null)
 				return;
 
-			control.OnOccupancyStateChanged -= ControlOnOccupancyStateChanged;
+			occupancyManager.OnOccupancyStateChanged -= OccupancyManagerOnOnOccupancyStateChanged;
 		}
 
-		private void ControlOnOccupancyStateChanged(object sender, GenericEventArgs<eOccupancyState> genericEventArgs)
+		private void OccupancyManagerOnOnOccupancyStateChanged(object sender, GenericEventArgs<eOccupancyState> args)
 		{
-			UpdateOccupancy();
-		}
-
-		private void UpdateOccupancy()
-		{
-			Occupied = Originators.GetInstancesRecursive<IOccupancyPoint>()
-			                      .Select(p => p.Control)
-			                      .Where(c => c != null)
-			                      .Select(c => c.OccupancyState)
-			                      .MaxOrDefault();
+			HandleOccupiedChanged(args.Data);
 		}
 
 		#endregion
+
+		
 
 		#region Settings
 
