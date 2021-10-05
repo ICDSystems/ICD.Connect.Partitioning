@@ -1,4 +1,10 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
@@ -6,7 +12,6 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Calendaring.Bookings;
 using ICD.Connect.Conferencing.DialContexts;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers.History
 {

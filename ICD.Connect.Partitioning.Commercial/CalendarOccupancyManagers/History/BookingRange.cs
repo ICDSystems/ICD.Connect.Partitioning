@@ -1,9 +1,14 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Json;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers.History
 {
