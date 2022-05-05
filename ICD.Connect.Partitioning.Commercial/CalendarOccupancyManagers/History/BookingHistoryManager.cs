@@ -154,8 +154,8 @@ namespace ICD.Connect.Partitioning.Commercial.CalendarOccupancyManagers.History
 
 			try
 			{
-				IEnumerable<IBooking> newBookings = bookingsList.Except(m_HistoricalBookings.Keys, BookingEqualityComparer.Instance);
-				IEnumerable<IBooking> staleBooking = m_HistoricalBookings.Keys.Except(bookingsList, BookingEqualityComparer.Instance);
+				IEnumerable<IBooking> newBookings = bookingsList.Except(m_HistoricalBookings.Keys, BookingEqualityComparer.Instance).ToList();
+				IEnumerable<IBooking> staleBooking = m_HistoricalBookings.Keys.Except(bookingsList, BookingEqualityComparer.Instance).ToList();
 
 				//Remove stale bookings, but only if they haven't ended yet (should be started?), or are more than one day old
 				foreach (IBooking booking in staleBooking)
