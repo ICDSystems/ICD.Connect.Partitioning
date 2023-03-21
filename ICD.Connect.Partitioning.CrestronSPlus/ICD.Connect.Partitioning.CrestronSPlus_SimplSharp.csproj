@@ -65,7 +65,6 @@
     <Compile Include="Devices\SPlusPartitionSensorDevice.cs" />
     <Compile Include="Devices\SPlusPartitionSensorDeviceSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shims\SPlusPartitionSensorShim.cs" />
     <None Include="Properties\ControlSystem.cfg" />
